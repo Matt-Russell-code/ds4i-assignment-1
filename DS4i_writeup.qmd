@@ -1,0 +1,75 @@
+---
+title: "DS4I - Project Writeup"
+format: html
+execute:
+  echo: false
+  warning: false
+  message: false
+  results: hide
+editor: visual
+---
+
+```{r setup}
+
+
+#libraries 
+
+library(kableExtra)
+library(tidyverse)
+library(ggplot2)
+library(ggpubr)
+
+#theme for ggplot2, let me know if you do not like this theme and we can change it :)
+
+#Theme for ggplot2 
+theme_set(
+  theme_bw(base_size = 9) +
+    theme(
+      plot.title   = element_text(hjust = 0.5, size = 9),
+      panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+      # keep grids but make them subtle
+      panel.grid.major = element_line(colour = "grey85", linewidth = 0.3),
+      panel.grid.minor = element_line(colour = "grey92", linewidth = 0.2),
+      # base-R style text/ticks
+      axis.text  = element_text(colour = "black"),
+      axis.title = element_text(colour = "black"),
+      axis.ticks = element_line(colour = "black", linewidth = 0.3)
+    )
+)
+
+
+
+#making geompoint have hollow circles
+update_geom_defaults(
+  "point",
+  list(size = 1, alpha = 0.9, shape = 21, colour = "black")
+)
+
+
+```
+
+```{r}
+#| echo: false
+knitr::include_graphics("av.jpg")
+
+```
+
+###### Photo by [Nicolas Cool](https://unsplash.com/@shotz?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash) on [Unsplash](https://unsplash.com/photos/caution-avalanche-danger-signage-during-winter-Cd2QnIKU6dk?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash)       
+
+## Introduction
+
+## Literature Review
+
+## Exploratory Data Analysis
+
+```{r}
+
+
+
+```
+
+## Feature Engineering
+
+## Modelling
+
+## Discussion 
