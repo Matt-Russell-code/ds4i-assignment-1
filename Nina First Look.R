@@ -80,7 +80,7 @@ yhatvanilla <- factor(as.vector(predictionsTest$predict), levels = levels(test_d
 mean(yhatvanilla == test_data$FAH) #VERY LOW!!!!!!!!
 
 
-
+#https://www.r-bloggers.com/2022/10/map-any-region-in-the-world-with-r-part-i-the-basic-map/
 
 #Map of Scotland (cant plot points because weird coordinates)
 mapdata <- map_data("world")
