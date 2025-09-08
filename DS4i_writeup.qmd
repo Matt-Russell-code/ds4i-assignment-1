@@ -54,7 +54,7 @@ knitr::include_graphics("av.jpg")
 
 ```
 
-###### Photo by [Nicolas Cool](https://unsplash.com/@shotz?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash) on [Unsplash](https://unsplash.com/photos/caution-avalanche-danger-signage-during-winter-Cd2QnIKU6dk?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash)       
+[Photo by Nicolas Cool on Unsplash]{style="font-size:12px"}
 
 ## Introduction
 
@@ -72,4 +72,4 @@ knitr::include_graphics("av.jpg")
 
 ## Modelling
 
-## Discussion 
+## Discussion
