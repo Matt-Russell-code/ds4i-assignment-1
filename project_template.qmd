@@ -1,0 +1,49 @@
+---
+title: "project_template"
+format: pdf
+editor: visual
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+# 1) Make sure TinyTeX/TeX Live is up to date
+tinytex::tlmgr_update("--self")
+tinytex::tlmgr_update()
+
+# 2) Pre-install core LaTeX bundles you’re likely missing
+pkgs <- c(
+  # KOMA + LaTeX3
+  "koma-script", "l3kernel", "l3packages",
+  # Engines/fonts for xelatex
+  "fontspec", "unicode-math", "xltxtra", "xunicode",
+  # Common essentials
+  "latex-bin", "etoolbox", "graphics", "xcolor", "tools",
+  "hyperref", "geometry", "caption", "booktabs", "multirow",
+  "threeparttable", "float", "amsmath", "amsfonts", "amssymb",
+  # Pandoc templates often use these
+  "ulem", "setspace", "titlesec", "fancyhdr", "csquotes"
+)
+tinytex::tlmgr_install(pkgs)
+
+# (Optional) If you want a broader “just work” set:
+# tinytex::tlmgr_install(c("collection-latex", "collection-latexrecommended", "collection-fontsrecommended"))
+
+# 3) Sanity check: can
+
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
