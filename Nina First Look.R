@@ -143,6 +143,17 @@ unique_area <- data %>%
   distinct(Area)
 unique_area
 
+unique_precip <- data %>%
+  distinct(Precip.Code)
+unique_precip
+
+unique_rain <- data %>%
+  distinct(Rain.at.900)
+unique_rain
+
+unique_boot <- data %>%
+  distinct(AV.Cat)
+unique_boot
 
 #separate data for each area
 Creag_data <- data %>%
