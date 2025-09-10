@@ -70,12 +70,41 @@ knitr::include_graphics("av.jpg")
 
 ## Feature Engineering
 
-```{r split_data}
+```{r read_data}
 
-
+library(lubridate)
 data = read.csv("scotland_avalanche_forecasts_2009_2025.csv")
 
 
+```
+
+```{r dates}
+
+data$Date <- as.POSIXct(data$Date, format="%Y-%m-%d %H:%M:%S", tz="UTC")
+
+
+data$month     <- month(data$Date)
+data$dayofyear <- yday(data$Date)
+data$hour      <- hour(data$Date)
+
+
+#Cyclical enocoding
+
+
+data$month_sin <- sin(2 * pi * data$month / 12)
+data$month_cos <- cos(2 * pi * data$month / 12)
+
+
+data$hour_sin <- sin(2 * pi * data$hour / 24)
+data$hour_cos <- cos(2 * pi * data$hour / 24)
+
+
+data$yday_sin <- sin(2 * pi * data$dayofyear / 366)
+data$yday_cos <- cos(2 * pi * data$dayofyear / 366) #leap years
+
+```
+
+```{set.seed(1)}
 train.idx <- sample(1:nrow(data), 
                     round(nrow(data)*0.8))
 
@@ -135,6 +164,137 @@ kable(missing_df,
   footnote(general = "")
 
 
+```
+
+```{r check}
+
+
+find_missing <- function(a){
+missing_df <- data.frame(Variable = character(),
+                         "Missing (%)" = numeric(),
+                         check.names = F)
+
+
+for (i in col.n){
+  
+  x <- sum(is.na(a[,i]))
+  
+  perc <- (x/n) * 100
+  
+  missing_df <- rbind(missing_df,
+                      data.frame(
+                        Variable = i,
+                        `Missing (%)` = perc
+                      , check.names = F)
+                      )
+  
+}
+ 
+missing_df <- missing_df %>% 
+  filter(`Missing (%)` > 0) %>% 
+  arrange(desc(`Missing (%)`),)
+
+return(missing_df)
+
+}
+
+
+
+#Counting the number of NA's
+
+#in terms of imputation, we can try use cell mean for all of the above
+count_na <- 0
+for (i in 1:nrow(data)){
+  if (any(is.na(data[i, ]))){count_na <- count_na +1}
+}
+
+
+count_na/nrow(data)
+
+
+
+#ideas 
+
+#time series transformation
+#geographic categorical variable
+groupings <- c()
+for (i in col.n){
+  
+  if(is.character(data[,i])){ groupings <- c(groupings, i)}
+}
+
+groupings
+
+# We cannot group by our target OAH, or date
+
+
+```
+
+```{r imputation}
+
+#Basic
+
+#I am not grouping by Date, OsGrid, Obs or OAH (As thats our target variable)
+groupings <- groupings[-c(1, 3, 5, 7)]
+
+#Cell mean imputation
+
+  
+any(is.na(train.imp[, -12]))
+
+
+train.imp <- train %>%
+  group_by(Area, FAH) %>% #cant group by precip code, or location, too many missing
+  mutate(
+    across(where(is.integer),
+           ~ replace_na(., as.integer(round(mean(., na.rm = TRUE))))),
+    across(where(is.double),
+           ~ replace_na(., mean(., na.rm = TRUE)))
+  ) %>% #after this, some variables 
+  ungroup() %>% 
+  mutate(Aspect = round(mean(Aspect, na.rm = T),), #remaining, just taking the mean
+         Max.Temp.Grad = round(mean(Max.Temp.Grad, na.rm = T)),
+         Max.Hardness.Grad = round(mean(Max.Hardness.Grad, na.rm  = T))) 
+
+train.imp <- train.imp[-which(is.na(train.imp$OAH)),]
+  
+unique(train.imp$OAH)
+#debug
+
+#eijdoias
+
+
+#trying same method with testing data
+
+
+test.imp <- test %>%
+  group_by(Area, FAH) %>% #cant group by precip code, or location, too many missing
+  mutate(
+    across(where(is.integer),
+           ~ replace_na(., as.integer(round(mean(., na.rm = TRUE))))),
+    across(where(is.double),
+           ~ replace_na(., mean(., na.rm = TRUE)))
+  ) %>% #after this, some variables 
+  ungroup() %>% 
+  mutate(Aspect = round(mean(Aspect, na.rm = T),), #remaining, just taking the mean
+         Max.Temp.Grad = round(mean(Max.Temp.Grad, na.rm = T)),
+         Max.Hardness.Grad = round(mean(Max.Hardness.Grad, na.rm  = T))) 
+
+test.imp <- train.imp[-which(is.na(test.imp$OAH)),]
+
+
+
+
+```
+
+```         
+```
+
+```{r}
+
+
+
+ 
 
 ```
 
