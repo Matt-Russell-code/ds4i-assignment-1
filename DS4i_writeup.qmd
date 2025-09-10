@@ -70,6 +70,74 @@ knitr::include_graphics("av.jpg")
 
 ## Feature Engineering
 
+```{r split_data}
+
+
+data = read.csv("scotland_avalanche_forecasts_2009_2025.csv")
+
+
+train.idx <- sample(1:nrow(data), 
+                    round(nrow(data)*0.8))
+
+train <- data[train.idx,] #Training data
+test <- data[-train.idx,] #Testing Data
+
+
+```
+
+```{r missing_val}
+
+#Getting table of missing values
+
+
+col.n <- colnames(data)
+n <- nrow(data)
+
+missing_df <- data.frame(Variable = character(),
+                         "Missing (%)" = numeric(),
+                         check.names = F)
+
+
+for (i in col.n){
+  
+  x <- sum(is.na(data[,i]))
+  
+  perc <- (x/n) * 100
+  
+  missing_df <- rbind(missing_df,
+                      data.frame(
+                        Variable = i,
+                        `Missing (%)` = perc
+                      , check.names = F)
+                      )
+  
+}
+
+missing_df <- missing_df %>% 
+  filter(`Missing (%)` > 0) %>% 
+  arrange(desc(`Missing (%)`),)
+
+
+```
+
+```{r tablex}
+
+
+
+kable(missing_df, 
+      format = "html",
+      digits = 2,
+      caption = "Missing Values") %>%
+  kable_styling(
+    bootstrap_options = c("hover"),
+    full_width = FALSE
+  ) %>%
+  footnote(general = "")
+
+
+
+```
+
 ## Modelling
 
 ## Discussion
