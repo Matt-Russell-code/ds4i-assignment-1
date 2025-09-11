@@ -476,6 +476,8 @@ fviz_eig(pca_res, addlabels = TRUE, ncp = 15) + ggtitle("PCA: Scree plot")
 loadings <- as_tibble(pca_res$rotation[,1:4], rownames = "variable")
 loadings %>% arrange(desc(abs(PC1))) %>% slice(1:10)
 
+biplot(pca_res)
+
 ```
 
 ## Spatial quick-check (longitude / latitude vs OAH)
