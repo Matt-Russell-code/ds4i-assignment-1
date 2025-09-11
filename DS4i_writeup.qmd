@@ -76,41 +76,8 @@ library(lubridate)
 data = read.csv("scotland_avalanche_forecasts_2009_2025.csv")
 
 
-```
-
-```{r dates}
-
-data$Date <- as.POSIXct(data$Date, format="%Y-%m-%d %H:%M:%S", tz="UTC")
-
-
-data$month     <- month(data$Date)
-data$dayofyear <- yday(data$Date)
-data$hour      <- hour(data$Date)
-
-
-#Cyclical enocoding
-
-
-data$month_sin <- sin(2 * pi * data$month / 12)
-data$month_cos <- cos(2 * pi * data$month / 12)
-
-
-data$hour_sin <- sin(2 * pi * data$hour / 24)
-data$hour_cos <- cos(2 * pi * data$hour / 24)
-
-
-data$yday_sin <- sin(2 * pi * data$dayofyear / 366)
-data$yday_cos <- cos(2 * pi * data$dayofyear / 366) #leap years
-
-```
-
-```{set.seed(1)}
-train.idx <- sample(1:nrow(data), 
-                    round(nrow(data)*0.8))
-
-train <- data[train.idx,] #Training data
-test <- data[-train.idx,] #Testing Data
-
+data <- data %>% 
+  mutate(across(where(is.character), as.factor))
 
 ```
 
@@ -166,10 +133,16 @@ kable(missing_df,
 
 ```
 
-```{r check}
+```{r check_missing_fnx}
 
+# a few functions to help me evaluate the extent of missing values
 
+#Find percentage of missing values per Column
 find_missing <- function(a){
+  
+  
+col.n <- colnames(a)
+n <- nrow(a)
 missing_df <- data.frame(Variable = character(),
                          "Missing (%)" = numeric(),
                          check.names = F)
@@ -198,103 +171,124 @@ return(missing_df)
 
 }
 
-
-
-#Counting the number of NA's
-
-#in terms of imputation, we can try use cell mean for all of the above
-count_na <- 0
-for (i in 1:nrow(data)){
+#Find total % missing values
+find_total_missing <- function(b){
+  
+  
+  count_na <- 0
+for (i in 1:nrow(b)){
   if (any(is.na(data[i, ]))){count_na <- count_na +1}
 }
 
 
-count_na/nrow(data)
-
-
-
-#ideas 
-
-#time series transformation
-#geographic categorical variable
-groupings <- c()
-for (i in col.n){
+count_na/nrow(b)
   
-  if(is.character(data[,i])){ groupings <- c(groupings, i)}
+  return(count_na*100/nrow(b) )
 }
-
-groupings
-
-# We cannot group by our target OAH, or date
-
 
 ```
 
 ```{r imputation}
+#Come back to this later
 
-#Basic
+# 
+# #I am not grouping by Date, OsGrid, Obs or OAH (As thats our target variable)
+# groupings <- groupings[-c(1, 3, 5, 7)]
+# 
+# #Cell mean imputation
+# 
+# #Imputing Training data first
+# train.imp <- train %>%
+#   group_by(Area, FAH) %>% #cant group by precip code, or location, too many missing
+#   mutate(
+#     across(where(is.integer),
+#            ~ replace_na(., as.integer(round(mean(., na.rm = TRUE))))),
+#     across(where(is.double),
+#            ~ replace_na(., mean(., na.rm = TRUE)))
+#   ) %>% #after this, some variables 
+#   ungroup() %>% 
+#   mutate(Aspect = round(mean(Aspect, na.rm = T),), #remaining, just taking the mean
+#          Max.Temp.Grad = round(mean(Max.Temp.Grad, na.rm = T)),
+#          Max.Hardness.Grad = round(mean(Max.Hardness.Grad, na.rm  = T))) 
+# 
+# train.imp <- train.imp[-which(is.na(train.imp$OAH)),] #removing remaining missing
+#   
+# 
+# #Imputing Test data in the same manner
+# test.imp <- test %>%
+#   group_by(Area, FAH) %>% #cant group by precip code, or location, too many missing
+#   mutate(
+#     across(where(is.integer),
+#            ~ replace_na(., as.integer(round(mean(., na.rm = TRUE))))),
+#     across(where(is.double),
+#            ~ replace_na(., mean(., na.rm = TRUE)))
+#   ) %>% #after this, some variables 
+#   ungroup() %>% 
+#   mutate(Aspect = round(mean(Aspect, na.rm = T),), #remaining, just taking the mean
+#          Max.Temp.Grad = round(mean(Max.Temp.Grad, na.rm = T)),
+#          Max.Hardness.Grad = round(mean(Max.Hardness.Grad, na.rm  = T))) 
+# 
+# test.imp <- train.imp[-which(is.na(test.imp$OAH)),] #removing remaining missing
+```
 
-#I am not grouping by Date, OsGrid, Obs or OAH (As thats our target variable)
-groupings <- groupings[-c(1, 3, 5, 7)]
+```{r date_time}
 
-#Cell mean imputation
-
-  
-any(is.na(train.imp[, -12]))
+#adding date variable
+data$Date <- as.POSIXct(data$Date, format="%Y-%m-%d %H:%M:%S", tz="UTC")
 
 
-train.imp <- train %>%
-  group_by(Area, FAH) %>% #cant group by precip code, or location, too many missing
-  mutate(
-    across(where(is.integer),
-           ~ replace_na(., as.integer(round(mean(., na.rm = TRUE))))),
-    across(where(is.double),
-           ~ replace_na(., mean(., na.rm = TRUE)))
-  ) %>% #after this, some variables 
-  ungroup() %>% 
-  mutate(Aspect = round(mean(Aspect, na.rm = T),), #remaining, just taking the mean
-         Max.Temp.Grad = round(mean(Max.Temp.Grad, na.rm = T)),
-         Max.Hardness.Grad = round(mean(Max.Hardness.Grad, na.rm  = T))) 
+data$month     <- lubridate::month(data$Date)
+data$hour      <- lubridate::hour(data$Date)
+data$year      <- lubridate::year(data$Date)
 
-train.imp <- train.imp[-which(is.na(train.imp$OAH)),]
-  
-unique(train.imp$OAH)
-#debug
+#make a day of the season variable
 
-#eijdoias
+#season begins from December to april
 
 
-#trying same method with testing data
 
-
-test.imp <- test %>%
-  group_by(Area, FAH) %>% #cant group by precip code, or location, too many missing
-  mutate(
-    across(where(is.integer),
-           ~ replace_na(., as.integer(round(mean(., na.rm = TRUE))))),
-    across(where(is.double),
-           ~ replace_na(., mean(., na.rm = TRUE)))
-  ) %>% #after this, some variables 
-  ungroup() %>% 
-  mutate(Aspect = round(mean(Aspect, na.rm = T),), #remaining, just taking the mean
-         Max.Temp.Grad = round(mean(Max.Temp.Grad, na.rm = T)),
-         Max.Hardness.Grad = round(mean(Max.Hardness.Grad, na.rm  = T))) 
-
-test.imp <- train.imp[-which(is.na(test.imp$OAH)),]
-
+data <- data %>% 
+  mutate(season_year = if_else(month >= 12, year, year -1),
+         season_id = dense_rank(season_year),
+         season = paste0("season", season_id),
+         season = as.factor(season)) %>% 
+  group_by(season, Area) %>% 
+  mutate(dayofseason = row_number()) %>% 
+  arrange(Date, Area)
 
 
 
 ```
 
-```         
+```{r drop variables}
+
+#Drop the top 3 variables wtih the most missing values
+data <- data %>% 
+  select(- c(AV.Cat, Ski.Pen, Summit.Wind.Dir))
+
+data <- na.omit(data) #remove remaining missing
+
+
+
 ```
 
-```{r}
+```{r split_data}
+
+set.seed(1)
+train.idx <- sample(1:nrow(data), 
+                    round(nrow(data)*0.8))
+
+train <- data[train.idx,] #Training data
+test <- data[-train.idx,] #Testing Data
 
 
+```
 
- 
+```{r h2o_test_Matthew}
+
+#nothing for now
+
+
 
 ```
 
