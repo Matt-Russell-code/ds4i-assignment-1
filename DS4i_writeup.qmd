@@ -297,7 +297,246 @@ test.imp <- train.imp[-which(is.na(test.imp$OAH)),]
  
 
 ```
-
+=============================
 ## Modelling
+=============================
 
+```{r}
+# Install missing packages automatically (uncomment if needed)
+required <- c("tidyverse","janitor","lubridate","skimr","naniar","GGally",
+              "corrplot","factoextra","cluster","factoextra","rsample","recipes","scales")
+missing <- required[!(required %in% installed.packages()[,"Package"])]
+if(length(missing)) install.packages(missing, repos = "https://cloud.r-project.org")
+
+library(tidyverse)   # data wrangling + ggplot
+library(janitor)     # clean names
+library(lubridate)   # dates
+library(skimr)       # fast dataset summary
+library(naniar)      # missingness visual
+library(GGally)      # ggpairs
+library(corrplot)    # correlation plot
+library(factoextra)  # PCA & cluster visual
+library(cluster)     # clustering tools
+library(rsample)     # train/test splits
+library(recipes)     # preprocessing pipeline
+library(scales)      # axis formats
+```
+
+## [Load data and initial cleaning]{.underline}
+
+```{r}
+# 1. Read with readr (fast). Then clean column names to snake_case.
+
+df_raw <- read_csv("scotland_avalanche_forecasts_2009_2025.csv")
+
+# Clean col names
+df <- df_raw %>% janitor::clean_names() # lowercase + underscores
+
+# Parse date/time robustly. If time exists use ymd_hms, else try ymd.
+df <- df %>%
+  mutate(date = parse_date_time(date, orders = c("ymd HMS", "ymd HM"), tz = "Europe/London"))
+
+# Quick check
+glimpse(df$date)
+
+# Quick structure check
+head(df)
+
+```
+
+## Full skim (single call summary)
+
+```{r}
+# Thorough summary for initial understanding
+#?skim
+skimr::skim(df)
+vis_miss(df) # Missingness
+```
+
+## Univariate numeric exploration (histograms, outliers)
+
+```{r}
+# Select numeric columns for plotting
+num_vars <- df %>% select(where(is.numeric)) %>% names()
+length(num_vars)
+
+# If many numeric variables use facetted histograms (log scale option for skewed)
+plot_df <- df %>% select(all_of(num_vars)) %>% pivot_longer(everything(), names_to = "var", values_to = "val")
+
+# Plot: histograms by variable (facetted)
+ggplot(plot_df, aes(x = val)) +
+  geom_histogram(bins = 40, na.rm = TRUE) +
+  facet_wrap(~var, scales = "free", ncol = 4) +
+  labs(title = "Univariate distributions (numeric vars)") +
+  theme_minimal()
+```
+
+## Univariate categorical exploration (FAH, OAH, Area, Obs)
+
+```{r}
+# Ensure key categorical variables are factors
+df <- df %>%
+  mutate(fah = as.factor(fah),
+         oah = as.factor(oah),
+         area = as.factor(area),
+         obs = as.factor(obs))
+
+# Frequency plots
+p1 <- ggplot(df, aes(x = fah)) + geom_bar() + labs(title = "FAH (forecasted hazard) counts") + theme_minimal()
+p2 <- ggplot(df, aes(x = oah)) + geom_bar() + labs(title = "OAH (observed hazard) counts") + theme_minimal()
+p3 <- ggplot(df, aes(x = area)) + geom_bar() + labs(title = "Records per Area") + theme_minimal() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+cowplot::plot_grid(p1, p2, p3, ncol = 1)
+# p1
+# p2
+# p3
+
+```
+
+## Bivariate: FAH vs OAH contingency and simple agreement
+
+```{r}
+# Contingency table
+tab <- table(df$fah, df$oah)
+tab
+
+# Convert to proportions by FAH (how forecasts translate to observed)
+prop.table(tab, margin = 1)
+
+# Simple agreement metric (raw)
+agree_pct <- sum(diag(prop.table(tab))) # diagonal proportion
+paste0("Raw agreement FAH==OAH: ", scales::percent(agree_pct))
+
+```
+
+## Bivariate numeric vs target (OAH): boxplots + statistical tests
+
+```{r}
+# Numeric variables vs oah (boxplots) - select a reasonable subset
+num_for_target <- num_vars[!num_vars %in% c("longitude","latitude")] # drop raw coordinates from this view
+num_for_target <- head(num_for_target, 12) # plot top 12 numeric for readability
+
+plot_df2 <- df %>% select(oah, all_of(num_for_target)) %>% pivot_longer(-oah, names_to = "var", values_to = "val")
+
+ggplot(plot_df2, aes(x = oah, y = val)) +
+  geom_boxplot(outlier.size = 0.5, na.rm = TRUE) +
+  facet_wrap(~var, scales = "free_y", ncol = 3) +
+  labs(title = "Numeric variables by observed hazard (OAH)") +
+  theme_minimal()
+
+```
+
+```{r}
+# For each numeric variable compute a Kruskal-Wallis test against ordered OAH (non-parametric)
+oah_ordered <- df %>% filter(!is.na(oah)) %>% mutate(oah_ord = as.numeric(factor(oah, ordered = TRUE)))
+kruskal_results <- map_dfr(num_vars, function(var){
+  dat <- df %>% select(all_of(var), oah) %>% filter(!is.na(oah) & !is.na(.data[[var]]))
+  if(nrow(dat) < 50) return(tibble(variable = var, p_value = NA_real_, n = nrow(dat)))
+  test <- kruskal.test(dat[[var]] ~ dat$oah)
+  tibble(variable = var, p_value = test$p.value, n = nrow(dat))
+}) %>% arrange(p_value)
+
+kruskal_results %>% head(20)
+
+```
+
+## Correlation matrix (numeric variables) + variable selection guidance
+
+```{r}
+nums <- df %>% select(where(is.numeric))
+# Keep variables with at least some non-missing values
+nums <- nums %>% select(where(~sum(!is.na(.)) > (0.05 * nrow(df))))
+cor_mat <- cor(stats::na.omit(nums), use = "pairwise.complete.obs")
+corrplot::corrplot(cor_mat, method = "color", tl.cex = 0.7, number.cex = 0.7)
+
+```
+
+```{r}
+# Identify pairs with |r| > 0.85 to consider dropping or combining
+high_cor_pairs <- which(abs(cor_mat) > 0.85 & abs(cor_mat) < 1, arr.ind = TRUE)
+if(nrow(high_cor_pairs) > 0) {
+  apply(high_cor_pairs, 1, function(idx){
+    cat(rownames(cor_mat)[idx[1]], "<->", colnames(cor_mat)[idx[2]], ":", cor_mat[idx[1], idx[2]], "\n")
+  })
+} else cat("No very high correlations (>0.85) found among numeric subset.\n")
+
+```
+
+## PCA on scaled numeric predictors (exploratory only)
+
+```{r}
+# Use numeric variables with reasonable completeness
+nums_for_pca <- nums %>% select(where(~sum(!is.na(.)) > 0.6 * nrow(df)))
+pca_df <- nums_for_pca %>% drop_na()  # PCA here uses complete cases; record row loss
+cat("Rows used for PCA:", nrow(pca_df), "of", nrow(df), "\n")
+
+pca_res <- prcomp(pca_df, center = TRUE, scale. = TRUE)
+fviz_eig(pca_res, addlabels = TRUE, ncp = 15) + ggtitle("PCA: Scree plot")
+
+# Show loadings for first two PCs
+loadings <- as_tibble(pca_res$rotation[,1:4], rownames = "variable")
+loadings %>% arrange(desc(abs(PC1))) %>% slice(1:10)
+
+```
+
+## Spatial quick-check (longitude / latitude vs OAH)
+
+```{r}
+if(all(c("longitude","latitude") %in% names(df))) {
+  df %>% filter(!is.na(longitude) & !is.na(latitude) & !is.na(oah)) %>%
+    ggplot(aes(x = longitude, y = latitude, color = oah)) +
+    geom_point(alpha = 0.6, size = 1) +
+    labs(title = "Spatial scatter: observations colored by OAH", x = "Longitude", y = "Latitude") +
+    theme_minimal()
+} else {
+  cat("Longitude/Latitude not available or have been removed.")
+}
+```
+
+## Time-based checks (seasonality / trends)
+
+```{r}
+# Ensure date exists
+df %>% filter(!is.na(date)) %>%
+  mutate(ym = lubridate::floor_date(date, "month")) %>%
+  group_by(ym, oah) %>%
+  summarise(n = n(), .groups = "drop") %>%
+  ggplot(aes(x = ym, y = n, color = oah)) +
+  geom_line() +
+  labs(title = "Monthly counts by OAH over time", x = "Month", y = "Count") +
+  theme_minimal()
+
+```
+
+## Quick predictor importance proxy (Spearman w/ OAH treated ordinal)
+
+```{r}
+# Convert OAH to ordinal numeric (careful: mapping preserved from factor order)
+oah_levels <- levels(df$oah)
+cat("OAH levels:", paste(oah_levels, collapse = ", "), "\n")
+df_imp <- df %>% mutate(oah_ord = as.numeric(factor(oah, ordered = TRUE)))
+
+importance_tbl <- map_dfr(num_vars, function(var){
+  dat <- df_imp %>% select(all_of(var), oah_ord) %>% filter(!is.na(.data[[var]]) & !is.na(oah_ord))
+  if(nrow(dat) < 50) return(tibble(variable = var, spearman = NA_real_, p = NA_real_, n = nrow(dat)))
+  test <- cor.test(dat[[var]], dat$oah_ord, method = "spearman", exact = FALSE)
+  tibble(variable = var, spearman = test$estimate, p = test$p.value, n = nrow(dat))
+}) %>% arrange(desc(abs(spearman)))
+
+importance_tbl %>% slice(1:20)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+=======================
 ## Discussion
