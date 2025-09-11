@@ -232,7 +232,48 @@ groupings
 
 ```{r imputation}
 
-#Basic
+
+# 
+# #I am not grouping by Date, OsGrid, Obs or OAH (As thats our target variable)
+# groupings <- groupings[-c(1, 3, 5, 7)]
+# 
+# #Cell mean imputation
+# 
+# #Imputing Training data first
+# train.imp <- train %>%
+#   group_by(Area, FAH) %>% #cant group by precip code, or location, too many missing
+#   mutate(
+#     across(where(is.integer),
+#            ~ replace_na(., as.integer(round(mean(., na.rm = TRUE))))),
+#     across(where(is.double),
+#            ~ replace_na(., mean(., na.rm = TRUE)))
+#   ) %>% #after this, some variables 
+#   ungroup() %>% 
+#   mutate(Aspect = round(mean(Aspect, na.rm = T),), #remaining, just taking the mean
+#          Max.Temp.Grad = round(mean(Max.Temp.Grad, na.rm = T)),
+#          Max.Hardness.Grad = round(mean(Max.Hardness.Grad, na.rm  = T))) 
+# 
+# train.imp <- train.imp[-which(is.na(train.imp$OAH)),] #removing remaining missing
+#   
+# 
+# #Imputing Test data in the same manner
+# test.imp <- test %>%
+#   group_by(Area, FAH) %>% #cant group by precip code, or location, too many missing
+#   mutate(
+#     across(where(is.integer),
+#            ~ replace_na(., as.integer(round(mean(., na.rm = TRUE))))),
+#     across(where(is.double),
+#            ~ replace_na(., mean(., na.rm = TRUE)))
+#   ) %>% #after this, some variables 
+#   ungroup() %>% 
+#   mutate(Aspect = round(mean(Aspect, na.rm = T),), #remaining, just taking the mean
+#          Max.Temp.Grad = round(mean(Max.Temp.Grad, na.rm = T)),
+#          Max.Hardness.Grad = round(mean(Max.Hardness.Grad, na.rm  = T))) 
+# 
+# test.imp <- train.imp[-which(is.na(test.imp$OAH)),] #removing remaining missing
+
+
+```
 
 #I am not grouping by Date, OsGrid, Obs or OAH (As thats our target variable)
 groupings <- groupings[-c(1, 3, 5, 7)]
