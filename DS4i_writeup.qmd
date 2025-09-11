@@ -229,6 +229,8 @@ count_na/nrow(b)
 #          Max.Hardness.Grad = round(mean(Max.Hardness.Grad, na.rm  = T))) 
 # 
 # test.imp <- train.imp[-which(is.na(test.imp$OAH)),] #removing remaining missing
+
+
 ```
 
 ```{r date_time}
