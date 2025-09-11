@@ -239,7 +239,6 @@ groupings <- groupings[-c(1, 3, 5, 7)]
 
 #Cell mean imputation
 
-  
 any(is.na(train.imp[, -12]))
 
 
@@ -526,12 +525,6 @@ importance_tbl <- map_dfr(num_vars, function(var){
 importance_tbl %>% slice(1:20)
 
 ```
-
-
-
-
-
-
 
 
 
