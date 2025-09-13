@@ -286,9 +286,19 @@ test <- data[-train.idx,] #Testing Data
 
 ```
 
+```{r dimension_reduction}
+
+
+
+
+
+```
+
 ```{r h2o_test_Matthew}
 
 #nothing for now
+
+
 
 
 
