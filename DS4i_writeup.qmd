@@ -275,6 +275,8 @@ groupings
 
 ```
 
+
+```{r}
 #I am not grouping by Date, OsGrid, Obs or OAH (As thats our target variable)
 groupings <- groupings[-c(1, 3, 5, 7)]
 
@@ -322,153 +324,146 @@ test.imp <- test %>%
 
 test.imp <- train.imp[-which(is.na(test.imp$OAH)),]
 
-
-
-
-```
-
-```         
-```
-
-```{r}
-
-
-
- 
-
 ```
 =============================
 ## Modelling
 =============================
+=============================
 
-```{r}
-# Install missing packages automatically (uncomment if needed)
+
+```{r setup, include=FALSE}
+# Global setup for RMarkdown
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+# Setup and Libraries
+```{r libraries}
+# Install required packages if missing
 required <- c("tidyverse","janitor","lubridate","skimr","naniar","GGally",
-              "corrplot","factoextra","cluster","factoextra","rsample","recipes","scales")
+              "corrplot","factoextra","cluster","rsample","recipes","scales","cowplot")
 missing <- required[!(required %in% installed.packages()[,"Package"])]
 if(length(missing)) install.packages(missing, repos = "https://cloud.r-project.org")
 
-library(tidyverse)   # data wrangling + ggplot
-library(janitor)     # clean names
-library(lubridate)   # dates
-library(skimr)       # fast dataset summary
-library(naniar)      # missingness visual
-library(GGally)      # ggpairs
-library(corrplot)    # correlation plot
-library(factoextra)  # PCA & cluster visual
-library(cluster)     # clustering tools
-library(rsample)     # train/test splits
-library(recipes)     # preprocessing pipeline
-library(scales)      # axis formats
+# Load libraries for data wrangling, visualization, preprocessing, and modeling
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(janitor)
+library(caTools)
+library(caret)
+library(e1071)
+library(readr)
+library(tidyverse)
+library(janitor)
+library(lubridate)
+library(skimr)
+library(naniar)
+library(GGally)
+library(corrplot)
+library(factoextra)
+library(cluster)
+library(rsample)
+library(recipes)
+library(scales)
+library(cowplot)
+library(pROC)
+library(reshape2)
 ```
 
-## [Load data and initial cleaning]{.underline}
+# Data Loading and Cleaning
+```{r data-loading}
+# Load raw data from CSV
+# Adjust file path if needed
+df_raw <- read_csv("avalanche.csv")
 
-```{r}
-# 1. Read with readr (fast). Then clean column names to snake_case.
+# Clean column names -> snake_case
+df <- df_raw %>% clean_names()
 
-df_raw <- read_csv("scotland_avalanche_forecasts_2009_2025.csv")
+# Parse date column with flexible formats
+df <- df %>% mutate(date = parse_date_time(date, orders = c("ymd HMS", "ymd HM", "ymd"), tz = "Europe/London"))
 
-# Clean col names
-df <- df_raw %>% janitor::clean_names() # lowercase + underscores
-
-# Parse date/time robustly. If time exists use ymd_hms, else try ymd.
-df <- df %>%
-  mutate(date = parse_date_time(date, orders = c("ymd HMS", "ymd HM"), tz = "Europe/London"))
-
-# Quick check
-glimpse(df$date)
-
-# Quick structure check
-head(df)
-
+# Inspect structure of cleaned dataset
+glimpse(df)
 ```
 
-## Full skim (single call summary)
+# Data Overview
+```{r data-overview}
+# Summary statistics for all variables
+skim(df)
 
-```{r}
-# Thorough summary for initial understanding
-#?skim
-skimr::skim(df)
-vis_miss(df) # Missingness
+# Visualize missingness across variables
+vis_miss(df)
 ```
 
-## Univariate numeric exploration (histograms, outliers)
+# Univariate Analysis
 
-```{r}
-# Select numeric columns for plotting
+## Numeric Variables
+```{r univariate-numeric}
+# Extract numeric variables
 num_vars <- df %>% select(where(is.numeric)) %>% names()
-length(num_vars)
 
-# If many numeric variables use facetted histograms (log scale option for skewed)
+# Reshape numeric data to long format for plotting
 plot_df <- df %>% select(all_of(num_vars)) %>% pivot_longer(everything(), names_to = "var", values_to = "val")
 
-# Plot: histograms by variable (facetted)
+# Histograms of numeric variable distributions
 ggplot(plot_df, aes(x = val)) +
   geom_histogram(bins = 40, na.rm = TRUE) +
   facet_wrap(~var, scales = "free", ncol = 4) +
-  labs(title = "Univariate distributions (numeric vars)") +
+  labs(title = "Univariate Distributions (Numeric Variables)") +
   theme_minimal()
 ```
 
-## Univariate categorical exploration (FAH, OAH, Area, Obs)
+## Categorical Variables
+```{r univariate-categorical}
+# Convert selected variables to factors
+df <- df %>% mutate(fah = as.factor(fah),
+                    oah = as.factor(oah),
+                    area = as.factor(area),
+                    obs = as.factor(obs))
 
-```{r}
-# Ensure key categorical variables are factors
-df <- df %>%
-  mutate(fah = as.factor(fah),
-         oah = as.factor(oah),
-         area = as.factor(area),
-         obs = as.factor(obs))
-
-# Frequency plots
-p1 <- ggplot(df, aes(x = fah)) + geom_bar() + labs(title = "FAH (forecasted hazard) counts") + theme_minimal()
-p2 <- ggplot(df, aes(x = oah)) + geom_bar() + labs(title = "OAH (observed hazard) counts") + theme_minimal()
+# Frequency plots for categorical variables
+p1 <- ggplot(df, aes(x = fah)) + geom_bar() + labs(title = "Forecasted Avalanche Hazard (FAH)") + theme_minimal()
+p2 <- ggplot(df, aes(x = oah)) + geom_bar() + labs(title = "Observed Avalanche Hazard (OAH)") + theme_minimal()
 p3 <- ggplot(df, aes(x = area)) + geom_bar() + labs(title = "Records per Area") + theme_minimal() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-cowplot::plot_grid(p1, p2, p3, ncol = 1)
-# p1
-# p2
-# p3
-
+# Arrange categorical plots vertically
+plot_grid(p1, p2, p3, ncol = 1)
 ```
 
-## Bivariate: FAH vs OAH contingency and simple agreement
+# Bivariate Analysis
 
-```{r}
-# Contingency table
+## FAH vs OAH Contingency
+```{r fah-vs-oah}
+# Cross-tabulation of FAH and OAH
 tab <- table(df$fah, df$oah)
 tab
 
-# Convert to proportions by FAH (how forecasts translate to observed)
+# Row-wise proportions of FAH vs OAH
 prop.table(tab, margin = 1)
 
-# Simple agreement metric (raw)
-agree_pct <- sum(diag(prop.table(tab))) # diagonal proportion
-paste0("Raw agreement FAH==OAH: ", scales::percent(agree_pct))
-
+# Raw percentage agreement between FAH and OAH
+agree_pct <- sum(diag(prop.table(tab)))
+paste0("Raw FAH==OAH Agreement: ", percent(agree_pct))
 ```
 
-## Bivariate numeric vs target (OAH): boxplots + statistical tests
+## Numeric Variables vs OAH
+```{r numeric-vs-oah}
+# Select numeric variables excluding geo coordinates
+num_for_target <- setdiff(num_vars, c("longitude","latitude")) %>% head(12)
 
-```{r}
-# Numeric variables vs oah (boxplots) - select a reasonable subset
-num_for_target <- num_vars[!num_vars %in% c("longitude","latitude")] # drop raw coordinates from this view
-num_for_target <- head(num_for_target, 12) # plot top 12 numeric for readability
-
+# Reshape numeric variables with OAH for plotting
 plot_df2 <- df %>% select(oah, all_of(num_for_target)) %>% pivot_longer(-oah, names_to = "var", values_to = "val")
 
+# Boxplots of numeric variables by OAH
 ggplot(plot_df2, aes(x = oah, y = val)) +
   geom_boxplot(outlier.size = 0.5, na.rm = TRUE) +
   facet_wrap(~var, scales = "free_y", ncol = 3) +
-  labs(title = "Numeric variables by observed hazard (OAH)") +
+  labs(title = "Numeric Variables by OAH") +
   theme_minimal()
-
 ```
 
-```{r}
-# For each numeric variable compute a Kruskal-Wallis test against ordered OAH (non-parametric)
-oah_ordered <- df %>% filter(!is.na(oah)) %>% mutate(oah_ord = as.numeric(factor(oah, ordered = TRUE)))
+```{r kruskal-tests}
+# Kruskal-Wallis tests of numeric variables vs OAH
 kruskal_results <- map_dfr(num_vars, function(var){
   dat <- df %>% select(all_of(var), oah) %>% filter(!is.na(oah) & !is.na(.data[[var]]))
   if(nrow(dat) < 50) return(tibble(variable = var, p_value = NA_real_, n = nrow(dat)))
@@ -476,97 +471,433 @@ kruskal_results <- map_dfr(num_vars, function(var){
   tibble(variable = var, p_value = test$p.value, n = nrow(dat))
 }) %>% arrange(p_value)
 
-kruskal_results %>% head(20)
-
+# Display top 20 most significant results
+head(kruskal_results, 20)
 ```
 
-## Correlation matrix (numeric variables) + variable selection guidance
+# Correlation Analysis
+```{r correlation-analysis}
+# Compute correlation matrix for numeric variables with sufficient data
+nums <- df %>% select(where(is.numeric)) %>% select(where(~sum(!is.na(.)) > 0.05 * nrow(df)))
+cor_mat <- cor(na.omit(nums), use = "pairwise.complete.obs")
 
-```{r}
-nums <- df %>% select(where(is.numeric))
-# Keep variables with at least some non-missing values
-nums <- nums %>% select(where(~sum(!is.na(.)) > (0.05 * nrow(df))))
-cor_mat <- cor(stats::na.omit(nums), use = "pairwise.complete.obs")
-corrplot::corrplot(cor_mat, method = "color", tl.cex = 0.7, number.cex = 0.7)
+# Visualize correlation matrix
+corrplot(cor_mat, method = "color", tl.cex = 0.7, number.cex = 0.7)
 
-```
-
-```{r}
-# Identify pairs with |r| > 0.85 to consider dropping or combining
+# Identify highly correlated pairs (|r| > 0.85)
 high_cor_pairs <- which(abs(cor_mat) > 0.85 & abs(cor_mat) < 1, arr.ind = TRUE)
 if(nrow(high_cor_pairs) > 0) {
   apply(high_cor_pairs, 1, function(idx){
     cat(rownames(cor_mat)[idx[1]], "<->", colnames(cor_mat)[idx[2]], ":", cor_mat[idx[1], idx[2]], "\n")
   })
-} else cat("No very high correlations (>0.85) found among numeric subset.\n")
-
+} else cat("No very high correlations (>0.85) found.\n")
 ```
 
-## PCA on scaled numeric predictors (exploratory only)
-
-```{r}
-# Use numeric variables with reasonable completeness
+# Principal Component Analysis (PCA)
+```{r pca-analysis}
+# Prepare numeric variables for PCA
 nums_for_pca <- nums %>% select(where(~sum(!is.na(.)) > 0.6 * nrow(df)))
-pca_df <- nums_for_pca %>% drop_na()  # PCA here uses complete cases; record row loss
+pca_df <- drop_na(nums_for_pca)
 cat("Rows used for PCA:", nrow(pca_df), "of", nrow(df), "\n")
 
+# Run PCA
 pca_res <- prcomp(pca_df, center = TRUE, scale. = TRUE)
-fviz_eig(pca_res, addlabels = TRUE, ncp = 15) + ggtitle("PCA: Scree plot")
 
-# Show loadings for first two PCs
-loadings <- as_tibble(pca_res$rotation[,1:4], rownames = "variable")
-loadings %>% arrange(desc(abs(PC1))) %>% slice(1:10)
+# Scree plot of explained variance
+fviz_eig(pca_res, addlabels = TRUE, ncp = 15) + ggtitle("PCA: Scree Plot")
 
-biplot(pca_res)
-
+# Top variable loadings for first 4 PCs
+tibble(variable = rownames(pca_res$rotation), pca_res$rotation[,1:4]) %>% arrange(desc(abs(PC1))) %>% slice(1:10)
 ```
 
-## Spatial quick-check (longitude / latitude vs OAH)
-
-```{r}
+# Spatial Analysis
+```{r spatial-analysis}
+# Scatter plot of locations colored by OAH if coordinates available
 if(all(c("longitude","latitude") %in% names(df))) {
-  df %>% filter(!is.na(longitude) & !is.na(latitude) & !is.na(oah)) %>%
+  df %>% filter(!is.na(longitude), !is.na(latitude), !is.na(oah)) %>%
     ggplot(aes(x = longitude, y = latitude, color = oah)) +
     geom_point(alpha = 0.6, size = 1) +
-    labs(title = "Spatial scatter: observations colored by OAH", x = "Longitude", y = "Latitude") +
+    labs(title = "Spatial Scatter by OAH", x = "Longitude", y = "Latitude") +
     theme_minimal()
 } else {
-  cat("Longitude/Latitude not available or have been removed.")
+  cat("Longitude/Latitude not available.")
 }
 ```
 
-## Time-based checks (seasonality / trends)
-
-```{r}
-# Ensure date exists
+# Time-Series Analysis
+```{r time-series-analysis}
+# Monthly time series of OAH counts
 df %>% filter(!is.na(date)) %>%
-  mutate(ym = lubridate::floor_date(date, "month")) %>%
-  group_by(ym, oah) %>%
-  summarise(n = n(), .groups = "drop") %>%
+  mutate(ym = floor_date(date, "month")) %>%
+  group_by(ym, oah) %>% summarise(n = n(), .groups = "drop") %>%
   ggplot(aes(x = ym, y = n, color = oah)) +
   geom_line() +
-  labs(title = "Monthly counts by OAH over time", x = "Month", y = "Count") +
+  labs(title = "Monthly Counts by OAH", x = "Month", y = "Count") +
   theme_minimal()
-
 ```
 
-## Quick predictor importance proxy (Spearman w/ OAH treated ordinal)
-
-```{r}
-# Convert OAH to ordinal numeric (careful: mapping preserved from factor order)
-oah_levels <- levels(df$oah)
-cat("OAH levels:", paste(oah_levels, collapse = ", "), "\n")
+# Feature Importance Proxy
+```{r feature-importance}
+# Treat OAH as ordinal numeric for correlation importance
 df_imp <- df %>% mutate(oah_ord = as.numeric(factor(oah, ordered = TRUE)))
 
+# Spearman correlations of numeric variables with OAH
 importance_tbl <- map_dfr(num_vars, function(var){
-  dat <- df_imp %>% select(all_of(var), oah_ord) %>% filter(!is.na(.data[[var]]) & !is.na(oah_ord))
+  dat <- df_imp %>% select(all_of(var), oah_ord) %>% filter(!is.na(.data[[var]]), !is.na(oah_ord))
   if(nrow(dat) < 50) return(tibble(variable = var, spearman = NA_real_, p = NA_real_, n = nrow(dat)))
   test <- cor.test(dat[[var]], dat$oah_ord, method = "spearman", exact = FALSE)
   tibble(variable = var, spearman = test$estimate, p = test$p.value, n = nrow(dat))
 }) %>% arrange(desc(abs(spearman)))
 
-importance_tbl %>% slice(1:20)
+# Display top 20 most correlated variables
+head(importance_tbl, 20)
+```
 
+
+
+=============================
+=============================
+## Models
+=============================
+=============================
+
+
+
+```{r libs-and-seed}
+# Load the required libraries so their functions are available for use.
+library(xgboost)   # Core API for training and using XGBoost models.
+library(caret)     # High-level interface for model training, tuning, and evaluation.
+library(pROC)      # Provides functions for ROC curve plotting and AUC computation.
+library(pdp)       # Used to generate Partial Dependence Plots for model interpretation.
+
+# Set the random seed for reproducibility.
+# Ensures that random processes like resampling and model training are consistent across runs.
+set.seed(123)
+```
+
+```{r data-loading}
+# Load raw data from CSV
+df_raw <- read_csv("avalanche.csv")
+
+# Clean column names -> snake_case
+df <- df_raw %>% clean_names()
+
+# Fix Cols
+df <- df %>% mutate(date = parse_date_time(date, orders = c("ymd HMS", "ymd HM", "ymd"), tz = "Europe/London"),
+                    fah = as.factor(fah),
+                    oah = as.factor(oah),
+                    area = as.factor(area),
+                    obs = as.factor(obs))
+
+
+# Inspect structure of cleaned dataset
+head(df)
+```
+
+```{r target-var-distr}
+ggplot(df, aes(x = oah)) + geom_bar() + labs(title = "Observed Avalanche Hazard (OAH)") + theme_minimal()
+
+library(ggplot2)
+library(dplyr)
+
+# First, prepare the data with counts and percentages
+df_counts <- df %>%
+  count(oah) %>%
+  mutate(percent = n / sum(n) * 100)
+
+# Plot
+ggplot(df_counts, aes(x = reorder(oah, -n), y = n, fill = oah)) +
+  geom_bar(stat = "identity", show.legend = FALSE) +
+  geom_text(aes(label = paste0(n, " (", round(percent, 1), "%)")), 
+            vjust = -0.5, size = 4) +
+  labs(
+    title = "Observed Avalanche Hazard (OAH)",
+    x = "Hazard Level",
+    y = "Count"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    axis.title.y = element_text(margin = margin(r = 10))
+  ) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1)))
+
+
+ggplot(train, aes(x = oah)) + geom_bar() + labs(title = "Observed Avalanche Hazard (OAH)") + theme_minimal()
+
+ggplot(test, aes(x = oah)) + geom_bar() + labs(title = "Observed Avalanche Hazard (OAH)") + theme_minimal()
+
+```
+
+
+
+```{r data-preparation}
+## ---------------------------
+# Data preparation 
+## ---------------------------
+# Define target column
+target <- "oah"
+
+# ---------------------------
+# Train-test split
+# ---------------------------
+set.seed(123)
+
+split <- sample.split(df[[target]], SplitRatio = 0.7)
+train <- subset(df, split == TRUE)
+test  <- subset(df, split == FALSE)
+```
+
+
+```{r drop-missing}
+# ---------------------------
+# Drop rows with missing values in both target and predictors
+# ---------------------------
+# Our predictors, col names
+# setdiff(a, b): Returns elements in a that are not in b.
+predictor_cols <- setdiff(names(df), target)
+
+#Explanation:
+# train[, c(target, predictor_cols)]: Selects columns from train that are either the target or one of the predictors.
+# complete.cases(...): Returns a logical vector indicating which rows have no missing values (NA) across the selected columns.
+# train[ ..., ]: Subsets the train data to only those rows that have complete data in both the target and predictors.
+# Result:
+#   Removes rows with missing values in any of the important columns (target or predictors) from the training set.
+train <- train[complete.cases(train[, c(target, predictor_cols)]), ]
+test  <- test[complete.cases(test[, c(target, predictor_cols)]), ]
+```
+
+
+```{r target-var-factor-encoding}
+# ---------------------------
+# Target variable conversion
+#   Change the Target Variable (y) in our data into factor with all levels,
+#   making sure all data has levels from whole data even if it doesn't show in train or test
+#   because of the split.
+# ---------------------------
+
+# Extract all possible levels (classes) of the target variable from the full dataset
+# This ensures consistency in factor levels across training and test sets, even if some classes are missing in one set.
+target_levels <- levels(factor(df[[target]]))
+
+# Convert the target variable in the training set to a factor with levels set to target_levels
+# This makes sure the factor levels are in the same order as in the full dataset (important for classification labels).
+train[[target]] <- factor(train[[target]], levels = target_levels)
+
+# Do the same for the test set
+test[[target]]  <- factor(test[[target]],  levels = target_levels)
+```
+
+
+```{r target-var-encoding}
+# ------------------------------------------------------
+# Numeric encoding for XGBoost (0-based indexing)
+# XGB Model needs all our factor variables encoded into numerical values,
+# so we change all y levels into numbers, STARTING FROM 0 ...so -1L
+# ------------------------------------------------------
+
+# Convert the factor target in training set to integer values, then subtract 1
+# XGBoost expects class labels as integers starting from 0, so this makes sure labels are 0-based.
+y_train <- as.integer(train[[target]]) - 1L
+
+# Same conversion for test set
+y_test  <- as.integer(test[[target]]) - 1L
+
+# Store the original class labels (factor levels)
+# Useful later to map predictions back to human-readable class names (e.g., for confusion matrix or reporting).
+levels_y <- target_levels
+
+# Count the number of unique classes
+# This is needed when setting the "num_class" parameter in the XGBoost model (for multi-class classification).
+num_class <- length(levels_y)
+
+```
+
+
+```{r model-feature-matrix}
+# ---------------------------
+# Feature matrix creation
+# ---------------------------
+# Select only predictor columns from the training set
+# 'predictor_cols' contains the names of all input features (excluding the target)
+x_train <- train %>% 
+  select(all_of(predictor_cols))
+
+# Do the same for the test set
+x_test  <- test %>% 
+  select(all_of(predictor_cols))
+
+
+# ------------------------------------------------------------
+# Convert to design matrices (dummy encoding for categorical variables)
+# ------------------------------------------------------------
+
+# Convert the training data frame to a design matrix using model.matrix
+# '~ . -1' creates a formula that includes all variables (.) but removes the intercept (-1)
+# This will automatically dummy-encode categorical variables into binary columns (one-hot encoding)
+dm_train <- model.matrix(~ . -1, 
+                         data = x_train)
+
+# Same transformation to the test set
+dm_test  <- model.matrix(~ . -1, 
+                         data = x_test)
+
+
+# ------------------------------------------------------------
+# Debugging check to confirm alignment
+# ------------------------------------------------------------
+# Output number of rows in design matrix vs. number of labels
+# This is a sanity check to ensure that the feature matrix (dm_train) has the same number of rows
+#   as the target label vector (y_train), which is essential for training
+cat("Rows in dm_train:", nrow(dm_train), "Length of y_train:", length(y_train), "\n")
+
+# Same check for the test set
+cat("Rows in dm_test:", nrow(dm_test), "Length of y_test:", length(y_test), "\n")
+
+```
+
+
+
+
+```{r dmatrix}
+# ---------------------------
+# DMatrix creation
+#   :( REQUIRED
+# ---------------------------
+
+dtrain <- xgb.DMatrix(data = dm_train, 
+                      label = y_train)
+
+
+dtest  <- xgb.DMatrix(data = dm_test,
+                      label = y_test)
+```
+
+
+
+
+```{r crossval-earlystop}
+# ---------------------------
+# Cross-validated early stopping for multi-class XGBoost
+# ---------------------------
+
+# # Define the set of hyperparameters for XGBoost cross-validation
+# cv_params <- list(
+# objective = "multi:softprob", # Predict probabilities for each class (required for multi-class)
+# eval_metric = "mlogloss", # Use multi-class logarithmic loss as evaluation metric
+# eta = 0.1, # Learning rate: smaller values improve generalization
+# max_depth = 6, # Maximum depth of each tree (controls model complexity)
+# min_child_weight = 1, # Minimum sum of instance weights needed in a child node
+# subsample = 0.8, # Fraction of training data used for each tree (prevents overfitting)
+# colsample_bytree = 0.8, # Fraction of features used for each tree (prevents overfitting)
+# gamma = 0, # Minimum loss reduction to make a split
+# num_class = num_class # Number of classes in the target variable
+# )
+# 
+# # Perform k-fold cross-validation with early stopping
+# cv <- xgb.cv(
+# params = cv_params, # Hyperparameters defined above
+# data = dtrain, # Training data in DMatrix format
+# nrounds = 2000, # Maximum number of boosting iterations
+# nfold = 5, # Number of folds for cross-validation
+# stratified = TRUE, # Ensure class proportions are preserved in folds
+# early_stopping_rounds = 25, # Stop if no improvement after 25 rounds
+# verbose = 1, # Print progress during training
+# maximize = FALSE # Minimize the logloss metric
+# )
+# 
+# # Extract the optimal number of boosting rounds
+# best_nrounds <- cv$best_iteration
+# cat('Best nrounds from xgb.cv:', best_nrounds, "\n")
+```
+
+
+
+```{r xgbmodel}
+# ---------------------------
+# Final Multi-Class XGBoost Model
+# ---------------------------
+
+# Set hyperparameters (based on CV up there)
+final_params <- list(
+  objective = "multi:softprob",   # Multiclass classification: predict probability for each class
+  eval_metric = "mlogloss",       # Use multiclass log-loss as evaluation metric
+  eta = 0.1,                      # Learning rate: step size shrinkage to prevent overfitting
+  max_depth = 6,                  # Maximum depth of trees (controls model complexity)
+  min_child_weight = 1,           # Minimum sum of instance weights (hessian) needed in a child (controls overfitting)
+  subsample = 0.8,                # Subsample ratio of training instances (row sampling, adds randomness)
+  colsample_bytree = 0.8,         # Fraction of features sampled per tree (adds randomness)
+  gamma = 0,                      # Minimum loss reduction required for a split (regularization parameter)
+  num_class = num_class)           # Total number of target classes (required for multi-class setup)
+
+
+# Use optimal nrounds from CV
+final_nrounds <- 68  # Best number of boosting rounds determined by earlier cross-validation
+
+# Train final model with early stopping on evaluation set
+final_model <- xgb.train(
+  params = final_params,          # Pass hyperparameters
+  data = dtrain,                  # Training data (DMatrix)
+  nrounds = final_nrounds,        # Number of boosting rounds (iterations)
+  watchlist = list(train = dtrain, eval = dtest),  # Monitor train and test sets during training
+  early_stopping_rounds = 25,     # Stop training if no improvement for 25 consecutive rounds
+  verbose = 1,                    # Print training log (progress per round)
+  maximize = FALSE)               # We are minimizing logloss (not maximizing accuracy)
+```
+
+
+
+```{r model-test-set-eval}
+# ---------------------------
+# Test set evaluation
+# ---------------------------
+
+# Predict probabilities on test set
+pred_test_prob <- predict(final_model, dtest)  
+# -> Returns a flat vector of probabilities for all classes stacked row-wise
+
+# Convert probability vector into a matrix (rows = observations, cols = classes)
+pred_test_matrix <- matrix(pred_test_prob, 
+                           nrow = nrow(dm_test),   # Number of test samples
+                           ncol = num_class,       # Number of classes
+                           byrow = TRUE)           # Fill by rows (each row = one observation)
+
+# Convert probabilities to predicted classes
+pred_test_class <- max.col(pred_test_matrix) - 1L  
+# -> max.col finds index of highest probability (predicted class)
+# -> Subtract 1 since XGBoost class indices start at 0
+
+# Convert numeric labels back to factors for confusion matrix
+y_test_factor <- factor(y_test, levels = 0:(num_class-1), labels = levels_y)  
+pred_test_factor <- factor(pred_test_class, levels = 0:(num_class-1), labels = levels_y)  
+# -> Factors needed for caret's confusionMatrix
+```
+
+
+
+```{r eval-results}
+# Compute confusion matrix and overall accuracy
+cm_test <- confusionMatrix(pred_test_factor, y_test_factor)  
+
+# Prints
+cat("\nFinal Model Test Accuracy:", round(cm_test$overall['Accuracy'], 4), "\n")  
+cat("\nConfusion Matrix (Test Set):\n")  
+print(cm_test$table)  
+# -> Shows prediction performance per class (actual vs predicted counts)
+
+# Compute multi-class AUC per class (one-vs-all)
+test_auc_list <- list()
+for (i in 1:num_class) {
+  binary_labels <- as.numeric(y_test == (i - 1))          
+  # -> Convert labels into binary (one-vs-rest for class i)
+  test_auc_list[[levels_y[i]]] <- roc(binary_labels, pred_test_matrix[, i])$auc  
+  # -> Compute ROC-AUC for that class
+}
+
+
+cat("\nFinal Model Test AUC per class:\n")
+print(round(unlist(test_auc_list), 4))  
+# -> Print AUC values for each class
 ```
 
 
@@ -574,5 +905,38 @@ importance_tbl %>% slice(1:20)
 
 
 
-=======================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=============================
 ## Discussion
