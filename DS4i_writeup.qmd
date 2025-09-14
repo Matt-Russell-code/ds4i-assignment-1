@@ -562,7 +562,11 @@ head(importance_tbl, 20)
 =============================
 
 
+We want to apply pca to our wine data for...
 
+Customer Segment is our dependant variable, in the original data this column is not a customer segment but the place of origin of the wine. But let's imagine we are working for a wine business owner.
+
+The customer segment are customers and the specific wine that they like, we have 3 segments of customers. So our goal now is to take all the wine details and the corresponding customer segment that likes it and then build a classification model where we can predict based on wine feature details which customer segment to recommend this wine to.
 ```{r libs-and-seed}
 # Load the required libraries so their functions are available for use.
 library(xgboost)   # Core API for training and using XGBoost models.
@@ -899,6 +903,410 @@ cat("\nFinal Model Test AUC per class:\n")
 print(round(unlist(test_auc_list), 4))  
 # -> Print AUC values for each class
 ```
+
+
+```{r model-feature-importance}
+# ---------------------------
+# Feature importance and interpretation
+# ---------------------------
+# Get feature importance
+importance_matrix <- xgb.importance(model = final_model)  
+print(head(importance_matrix, 20))  # Print top 20 most important features ranked by gain
+
+# Plot feature importance
+xgb.plot.importance(importance_matrix, top_n = 20)  
+# -> Visualize top 20 important features
+```
+
+
+
+
+
+=====================================================
+Neural Net
+====================================================
+
+
+```{r h2o-initialise}
+## ---------------------------
+## H2O Deep Learning (Neural Network) workflow
+## Built from existing objects: `train`, `test`, `predictor_cols`, `target`, `levels_y`, `num_class`
+## This script uses the data preparation already done above and trains an H2O neural net,
+## evaluates on the test set and shows how to tune hyperparameters with H2O Grid Search.
+## ---------------------------
+
+# Load h2o and initialize --------------------------------------------------
+# Note: if h2o isn't installed, run: install.packages("h2o")
+library(h2o)
+# Start (or connect to) an H2O cluster. This creates an in-memory instance used for training.
+# nthreads = -1 will use all available cores.
+h2o.init(nthreads = -1)
+
+```
+
+
+```{r turn-to-h2o-format}
+# Convert existing R data.frames to H2O frames --------------------------------
+# We use the `train` and `test` data.frames already prepared earlier in the pipeline.
+# H2O works with its own frame objects; as.h2o() converts R data.frames into H2O frames.
+train_h2o <- as.h2o(train)
+test_h2o  <- as.h2o(test)
+```
+
+
+
+```{r feature-modification-h2o}
+# Define features (x) and response (y) -------------------------------------
+# Using the same predictor list used for XGBoost so we reuse feature engineering already performed.
+x_vars <- predictor_cols  # character vector of predictor column names
+y_var  <- target          # the response column name ("oah")
+
+# Ensure response is treated as a categorical (factor) in H2O for classification
+train_h2o[[y_var]] <- as.factor(train_h2o[[y_var]])
+test_h2o[[y_var]]  <- as.factor(test_h2o[[y_var]])
+```
+
+
+
+```{r h2o-train-test-split}
+# Split training H2O frame into train/validation for early stopping ---------
+# We'll keep a validation frame to enable early stopping during H2O training.
+# Use an 80/20 split of the existing training data.
+splits <- h2o.splitFrame(train_h2o, ratios = 0.8, seed = 123)
+
+train_h2o_split <- splits[[1]]  # used for model fitting
+valid_h2o_split <- splits[[2]]  # used for early stopping / model selection
+```
+
+
+
+
+
+```{r neural-net-weights}
+# ---------------------------
+# H2O neural network with class weighting + randomized grid search
+# ---------------------------
+# This block expects the following objects already exist:
+#  - train (R data.frame), test (R data.frame)
+#  - predictor_cols (character vector), target (string), levels_y (factor levels), num_class (int)
+#  - h2o cluster started (h2o.init() called earlier)
+# If train_h2o/test_h2o are not present, the script will create them from train/test.
+
+
+# 1) Create a class-weight column (inverse frequency) to help under-represented classes -
+#    weight_i = N / (K * count(class_i))  -> standard balanced weight
+freq_table <- as.data.frame(table(train[[target]]))
+names(freq_table) <- c("class", "count")
+N_total <- nrow(train)
+K <- num_class
+
+# map class -> weight
+class_counts <- setNames(freq_table$count, freq_table$class)
+class_weights_map <- N_total / (K * class_counts)   # higher weight for rarer classes
+
+# create a vector of weights for each row in train, matching the order of 'train'
+weights_vector <- as.numeric(class_weights_map[as.character(train[[target]])])
+
+# attach weights column into train H2O frame (column name: "class_weights")
+train_h2o[,"class_weights"] <- as.h2o(weights_vector)
+
+# For reproducibility, add the weights to the R 'train' too (keeps them in sync)
+train$class_weights <- weights_vector
+```
+
+
+
+
+
+```{r neural-net-weighted-data-train-test-split}
+# Create a fresh train/validation split inside H2O for grid search / early stopping
+#    We keep a validation frame so early stopping works.
+set.seed(123)
+
+splits <- h2o.splitFrame(train_h2o, ratios = 0.8, seed = 123)
+
+train_h2o_split <- splits[[1]]
+valid_h2o_split <- splits[[2]]
+```
+
+
+
+
+```{r neural-net-hyper-params}
+# Define hyperparameter search space (RandomDiscrete)
+#    Note: large search space with many models will run long; adjust max_models for runtime.
+hyper_params <- list(
+  hidden = list(
+    c(256,128,64),
+    c(512,256,128),
+    c(256,256,128,64),
+    c(128,128),
+    c(128,64)),
+  l1 = c(0, 1e-6, 1e-5, 1e-4),
+  l2 = c(0, 1e-6, 1e-5, 1e-4),
+  rate = c(0.01, 0.005, 0.001),                # learning rates (smaller = slower but better generalization)
+  input_dropout_ratio = c(0.0, 0.05, 0.1))     # apply some input dropout regularization
+```
+
+
+
+
+```{r neural-net-search-criteria}
+# Because hidden_dropout_ratios must match hidden layer length, we will set a default dropout
+# and not include it in the hyperparameter space (keeps models from failing due to mismatched lengths)
+
+search_criteria <- list(
+  strategy = "RandomDiscrete",
+  max_models = 30,    # change to 40-60 if you want a longer run (4-5 hours) — careful with RAM
+  seed = 123,
+  max_runtime_secs = 60*60*4)  # optional: cap runtime to ~4 hours (comment out if you prefer model count)
+
+```
+
+
+
+
+```{r h2o-grid-search}
+# Launch grid search using class weights (weights_column) ---------------------
+#    Note: epochs increased to allow deeper training; early stopping will limit wasted epochs.
+grid_id <- "h2o_nn_balanced_grid"
+
+grid <- h2o.grid(algorithm = "deeplearning",
+                 grid_id = grid_id,
+                 x = predictor_cols,
+                 y = target,
+                 training_frame = train_h2o_split,
+                 validation_frame = valid_h2o_split,
+                 # Use the weights column computed earlier:
+                 weights_column = "class_weights",
+                 # Make H2O use classes weighting; setting balance_classes=FALSE because we supply weights explicitly
+                 balance_classes = FALSE,
+                 # Training control
+                 epochs = 200,                       # allow many epochs (early stopping will truncate)
+                 stopping_metric = "logloss",
+                 stopping_tolerance = 1e-4,
+                 stopping_rounds = 10,
+                 # optimization / regularization defaults; some are overridden by hyperparams
+                 distribution = "multinomial",
+                 activation = "RectifierWithDropout",
+                 adaptive_rate = TRUE,
+                 # small-ish default l1/l2 (grid will explore others)
+                 l1 = 0, l2 = 0,
+                 # Use relatively small mini-batch default (H2O autodetects)
+                 reproducible = FALSE,   # reproducible=TRUE may slow things on multi-core machines
+                 seed = 123,
+                 # hyperparameter space and search criteria:
+                 hyper_params = hyper_params,
+                 search_criteria = search_criteria)
+
+# Review the grid search summary (sorted by validation logloss) ---------------
+grid_perf <- h2o.getGrid(grid_id = grid_id, sort_by = "logloss", decreasing = FALSE)
+print(grid_perf)
+```
+
+
+
+
+```{r get-best-model}
+# Pull the best model (lowest validation logloss) ----------------------------
+best_model_id <- grid_perf@model_ids[[1]]
+best_model <- h2o.getModel(best_model_id)
+
+cat("Best model id:", best_model_id, "\n")
+print(best_model)
+```
+
+
+
+```{r best-model-eval}
+# Evaluate the best model on the held-out test set ---------------------------
+best_pred_h2o <- h2o.predict(best_model, test_h2o)   # returns 'predict' + per-class probabilities
+best_pred_df <- as.data.frame(best_pred_h2o)
+
+# predicted class labels (as factor)
+pred_labels_best <- factor(best_pred_df$predict, levels = levels_y)
+true_labels_best <- factor(as.vector(test_h2o[[target]]), levels = levels_y)
+
+# confusion matrix & caret metrics
+cm_best <- confusionMatrix(pred_labels_best, true_labels_best)
+print(cm_best)
+cat("Test Accuracy (best H2O NN):", round(cm_best$overall['Accuracy'],4), "\n")
+```
+
+
+
+```{r per-class-auc}
+# NEEDS DEBUGGIN!
+
+
+# Compute per-class AUC (one-vs-all) using predicted probabilities ------------
+# probability columns in best_pred_df must match levels_y order; H2O uses level names as columns
+# prob_matrix <- as.matrix(best_pred_df[, levels_y])
+# 
+# auc_list <- sapply(seq_along(levels_y), function(i) {
+#   cls <- levels_y[i]
+#   bin_true <- as.numeric(true_labels_best == cls)
+#   scores <- prob_matrix[, cls]
+#   if (length(unique(bin_true)) < 2) return(NA)   # if a class not present in test
+#   auc_val <- as.numeric(roc(bin_true, scores)$auc)
+#   return(round(auc_val,4))
+# })
+# 
+# names(auc_list) <- levels_y
+# 
+# print(auc_list)
+```
+
+
+
+```{r top-three-predicted-classes}
+# NEEDS DEBUGGIN!
+
+# # Top-K (e.g. Top-3) hit ratio - useful in practice -------------------------
+# # calculate if true label is in top-3 predicted probabilities
+# topk <- function(prob_row, k = 3) {
+#   ord <- order(prob_row, decreasing = TRUE)
+#   return(names(prob_row)[ord[1:k]])
+# }
+# 
+# probs_df <- as.data.frame(prob_matrix)
+# 
+# in_topk <- mapply(function(i, true_lbl) {
+#   topk_preds <- topk(as.numeric(probs_df[i, ]), k = 3)
+#   true_lbl %in% topk_preds
+# }, i = seq_len(nrow(probs_df)), true_lbl = as.character(true_labels_best))
+# 
+# 
+# top3_hit_ratio <- mean(in_topk, na.rm = TRUE)
+# 
+# cat("Top-3 hit ratio (best model):", round(top3_hit_ratio,4), "\n")
+```
+
+
+
+```{r save-best-model}
+# Save the best model to disk  -----------------------------------
+model_path <- h2o.saveModel(best_model, path = getwd(), force = TRUE)
+cat("Saved best model to:", model_path, "\n")
+
+#------------------------------------ Notes  -----------------------------------------------------------
+# - If you encounter OOM / memory errors: reduce `max_models` or reduce hidden layer sizes
+#   or set max_runtime_secs in search_criteria to limit the run-time.
+# - Because we used per-row weights, the model actively penalizes mistakes on rare classes.
+# - If you want even stronger balancing, you can set balance_classes = TRUE as well,
+#   or apply targeted over-sampling (SMOTE) on the R side before converting to H2O.
+# - For an ensemble: keep a few of the top grid models and use h2o.stackedEnsemble() to combine them.
+```
+
+
+
+
+```{r best-model-metrics}
+# ---------- Robust metrics, top-k, AUCs, calibration ----------
+
+#Get predicted DF and true labels (from best_pred_df / test_h2o)
+# If we don't have best_pred_df, compute it:
+# best_pred_h2o <- h2o.predict(best_model, test_h2o)
+# best_pred_df <- as.data.frame(best_pred_h2o)
+
+pred_df <- best_pred_df   # data.frame containing "predict" and per-class probability columns named by levels_y
+true_labels <- factor(as.vector(test_h2o[[target]]), levels = levels_y)
+
+# Confusion matrix (caret)
+pred_factor <- factor(pred_df$predict, levels = levels_y)
+cm <- confusionMatrix(pred_factor, true_labels)
+print(cm)   # this is safe
+```
+
+
+
+```{r neural-net-per-class-metrices}
+# Per-class precision, recall, F1, macro-F1 (safe numeric conversions)
+byClass <- as.data.frame(cm$byClass)
+
+# caret's byClass could have columns like 'Sensitivity','Specificity','Pos Pred Value' etc.
+# Ensure numeric columns are numeric:
+num_cols <- sapply(byClass, is.numeric)
+if (!all(num_cols)) {
+  # coerce columns that look like numbers but are factors/characters
+  for (cname in names(byClass)) {
+    byClass[[cname]] <- suppressWarnings(as.numeric(as.character(byClass[[cname]])))
+  }
+}
+
+precision <- byClass$`Pos Pred Value`       # precision
+recall    <- byClass$Sensitivity            # recall
+f1 <- 2 * (precision * recall) / (precision + recall)
+f1[is.na(f1)] <- 0
+metrics_tbl <- data.frame(
+  class = rownames(byClass),
+  precision = round(precision,4),
+  recall = round(recall,4),
+  F1 = round(f1,4))
+
+print(metrics_tbl)
+cat("Macro F1:", round(mean(f1, na.rm = TRUE),4), "\n")
+```
+
+
+
+```{r top-hits}
+# Top-K hit ratios (Top-1, Top-2, Top-3)
+topk_hit <- function(probs_df, true_labels, k=3) {
+  n <- nrow(probs_df)
+  hits <- logical(n)
+  for (i in seq_len(n)) {
+    row_probs <- as.numeric(probs_df[i, ])
+    names(row_probs) <- colnames(probs_df)
+    topk_names <- names(sort(row_probs, decreasing = TRUE))[1:k]
+    hits[i] <- as.character(true_labels[i]) %in% topk_names
+  }
+  mean(hits, na.rm = TRUE)
+}
+
+cat("Top-1 hit:", round(topk_hit(prob_cols, true_labels, 1),4), "\n")
+cat("Top-2 hit:", round(topk_hit(prob_cols, true_labels, 2),4), "\n")
+cat("Top-3 hit:", round(topk_hit(prob_cols, true_labels, 3),4), "\n")
+```
+
+
+
+```{r calibration-plot-perclass}
+# Calibration plot per class (reliability diagram) - example for one class
+calibration_plot_one <- function(class_label, prob_df, true_labels, n_bins = 10) {
+  scores <- prob_df[[class_label]]
+  true_bin <- as.numeric(true_labels == class_label)
+  df_cal <- data.frame(scores = scores, true = true_bin)
+  df_cal$bin <- cut(df_cal$scores, breaks = seq(0,1,length.out = n_bins+1), include.lowest = TRUE)
+  agg <- aggregate(cbind(mean_prob = scores, obs_rate = true) ~ bin, data = df_cal, FUN = mean)
+  agg$bin_mid <- (seq(0,1,length.out = n_bins+1)[-1] + seq(0,1,length.out = n_bins+1)[- (n_bins+1)])/2
+  ggplot(agg, aes(x = mean_prob, y = obs_rate)) +
+    geom_point() + geom_line() + geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "gray") +
+    labs(title = paste("Calibration for", class_label), x = "Mean predicted probability", y = "Observed frequency")
+}
+
+# Example: plot calibration for 'Moderate' (change to any class)
+if ("Moderate" %in% colnames(prob_cols)) {
+  print(calibration_plot_one("Moderate", prob_cols, true_labels, n_bins = 10))
+}
+```
+
+
+
+
+```{r neural-net-save-metrics}
+# Save metrics to file 
+write.csv(metrics_tbl, "h2o_nn_per_class_metrics.csv", row.names = FALSE)
+write.csv(data.frame(auc=auc_list), "h2o_nn_per_class_auc.csv")
+```
+
+
+```{r}
+h2o.varimp(best_h2o_model)
+
+h2o.varimp_plot(best_h2o_model)
+```
+
 
 
 
