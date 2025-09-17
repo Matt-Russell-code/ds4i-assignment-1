@@ -270,6 +270,8 @@ data <- data %>%
 
 data <- na.omit(data) #remove remaining missing
 
+data <- data[,!(names(data)) == "Obs"]
+
 
 
 ```
@@ -294,13 +296,171 @@ test <- data[-train.idx,] #Testing Data
 
 ```
 
-```{r h2o_test_Matthew}
+```{r Keras_Matthew}
 
-#nothing for now
+#considerations for future
+
+# justifying our dropping of Missing values ie columns and others
+# Justifying our window length
+# Looking at factor columns with a huge amount of categories
+
+library("keras3")
+
+#for this to work I need to convert the data into an array 
+# form is (N (length), L (Time frame), F (Features))
+
+#I promise that this code isnt made by Chatgpt I am just using a lot of comments otherwise I dont know what the #$!* is going on :)
+
+
+#--------Data Preparation-------------------------------------
+
+T <- length(data$Date) #time period length
+
+data_nn <- data %>% 
+  select(-c(Date, OSgrid, Location)) #removing date column, OSgrid, location
+
+
+L <- 3 #Rolling window length = 3. So what I am decided is that It can use the previus 3 days on record to train itself
+H <- 1 # predict 1 day ahead
+
+
+#number of samples we can have, so number of time slices, each one iterated one step ahead by H (which is just 1 day in our case)
+N_samp <- T - L - H + 1
+
+#BRain is broken, but this is what needs to happen, remove OAH and put into vector, one hot enocode x variables and fix the rest wrt Y = OAH and so on
+
+#----------------One hot encoding--------
+
+#This part is quite a process. So big picture, the numeric data needs to be standardised, but when we do one-hot-encoding, it becomes quite messy to avoid standardising the dummy variables. SO we are going to make indices for the numeric columns so we can standardise only them later
+
+#Taking our predictors and covariates into one df, and our labels into another
+
+X.variables <- data_nn %>% 
+  select(-OAH)   #x_variables = everything in data other than OAH column
+  
+X.variables <- model.matrix(~., data = X.variables)[,-1] # One Hot encoding
+
+y.variable <- data_nn[["OAH"]]  #y_variable = only our OAH column
+
+numeric.variables <- names(data_nn)[sapply(data_nn, is.numeric)]
+numeric.variables <- setdiff(numeric.variables, "OAH")
+
+numeric.indexes <- which(colnames(X.variables) %in% numeric.variables) #okay so the colnames are the same so we can find the indexes in x variables which are numeric with this code <--
+
+#dummy variable indexes
+dummy.indexes <- setdiff(1:(ncol(X.variables)), numeric.indexes)
+
+
+#Number features
+
+F_ <- ncol(X.variables)
+
+#--------------Making Array---------------------#
+
+
+#Arrays - this is the confusing part. Keras needs an array for this to work. In our case we can think of this as turning our data into a stack of data sheets. each sheet is for a particular feature. THen there are N_sampl columns, and each is shifted by L
+
+X <- array( NA_real_, #just an empty array, which will subsequently be filled
+           dim = c(N_samp,L, F_  ),
+           )
+
+y <- integer(N_samp)
 
 
 
 
+
+
+for (i in 1:N_samp){ #here we are filling in the array with our data
+  
+  index.window <- i:(i + L - 1) #index wind = ith value in N_samp to I + window minus 1
+  
+  X[i, , ] <- X.variables[index.window, , drop = F] #filling in the predictors with the corresponding indexes into that window
+  y[i] <- y.variable[i + L + H -1] #we predict the ith + L + H y values.
+  
+}
+
+
+
+#------------Training and testing split-----------------------------
+
+#We want to preserve time series patterns, so no shuffling 
+idx <- 1:N_samp
+number.training <- floor(N_samp * 0.8) #train = first 80% of features
+
+tr <- idx[1:number.training] #Training indices
+te <- idx[(number.training + 1):N_samp] #Testing indices
+
+X.train <- X[tr, , , drop = F] #training predictors data array
+X.test <- X[te, , , drop = F ] #testing predictors array
+y.train <- y[tr] #training target
+y.test <- y[te]
+
+
+
+
+#----------------Scaling--------------------
+
+#Remeber that we made indexes for our numeric data, which is the data we want to scale. 
+
+#We also need to scale the training data, and scale the testing data according to the training data mu and sd
+
+
+if (length(numeric.indexes) > 0){
+  
+  mu.numeric <- apply(X.train[, , numeric.indexes, drop = F], 3, mean, na.rm = T)
+  
+  sd.numeric <- apply(X.train[ , , numeric.indexes, drop = F], 3, sd, na.rm = T)
+  
+   sd.numeric[sd.numeric == 0 | is.na(sd.numeric)] <- 1 #make sure SD == 1
+  
+  for (j in seq_along(numeric.indexes)){
+    
+    k <- numeric.indexes[j]
+    X.train[, , k] <- (X.train[ , , k] - mu.numeric[j])/sd.numeric[j]
+    X.test[, , k] <- (X.test[ , , k] - mu.numeric[j])/sd.numeric[j]
+  }
+  
+  
+}
+
+# Numeric cols should ne ~N(0,1)
+round(apply(X.train[ , , numeric.indexes, drop = FALSE], 3, mean), 3)
+round(apply(X.train[ , , numeric.indexes, drop = FALSE], 3, sd),   3)
+
+
+
+#Getting there !
+
+#Since we are doing a multiclass prediction we need to use softmax
+#This means using the tocategorical() function on y
+
+y.test <- to_categorical(y.test)
+y.train <- to_categorical(y.train)
+
+
+
+#------------Finally : the moddeling part--------------------
+
+input <- layer_input(shape = c(F_))
+
+output <- input %>% 
+  layer_dense(units = 8, activation = 'relu') %>% 
+  layer_dropout(rate = 0.5) %>%
+  layer_dense(units = 3, activation = 'softmax')
+
+model <- keras_model(inputs = input, outputs = output)
+
+model %>% compile(loss = "categorical_crossentropy",
+                  optimizer = optimizer_adam(learning_rate = 0.01),
+                  metrics = c("accuracy"))
+
+history <- model %>% fit(X.train,y.train,
+                         epochs = 30,
+                         batch_size = 5, 
+                         validation_split = 0.2)
+
+model %>% evaluate(X.test, y.test)
 
 ```
 
