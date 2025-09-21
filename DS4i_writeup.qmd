@@ -330,15 +330,7 @@ test.imp <- train.imp[-which(is.na(test.imp$OAH)),]
 =============================
 
 
-# Setup and Libraries
-
-```{r libraries}
-# Install required packages if missing
-required <- c("tidyverse","janitor","lubridate","skimr","naniar","GGally",
-              "corrplot","factoextra","cluster","rsample","recipes","scales","cowplot")
-missing <- required[!(required %in% installed.packages()[,"Package"])]
-if(length(missing)) install.packages(missing, repos = "https://cloud.r-project.org")
-
+```{r libs-and-seed}
 # Load libraries for data wrangling, visualization, preprocessing, and modeling
 library(dplyr)
 library(tidyverse)
@@ -363,16 +355,7 @@ library(scales)
 library(cowplot)
 library(pROC)
 library(reshape2)
-```
 
-# =============================
-
-# \## Models
-
-=============================
-
-
-```{r libs-and-seed}
 # Load the required libraries so their functions are available for use.
 library(xgboost)   # Core API for training and using XGBoost models.
 library(caret)     # High-level interface for model training, tuning, and evaluation.
@@ -383,6 +366,7 @@ library(pdp)       # Used to generate Partial Dependence Plots for model interpr
 # Ensures that random processes like resampling and model training are consistent across runs.
 set.seed(123)
 ```
+
 
 ```{r data-loading}
 # Load raw data from CSV
@@ -404,7 +388,7 @@ head(df)
 ```
 
 ```{r target-var-distr}
-# ggplot(df, aes(x = oah)) + geom_bar() + labs(title = "Observed Avalanche Hazard (OAH)") + theme_minimal()
+ggplot(df, aes(x = oah)) + geom_bar() + labs(title = "Observed Avalanche Hazard (OAH)") + theme_minimal()
 
 library(ggplot2)
 library(dplyr)
@@ -414,22 +398,22 @@ df_counts <- df %>%
   count(oah) %>%
   mutate(percent = n / sum(n) * 100)
 
-# # Plot
-# ggplot(df_counts, aes(x = reorder(oah, -n), y = n, fill = oah)) +
-#   geom_bar(stat = "identity", show.legend = FALSE) +
-#   geom_text(aes(label = paste0(n, " (", round(percent, 1), "%)")), 
-#             vjust = -0.5, size = 4) +
-#   labs(
-#     title = "Observed Avalanche Hazard (OAH)",
-#     x = "Hazard Level",
-#     y = "Count"
-#   ) +
-#   theme_minimal(base_size = 14) +
-#   theme(
-#     plot.title = element_text(face = "bold", hjust = 0.5),
-#     axis.title.y = element_text(margin = margin(r = 10))
-#   ) +
-#   scale_y_continuous(expand = expansion(mult = c(0, 0.1)))
+# Plot
+ggplot(df_counts, aes(x = reorder(oah, -n), y = n, fill = oah)) +
+  geom_bar(stat = "identity", show.legend = FALSE) +
+  geom_text(aes(label = paste0(n, " (", round(percent, 1), "%)")), 
+            vjust = -0.5, size = 4) +
+  labs(
+    title = "Observed Avalanche Hazard (OAH)",
+    x = "Hazard Level",
+    y = "Count"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    axis.title.y = element_text(margin = margin(r = 10))
+  ) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1)))
 
 
 # ggplot(train, aes(x = oah)) + geom_bar() + labs(title = "Observed Avalanche Hazard (OAH)") + theme_minimal()
@@ -569,9 +553,6 @@ cat("Rows in dm_test:", nrow(dm_test), "Length of y_test:", length(y_test), "\n"
 
 ```
 
-
-
-
 ```{r dmatrix}
 # ---------------------------
 # DMatrix creation
@@ -585,8 +566,6 @@ dtrain <- xgb.DMatrix(data = dm_train,
 dtest  <- xgb.DMatrix(data = dm_test,
                       label = y_test)
 ```
-
-
 
 ```{r crossval-earlystop}
 # ---------------------------
@@ -623,8 +602,6 @@ dtest  <- xgb.DMatrix(data = dm_test,
 # cat('Best nrounds from xgb.cv:', best_nrounds, "\n")
 ```
 
-
-
 ```{r xgbmodel}
 # ---------------------------
 # Final Multi-Class XGBoost Model
@@ -657,8 +634,6 @@ final_model <- xgb.train(
   maximize = FALSE)               # We are minimizing logloss (not maximizing accuracy)
 ```
 
-
-
 ```{r model-test-set-eval}
 # ---------------------------
 # Test set evaluation
@@ -686,6 +661,7 @@ pred_test_factor <- factor(pred_test_class, levels = 0:(num_class-1), labels = l
 ```
 
 
+
 ```{r eval-results}
 # Compute confusion matrix and overall accuracy
 cm_test <- confusionMatrix(pred_test_factor, y_test_factor)  
@@ -711,9 +687,6 @@ print(round(unlist(test_auc_list), 4))
 # -> Print AUC values for each class
 ```
 
-
-
-
 ```{r model-feature-importance}
 # ---------------------------
 # Feature importance and interpretation
@@ -726,9 +699,6 @@ print(head(importance_matrix, 20))  # Print top 20 most important features ranke
 xgb.plot.importance(importance_matrix, top_n = 20)  
 # -> Visualize top 20 important features
 ```
-
-
-
 
 ===================================================== Neural Net ====================================================
 
@@ -749,9 +719,6 @@ h2o.init(nthreads = -1)
 
 ```
 
-
-
-
 ```{r turn-to-h2o-format}
 # Convert existing R data.frames to H2O frames --------------------------------
 # We use the `train` and `test` data.frames already prepared earlier in the pipeline.
@@ -759,9 +726,6 @@ h2o.init(nthreads = -1)
 train_h2o <- as.h2o(train)
 test_h2o  <- as.h2o(test)
 ```
-
-
-
 
 ```{r feature-modification-h2o}
 # Define features (x) and response (y) -------------------------------------
@@ -773,9 +737,6 @@ y_var  <- target          # the response column name ("oah")
 train_h2o[[y_var]] <- as.factor(train_h2o[[y_var]])
 test_h2o[[y_var]]  <- as.factor(test_h2o[[y_var]])
 ```
-
-
-
 
 ```{r neural-net-weights}
 # ---------------------------
@@ -809,10 +770,6 @@ train_h2o[,"class_weights"] <- as.h2o(weights_vector)
 train$class_weights <- weights_vector
 ```
 
-
-
-
-
 ```{r neural-net-weighted-data-train-test-split}
 # Split training H2O frame into train/validation for early stopping ---------
 # We'll keep a validation frame to enable early stopping during H2O training.
@@ -825,9 +782,6 @@ splits <- h2o.splitFrame(train_h2o, ratios = 0.8, seed = 123)
 train_h2o_split <- splits[[1]]
 valid_h2o_split <- splits[[2]]
 ```
-
-
-
 
 ```{r neural-net-hyper-params}
 # Define hyperparameter search space (RandomDiscrete)
@@ -845,9 +799,6 @@ hyper_params <- list(
   input_dropout_ratio = c(0.0, 0.05, 0.1))     # apply some input dropout regularization
 ```
 
-
-
-
 ```{r neural-net-search-criteria}
 # Because hidden_dropout_ratios must match hidden layer length, we will set a default dropout
 # and not include it in the hyperparameter space (keeps models from failing due to mismatched lengths)
@@ -859,9 +810,6 @@ search_criteria <- list(
   max_runtime_secs = 60*60*4)  # optional: cap runtime to ~4 hours (comment out if you prefer model count)
 
 ```
-
-
-
 
 ```{r h2o-grid-search}
 # Launch grid search using class weights (weights_column) ---------------------
@@ -901,9 +849,6 @@ grid_perf <- h2o.getGrid(grid_id = grid_id, sort_by = "logloss", decreasing = FA
 print(grid_perf)
 ```
 
-
-
-
 ```{r get-best-model}
 # Pull the best model (lowest validation logloss) ----------------------------
 best_model_id <- grid_perf@model_ids[[1]]
@@ -912,10 +857,6 @@ best_model <- h2o.getModel(best_model_id)
 cat("Best model id:", best_model_id, "\n")
 print(best_model)
 ```
-
-
-
-
 
 ```{r best-model-eval}
 # Evaluate the best model on the held-out test set ---------------------------
@@ -931,9 +872,6 @@ cm_best <- confusionMatrix(pred_labels_best, true_labels_best)
 print(cm_best)
 cat("Test Accuracy (best H2O NN):", round(cm_best$overall['Accuracy'],4), "\n")
 ```
-
-
-
 
 ```{r per-class-auc}
 # NEEDS DEBUGGIN!
@@ -956,10 +894,6 @@ cat("Test Accuracy (best H2O NN):", round(cm_best$overall['Accuracy'],4), "\n")
 # 
 # print(auc_list)
 ```
-
-
-
-
 
 ```{r top-three-predicted-classes}
 # NEEDS DEBUGGIN!
@@ -984,10 +918,6 @@ cat("Test Accuracy (best H2O NN):", round(cm_best$overall['Accuracy'],4), "\n")
 # cat("Top-3 hit ratio (best model):", round(top3_hit_ratio,4), "\n")
 ```
 
-
-
-
-
 ```{r save-best-model}
 # Save the best model to disk  -----------------------------------
 model_path <- h2o.saveModel(best_model, path = getwd(), force = TRUE)
@@ -1002,10 +932,6 @@ cat("Saved best model to:", model_path, "\n")
 # - For an ensemble: keep a few of the top grid models and use h2o.stackedEnsemble() to combine them.
 ```
 
-
-
-
-
 ```{r best-model-metrics}
 # ---------- Robust metrics, top-k, AUCs, calibration ----------
 
@@ -1017,14 +943,14 @@ cat("Saved best model to:", model_path, "\n")
 pred_df <- best_pred_df   # data.frame containing "predict" and per-class probability columns named by levels_y
 true_labels <- factor(as.vector(test_h2o[[target]]), levels = levels_y)
 
+# Extract only probability columns (exclude "predict")
+prob_cols <- pred_df[, setdiff(colnames(pred_df), "predict")]
+
 # Confusion matrix (caret)
 pred_factor <- factor(pred_df$predict, levels = levels_y)
 cm <- confusionMatrix(pred_factor, true_labels)
 print(cm)   # this is safe
 ```
-
-
-
 
 ```{r neural-net-per-class-metrices}
 # Per-class precision, recall, F1, macro-F1 (safe numeric conversions)
@@ -1054,8 +980,6 @@ print(metrics_tbl)
 cat("Macro F1:", round(mean(f1, na.rm = TRUE),4), "\n")
 ```
 
-
-
 ```{r top-hits}
 # Top-K hit ratios (Top-1, Top-2, Top-3)
 topk_hit <- function(probs_df, true_labels, k=3) {
@@ -1074,9 +998,6 @@ cat("Top-1 hit:", round(topk_hit(prob_cols, true_labels, 1),4), "\n")
 cat("Top-2 hit:", round(topk_hit(prob_cols, true_labels, 2),4), "\n")
 cat("Top-3 hit:", round(topk_hit(prob_cols, true_labels, 3),4), "\n")
 ```
-
-
-
 
 ```{r calibration-plot-perclass}
 # Calibration plot per class (reliability diagram) - example for one class
@@ -1098,18 +1019,18 @@ if ("Moderate" %in% colnames(prob_cols)) {
 }
 ```
 
-
-
 ```{r neural-net-save-metrics}
 # Save metrics to file 
 write.csv(metrics_tbl, "h2o_nn_per_class_metrics.csv", row.names = FALSE)
-write.csv(data.frame(auc=auc_list), "h2o_nn_per_class_auc.csv")
 ```
 
-```{r}
-h2o.varimp(best_h2o_model)
 
-h2o.varimp_plot(best_h2o_model)
+
+
+```{r}
+h2o.varimp(best_model)
+
+h2o.varimp_plot(best_model)
 ```
 
 =============================
