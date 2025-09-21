@@ -1,0 +1,469 @@
+---
+title: "DS4I - Project Writeup"
+format: html
+execute:
+  echo: false
+  warning: false
+  message: false
+  results: hide
+editor: visual
+---
+
+```{r setup}
+
+
+#libraries 
+
+library(kableExtra)
+library(tidyverse)
+library(ggplot2)
+library(ggpubr)
+
+#theme for ggplot2, let me know if you do not like this theme and we can change it :)
+
+#Theme for ggplot2 
+theme_set(
+  theme_bw(base_size = 9) +
+    theme(
+      plot.title   = element_text(hjust = 0.5, size = 9),
+      panel.border = element_rect(colour = "black", fill = NA, linewidth = 0.5),
+      # keep grids but make them subtle
+      panel.grid.major = element_line(colour = "grey85", linewidth = 0.3),
+      panel.grid.minor = element_line(colour = "grey92", linewidth = 0.2),
+      # base-R style text/ticks
+      axis.text  = element_text(colour = "black"),
+      axis.title = element_text(colour = "black"),
+      axis.ticks = element_line(colour = "black", linewidth = 0.3)
+    )
+)
+
+
+
+#making geompoint have hollow circles
+update_geom_defaults(
+  "point",
+  list(size = 1, alpha = 0.9, shape = 21, colour = "black")
+)
+
+
+```
+
+```{r}
+#| echo: false
+knitr::include_graphics("av.jpg")
+
+```
+
+[Photo by Nicolas Cool on Unsplash]{style="font-size:12px"}
+
+## Introduction
+
+## Literature Review
+
+## Exploratory Data Analysis
+
+```{r}
+
+
+
+```
+
+## Feature Engineering
+
+```{r read_data}
+
+library(lubridate)
+data = read.csv("scotland_avalanche_forecasts_2009_2025.csv")
+
+
+data <- data %>% 
+  mutate(across(where(is.character), as.factor))
+
+```
+
+```{r missing_val}
+
+#Getting table of missing values
+
+
+col.n <- colnames(data)
+n <- nrow(data)
+
+missing_df <- data.frame(Variable = character(),
+                         "Missing (%)" = numeric(),
+                         check.names = F)
+
+
+for (i in col.n){
+  
+  x <- sum(is.na(data[,i]))
+  
+  perc <- (x/n) * 100
+  
+  missing_df <- rbind(missing_df,
+                      data.frame(
+                        Variable = i,
+                        `Missing (%)` = perc
+                      , check.names = F)
+                      )
+  
+}
+ 
+missing_df <- missing_df %>% 
+  filter(`Missing (%)` > 0) %>% 
+  arrange(desc(`Missing (%)`),)
+
+
+```
+
+```{r tablex}
+
+
+
+kable(missing_df, 
+      format = "html",
+      digits = 2,
+      caption = "Missing Values") %>%
+  kable_styling(
+    bootstrap_options = c("hover"),
+    full_width = FALSE
+  ) %>%
+  footnote(general = "")
+
+
+```
+
+```{r check_missing_fnx}
+
+# a few functions to help me evaluate the extent of missing values
+
+#Find percentage of missing values per Column
+find_missing <- function(a){
+  
+  
+col.n <- colnames(a)
+n <- nrow(a)
+missing_df <- data.frame(Variable = character(),
+                         "Missing (%)" = numeric(),
+                         check.names = F)
+
+
+for (i in col.n){
+  
+  x <- sum(is.na(a[,i]))
+  
+  perc <- (x/n) * 100
+  
+  missing_df <- rbind(missing_df,
+                      data.frame(
+                        Variable = i,
+                        `Missing (%)` = perc
+                      , check.names = F)
+                      )
+  
+}
+ 
+missing_df <- missing_df %>% 
+  filter(`Missing (%)` > 0) %>% 
+  arrange(desc(`Missing (%)`),)
+
+return(missing_df)
+
+}
+
+#Find total % missing values
+find_total_missing <- function(b){
+  
+  
+  count_na <- 0
+for (i in 1:nrow(b)){
+  if (any(is.na(data[i, ]))){count_na <- count_na +1}
+}
+
+
+count_na/nrow(b)
+  
+  return(count_na*100/nrow(b) )
+}
+
+```
+
+```{r imputation}
+#Come back to this later
+
+# 
+# #I am not grouping by Date, OsGrid, Obs or OAH (As thats our target variable)
+# groupings <- groupings[-c(1, 3, 5, 7)]
+# 
+# #Cell mean imputation
+# 
+# #Imputing Training data first
+# train.imp <- train %>%
+#   group_by(Area, FAH) %>% #cant group by precip code, or location, too many missing
+#   mutate(
+#     across(where(is.integer),
+#            ~ replace_na(., as.integer(round(mean(., na.rm = TRUE))))),
+#     across(where(is.double),
+#            ~ replace_na(., mean(., na.rm = TRUE)))
+#   ) %>% #after this, some variables 
+#   ungroup() %>% 
+#   mutate(Aspect = round(mean(Aspect, na.rm = T),), #remaining, just taking the mean
+#          Max.Temp.Grad = round(mean(Max.Temp.Grad, na.rm = T)),
+#          Max.Hardness.Grad = round(mean(Max.Hardness.Grad, na.rm  = T))) 
+# 
+# train.imp <- train.imp[-which(is.na(train.imp$OAH)),] #removing remaining missing
+#   
+# 
+# #Imputing Test data in the same manner
+# test.imp <- test %>%
+#   group_by(Area, FAH) %>% #cant group by precip code, or location, too many missing
+#   mutate(
+#     across(where(is.integer),
+#            ~ replace_na(., as.integer(round(mean(., na.rm = TRUE))))),
+#     across(where(is.double),
+#            ~ replace_na(., mean(., na.rm = TRUE)))
+#   ) %>% #after this, some variables 
+#   ungroup() %>% 
+#   mutate(Aspect = round(mean(Aspect, na.rm = T),), #remaining, just taking the mean
+#          Max.Temp.Grad = round(mean(Max.Temp.Grad, na.rm = T)),
+#          Max.Hardness.Grad = round(mean(Max.Hardness.Grad, na.rm  = T))) 
+# 
+# test.imp <- train.imp[-which(is.na(test.imp$OAH)),] #removing remaining missing
+
+
+```
+
+```{r date_time}
+
+#adding date variable
+data$Date <- as.POSIXct(data$Date, format="%Y-%m-%d %H:%M:%S", tz="UTC")
+
+
+data$month     <- lubridate::month(data$Date)
+data$hour      <- lubridate::hour(data$Date)
+data$year      <- lubridate::year(data$Date)
+
+#make a day of the season variable
+
+#season begins from December to april
+
+
+
+data <- data %>% 
+  mutate(season_year = if_else(month >= 12, year, year -1),
+         season_id = dense_rank(season_year),
+         season = paste0("season", season_id),
+         season = as.factor(season)) %>% 
+  group_by(season, Area) %>% 
+  mutate(dayofseason = row_number()) %>% 
+  arrange(Date, Area)
+
+
+
+```
+
+```{r drop variables}
+
+#Drop the top 3 variables wtih the most missing values
+data <- data %>% 
+  select(- c(AV.Cat, Ski.Pen, Summit.Wind.Dir))
+
+data <- na.omit(data) #remove remaining missing
+
+data <- data[,!(names(data)) == "Obs"]
+
+
+
+```
+
+```{r split_data}
+
+set.seed(1)
+train.idx <- sample(1:nrow(data), 
+                    round(nrow(data)*0.8))
+
+train <- data[train.idx,] #Training data
+test <- data[-train.idx,] #Testing Data
+
+
+```
+
+```{r dimension_reduction}
+
+
+
+
+
+```
+
+```{r Keras_Matthew}
+
+#considerations for future
+
+# justifying our dropping of Missing values ie columns and others
+# Justifying our window length
+# Looking at factor columns with a huge amount of categories
+
+library("keras3")
+
+#for this to work I need to convert the data into an array 
+# form is (N (length), L (Time frame), F (Features))
+
+#I promise that this code isnt made by Chatgpt I am just using a lot of comments otherwise I dont know what the #$!* is going on :)
+
+
+#--------Data Preparation-------------------------------------
+
+T <- length(data$Date) #time period length
+
+data_nn <- data %>% 
+  select(-c(Date, OSgrid, Location)) #removing date column, OSgrid, location
+
+
+L <- 3 #Rolling window length = 3. So what I am decided is that It can use the previus 3 days on record to train itself
+H <- 1 # predict 1 day ahead
+
+
+#number of samples we can have, so number of time slices, each one iterated one step ahead by H (which is just 1 day in our case)
+N_samp <- T - L - H + 1
+
+#BRain is broken, but this is what needs to happen, remove OAH and put into vector, one hot enocode x variables and fix the rest wrt Y = OAH and so on
+
+#----------------One hot encoding--------
+
+#This part is quite a process. So big picture, the numeric data needs to be standardised, but when we do one-hot-encoding, it becomes quite messy to avoid standardising the dummy variables. SO we are going to make indices for the numeric columns so we can standardise only them later
+
+#Taking our predictors and covariates into one df, and our labels into another
+
+X.variables <- data_nn %>% 
+  select(-OAH)   #x_variables = everything in data other than OAH column
+  
+X.variables <- model.matrix(~., data = X.variables)[,-1] # One Hot encoding
+
+y.variable <- data_nn[["OAH"]]  #y_variable = only our OAH column
+
+numeric.variables <- names(data_nn)[sapply(data_nn, is.numeric)]
+numeric.variables <- setdiff(numeric.variables, "OAH")
+
+numeric.indexes <- which(colnames(X.variables) %in% numeric.variables) #okay so the colnames are the same so we can find the indexes in x variables which are numeric with this code <--
+
+#dummy variable indexes
+dummy.indexes <- setdiff(1:(ncol(X.variables)), numeric.indexes)
+
+
+#Number features
+
+F_ <- ncol(X.variables)
+
+#--------------Making Array---------------------#
+
+
+#Arrays - this is the confusing part. Keras needs an array for this to work. In our case we can think of this as turning our data into a stack of data sheets. each sheet is for a particular feature. THen there are N_sampl columns, and each is shifted by L
+
+X <- array( NA_real_, #just an empty array, which will subsequently be filled
+           dim = c(N_samp,L, F_  ),
+           )
+
+y <- integer(N_samp)
+
+
+
+
+
+
+for (i in 1:N_samp){ #here we are filling in the array with our data
+  
+  index.window <- i:(i + L - 1) #index wind = ith value in N_samp to I + window minus 1
+  
+  X[i, , ] <- X.variables[index.window, , drop = F] #filling in the predictors with the corresponding indexes into that window
+  y[i] <- y.variable[i + L + H -1] #we predict the ith + L + H y values.
+  
+}
+
+
+
+#------------Training and testing split-----------------------------
+
+#We want to preserve time series patterns, so no shuffling 
+idx <- 1:N_samp
+number.training <- floor(N_samp * 0.8) #train = first 80% of features
+
+tr <- idx[1:number.training] #Training indices
+te <- idx[(number.training + 1):N_samp] #Testing indices
+
+X.train <- X[tr, , , drop = F] #training predictors data array
+X.test <- X[te, , , drop = F ] #testing predictors array
+y.train <- y[tr] #training target
+y.test <- y[te]
+
+
+
+
+#----------------Scaling--------------------
+
+#Remeber that we made indexes for our numeric data, which is the data we want to scale. 
+
+#We also need to scale the training data, and scale the testing data according to the training data mu and sd
+
+
+if (length(numeric.indexes) > 0){
+  
+  mu.numeric <- apply(X.train[, , numeric.indexes, drop = F], 3, mean, na.rm = T)
+  
+  sd.numeric <- apply(X.train[ , , numeric.indexes, drop = F], 3, sd, na.rm = T)
+  
+   sd.numeric[sd.numeric == 0 | is.na(sd.numeric)] <- 1 #make sure SD == 1
+  
+  for (j in seq_along(numeric.indexes)){
+    
+    k <- numeric.indexes[j]
+    X.train[, , k] <- (X.train[ , , k] - mu.numeric[j])/sd.numeric[j]
+    X.test[, , k] <- (X.test[ , , k] - mu.numeric[j])/sd.numeric[j]
+  }
+  
+  
+}
+
+# Numeric cols should ne ~N(0,1)
+round(apply(X.train[ , , numeric.indexes, drop = FALSE], 3, mean), 3)
+round(apply(X.train[ , , numeric.indexes, drop = FALSE], 3, sd),   3)
+
+
+
+#Getting there !
+
+#Since we are doing a multiclass prediction we need to use softmax
+#This means using the tocategorical() function on y
+
+y.test <- to_categorical(y.test)
+y.train <- to_categorical(y.train)
+
+
+
+#------------Finally : the moddeling part--------------------
+
+input <- layer_input(shape = c(F_))
+
+output <- input %>% 
+  layer_dense(units = 8, activation = 'relu') %>% 
+  layer_dropout(rate = 0.5) %>%
+  layer_dense(units = 3, activation = 'softmax')
+
+model <- keras_model(inputs = input, outputs = output)
+
+model %>% compile(loss = "categorical_crossentropy",
+                  optimizer = optimizer_adam(learning_rate = 0.01),
+                  metrics = c("accuracy"))
+
+history <- model %>% fit(X.train,y.train,
+                         epochs = 30,
+                         batch_size = 5, 
+                         validation_split = 0.2)
+
+model %>% evaluate(X.test, y.test)
+
+```
+
+## Modelling
+
+## Discussion
