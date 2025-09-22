@@ -247,10 +247,7 @@ any(is.na(test))
 
 ## Modelling
 
-
 ## Modelling
-
-
 
 ```{r libs-and-seed}
 # Load libraries for data wrangling, visualization, preprocessing, and modeling
@@ -288,7 +285,6 @@ library(pdp)       # Used to generate Partial Dependence Plots for model interpr
 # Ensures that random processes like resampling and model training are consistent across runs.
 set.seed(123)
 ```
-
 
 ```{r data-loading}
 # # Load raw data from CSV
@@ -360,8 +356,6 @@ set.seed(123)
 # test  <- subset(df, split == FALSE)
 ```
 
-
-
 ```{r drop-missing}
 # ---------------------------
 # Drop rows with missing values in both target and predictors
@@ -380,8 +374,6 @@ set.seed(123)
 # train <- train[complete.cases(train[, c(target, predictor_cols)]), ]
 # test  <- test[complete.cases(test[, c(target, predictor_cols)]), ]
 ```
-
-
 
 ```{r target-var-factor-encoding}
 # ---------------------------
@@ -404,8 +396,6 @@ set.seed(123)
 # # Do the same for the test set
 # test[[target]]  <- factor(test[[target]],  levels = target_levels)
 ```
-
-
 
 ```{r target-var-encoding}
 # # ------------------------------------------------------
@@ -589,8 +579,6 @@ set.seed(123)
 # # -> Factors needed for caret's confusionMatrix
 ```
 
-
-
 ```{r eval-results}
 
 #MATT EDIT: Commented out for now
@@ -731,15 +719,14 @@ valid_h2o_split <- splits[[2]]
 #    Note: large search space with many models will run long; adjust max_models for runtime.
 hyper_params <- list(
   hidden = list(
-    c(256,128,64),
-    c(512,256,128),
-    c(256,256,128,64),
     c(128,128),
-    c(128,64)),
-  l1 = c(0, 1e-6, 1e-5, 1e-4),
-  l2 = c(0, 1e-6, 1e-5, 1e-4),
-  rate = c(0.01, 0.005, 0.001),                # learning rates (smaller = slower but better generalization)
-  input_dropout_ratio = c(0.0, 0.05, 0.1))     # apply some input dropout regularization
+    c(128,64),
+    c(64,32,16),
+    c(64,32)),
+  activation =  c("RectifierWithDropout"),
+  l2 = c(0, 1e-4),
+  rate = c(0.01, 0.001),                # learning rates (smaller = slower but better generalization)
+  input_dropout_ratio = c(0.1, 0.3, 0.5))     # apply some input dropout regularization
 ```
 
 ```{r neural-net-search-criteria}
@@ -776,12 +763,12 @@ grid <- h2o.grid(algorithm = "deeplearning",
                  stopping_rounds = 10,
                  # optimization / regularization defaults; some are overridden by hyperparams
                  distribution = "multinomial",
-                 activation = "RectifierWithDropout",
+                 #activation = "RectifierWithDropout",
                  adaptive_rate = TRUE,
                  # small-ish default l1/l2 (grid will explore others)
                  l1 = 0, l2 = 0,
                  # Use relatively small mini-batch default (H2O autodetects)
-                 reproducible = FALSE,   # reproducible=TRUE may slow things on multi-core machines
+                 reproducible = T,   # reproducible=TRUE may slow things on multi-core machines
                  seed = 123,
                  # hyperparameter space and search criteria:
                  hyper_params = hyper_params,
@@ -790,6 +777,8 @@ grid <- h2o.grid(algorithm = "deeplearning",
 # Review the grid search summary (sorted by validation logloss) ---------------
 grid_perf <- h2o.getGrid(grid_id = grid_id, sort_by = "logloss", decreasing = FALSE)
 print(grid_perf)
+
+
 ```
 
 ```{r get-best-model}
@@ -799,21 +788,66 @@ best_model <- h2o.getModel(best_model_id)
 
 cat("Best model id:", best_model_id, "\n")
 print(best_model)
+
+h2o.performance(best_model)
+#save(grid_perf,  file = "grid1")   first   round
+
+#plot of performance
+
+perf.df <- as.data.frame(grid_perf@summary_table) 
+
+
+ggplot(data = perf.df, aes(x = hidden, y = logloss, colour = as.factor(input_dropout_ratio))) + 
+  geom_point(size = 2)+
+  labs(y = "logloss")
+
+ggplot(data = perf.df, aes(x = hidden, y = logloss, colour = as.factor(l1))) + 
+  geom_point(size = 2)+
+  labs(y = "logloss")
+
+ggplot(data = perf.df, aes(x = hidden, y = logloss, colour = as.factor(l2))) + 
+  geom_point(size = 2)+
+  labs(y = "logloss")
+
+
+h2o.performance(best_model)
+
+
+ggplot(perf.df, aes(x = factor(l1), y = factor(l2), fill = logloss)) +
+  geom_tile() +
+  facet_wrap(~ hidden) +
+  scale_fill_viridis_c() +
+  theme_minimal() +
+  labs(title = "Effect of L1/L2 by Architecture")
+
+
+ggplot(perf.df, aes(x = rate, y = logloss, color = factor(input_dropout_ratio))) +
+  geom_point() +
+  facet_wrap(~ hidden) +
+  theme_minimal() +
+  labs(title = "Learning Rate vs Logloss by Architecture & Dropout")
+
+
 ```
 
 ```{r best-model-eval}
+
+levels_y <- levels(train$OAH)
 # Evaluate the best model on the held-out test set ---------------------------
 best_pred_h2o <- h2o.predict(best_model, test_h2o)   # returns 'predict' + per-class probabilities
 best_pred_df <- as.data.frame(best_pred_h2o)
 
 # predicted class labels (as factor)
-pred_labels_best <- factor(best_pred_df$predict, levels = levels_y)
-true_labels_best <- factor(as.vector(test_h2o[[target]]), levels = levels_y)
+pred_labels_best <- factor(best_pred_df$predict)
+true_labels_best <- factor(as.vector(test_h2o[[target]]))
 
 # confusion matrix & caret metrics
-cm_best <- confusionMatrix(pred_labels_best, true_labels_best)
+cm_best <- confusionMatrix(pred_labels_best, true_labels_best)  #adding the  levels
 print(cm_best)
 cat("Test Accuracy (best H2O NN):", round(cm_best$overall['Accuracy'],4), "\n")
+
+cm_best$overall
+mean(pred_labels_best==true_labels_best)
 ```
 
 ```{r per-class-auc}
@@ -885,6 +919,11 @@ cat("Saved best model to:", model_path, "\n")
 
 pred_df <- best_pred_df   # data.frame containing "predict" and per-class probability columns named by levels_y
 true_labels <- factor(as.vector(test_h2o[[target]]), levels = levels_y)
+
+
+library(caret)
+cm_best <- confusionMatrix(table(pred_labels_best, true_labels_best))
+
 
 # Extract only probability columns (exclude "predict")
 prob_cols <- pred_df[, setdiff(colnames(pred_df), "predict")]
@@ -966,9 +1005,6 @@ if ("Moderate" %in% colnames(prob_cols)) {
 # Save metrics to file 
 write.csv(metrics_tbl, "h2o_nn_per_class_metrics.csv", row.names = FALSE)
 ```
-
-
-
 
 ```{r}
 h2o.varimp(best_model)
