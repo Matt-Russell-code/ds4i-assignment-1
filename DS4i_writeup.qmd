@@ -225,7 +225,7 @@ data <- data %>%
 
 data <- na.omit(data) #remove remaining missing
 
-#data <- data[,!(names(data)) == "Obs"]
+#any(is.na(data))
 
 
 
@@ -240,6 +240,8 @@ train.idx <- sample(1:nrow(data),
 train <- data[train.idx,] #Training data
 test <- data[-train.idx,] #Testing Data
 
+any(is.na(train))
+any(is.na(test))
 
 ```
 
@@ -289,51 +291,51 @@ set.seed(123)
 
 
 ```{r data-loading}
-# Load raw data from CSV
-df_raw <- read_csv("scotland_avalanche_forecasts_2009_2025.csv")
-
-# Clean column names -> snake_case
-df <- df_raw %>% clean_names()
-
-# Fix Cols
-df <- df %>% mutate(date = parse_date_time(date, orders = c("ymd HMS", "ymd HM", "ymd"), tz = "Europe/London"),
-                    fah = as.factor(fah),
-                    oah = as.factor(oah),
-                    area = as.factor(area),
-                    obs = as.factor(obs))
-
-
-# Inspect structure of cleaned dataset
-head(df)
+# # Load raw data from CSV
+# df_raw <- read_csv("scotland_avalanche_forecasts_2009_2025.csv")
+# 
+# # Clean column names -> snake_case
+# df <- df_raw %>% clean_names()
+# 
+# # Fix Cols
+# df <- df %>% mutate(date = parse_date_time(date, orders = c("ymd HMS", "ymd HM", "ymd"), tz = "Europe/London"),
+#                     fah = as.factor(fah),
+#                     oah = as.factor(oah),
+#                     area = as.factor(area),
+#                     obs = as.factor(obs))
+# 
+# 
+# # Inspect structure of cleaned dataset
+# head(df)
 ```
 
 ```{r target-var-distr}
-ggplot(df, aes(x = oah)) + geom_bar() + labs(title = "Observed Avalanche Hazard (OAH)") + theme_minimal()
-
-library(ggplot2)
-library(dplyr)
-
-# First, prepare the data with counts and percentages
-df_counts <- df %>%
-  count(oah) %>%
-  mutate(percent = n / sum(n) * 100)
-
-# Plot
-ggplot(df_counts, aes(x = reorder(oah, -n), y = n, fill = oah)) +
-  geom_bar(stat = "identity", show.legend = FALSE) +
-  geom_text(aes(label = paste0(n, " (", round(percent, 1), "%)")), 
-            vjust = -0.5, size = 4) +
-  labs(
-    title = "Observed Avalanche Hazard (OAH)",
-    x = "Hazard Level",
-    y = "Count"
-  ) +
-  theme_minimal(base_size = 14) +
-  theme(
-    plot.title = element_text(face = "bold", hjust = 0.5),
-    axis.title.y = element_text(margin = margin(r = 10))
-  ) +
-  scale_y_continuous(expand = expansion(mult = c(0, 0.1)))
+# ggplot(df, aes(x = oah)) + geom_bar() + labs(title = "Observed Avalanche Hazard (OAH)") + theme_minimal()
+# 
+# library(ggplot2)
+# library(dplyr)
+# 
+# # First, prepare the data with counts and percentages
+# df_counts <- df %>%
+#   count(oah) %>%
+#   mutate(percent = n / sum(n) * 100)
+# 
+# # Plot
+# ggplot(df_counts, aes(x = reorder(oah, -n), y = n, fill = oah)) +
+#   geom_bar(stat = "identity", show.legend = FALSE) +
+#   geom_text(aes(label = paste0(n, " (", round(percent, 1), "%)")), 
+#             vjust = -0.5, size = 4) +
+#   labs(
+#     title = "Observed Avalanche Hazard (OAH)",
+#     x = "Hazard Level",
+#     y = "Count"
+#   ) +
+#   theme_minimal(base_size = 14) +
+#   theme(
+#     plot.title = element_text(face = "bold", hjust = 0.5),
+#     axis.title.y = element_text(margin = margin(r = 10))
+#   ) +
+#   scale_y_continuous(expand = expansion(mult = c(0, 0.1)))
 
 
 # ggplot(train, aes(x = oah)) + geom_bar() + labs(title = "Observed Avalanche Hazard (OAH)") + theme_minimal()
@@ -346,16 +348,16 @@ ggplot(df_counts, aes(x = reorder(oah, -n), y = n, fill = oah)) +
 # Data preparation 
 ## ---------------------------
 # Define target column
-target <- "oah"
+#target <- "OAH" #changed from oah to OAH
 
 # ---------------------------
 # Train-test split
 # ---------------------------
-set.seed(123)
-
-split <- sample.split(df[[target]], SplitRatio = 0.7)
-train <- subset(df, split == TRUE)
-test  <- subset(df, split == FALSE)
+#set.seed(123)
+#MATT EDIT: commenting this out because we are going to use my data above made before modeling going forward
+# split <- sample.split(df[[target]], SplitRatio = 0.7)
+# train <- subset(df, split == TRUE)
+# test  <- subset(df, split == FALSE)
 ```
 
 
@@ -366,7 +368,8 @@ test  <- subset(df, split == FALSE)
 # ---------------------------
 # Our predictors, col names
 # setdiff(a, b): Returns elements in a that are not in b.
-predictor_cols <- setdiff(names(df), target)
+
+#predictor_cols <- setdiff(names(data), target) #Matt edit, replaced df with data, to be consistent as above
 
 #Explanation:
 # train[, c(target, predictor_cols)]: Selects columns from train that are either the target or one of the predictors.
@@ -374,8 +377,8 @@ predictor_cols <- setdiff(names(df), target)
 # train[ ..., ]: Subsets the train data to only those rows that have complete data in both the target and predictors.
 # Result:
 #   Removes rows with missing values in any of the important columns (target or predictors) from the training set.
-train <- train[complete.cases(train[, c(target, predictor_cols)]), ]
-test  <- test[complete.cases(test[, c(target, predictor_cols)]), ]
+# train <- train[complete.cases(train[, c(target, predictor_cols)]), ]
+# test  <- test[complete.cases(test[, c(target, predictor_cols)]), ]
 ```
 
 
@@ -388,88 +391,90 @@ test  <- test[complete.cases(test[, c(target, predictor_cols)]), ]
 #   because of the split.
 # ---------------------------
 
-# Extract all possible levels (classes) of the target variable from the full dataset
-# This ensures consistency in factor levels across training and test sets, even if some classes are missing in one set.
-target_levels <- levels(factor(df[[target]]))
+#Matt comment: The data was converted to factors right at the begining of the data set so I dont think this is a necessary step. The test and training have the same factors levels.
 
-# Convert the target variable in the training set to a factor with levels set to target_levels
-# This makes sure the factor levels are in the same order as in the full dataset (important for classification labels).
-train[[target]] <- factor(train[[target]], levels = target_levels)
-
-# Do the same for the test set
-test[[target]]  <- factor(test[[target]],  levels = target_levels)
+# # Extract all possible levels (classes) of the target variable from the full dataset
+# # This ensures consistency in factor levels across training and test sets, even if some classes are missing in one set.
+# target_levels <- levels(factor(data[[target]])) #matt edit changed to "OAH" to make this more clear
+# 
+# # Convert the target variable in the training set to a factor with levels set to target_levels
+# # This makes sure the factor levels are in the same order as in the full dataset (important for classification labels).
+# train[[target]] <- factor(train[[target]], levels = target_levels)
+# 
+# # Do the same for the test set
+# test[[target]]  <- factor(test[[target]],  levels = target_levels)
 ```
 
 
 
 ```{r target-var-encoding}
-# ------------------------------------------------------
-# Numeric encoding for XGBoost (0-based indexing)
-# XGB Model needs all our factor variables encoded into numerical values,
-# so we change all y levels into numbers, STARTING FROM 0 ...so -1L
-# ------------------------------------------------------
-
-# Convert the factor target in training set to integer values, then subtract 1
-# XGBoost expects class labels as integers starting from 0, so this makes sure labels are 0-based.
-y_train <- as.integer(train[[target]]) - 1L
-
-# Same conversion for test set
-y_test  <- as.integer(test[[target]]) - 1L
-
-# Store the original class labels (factor levels)
-# Useful later to map predictions back to human-readable class names (e.g., for confusion matrix or reporting).
-levels_y <- target_levels
-
-# Count the number of unique classes
-# This is needed when setting the "num_class" parameter in the XGBoost model (for multi-class classification).
-num_class <- length(levels_y)
+# # ------------------------------------------------------
+# # Numeric encoding for XGBoost (0-based indexing)
+# # XGB Model needs all our factor variables encoded into numerical values,
+# # so we change all y levels into numbers, STARTING FROM 0 ...so -1L
+# # ------------------------------------------------------
+# 
+# # Convert the factor target in training set to integer values, then subtract 1
+# # XGBoost expects class labels as integers starting from 0, so this makes sure labels are 0-based.
+# y_train <- as.integer(train[[target]]) - 1L
+# 
+# # Same conversion for test set
+# y_test  <- as.integer(test[[target]]) - 1L
+# 
+# # Store the original class labels (factor levels)
+# # Useful later to map predictions back to human-readable class names (e.g., for confusion matrix or reporting).
+# levels_y <- target_levels
+# 
+# # Count the number of unique classes
+# # This is needed when setting the "num_class" parameter in the XGBoost model (for multi-class classification).
+# num_class <- length(levels_y)
 
 ```
 
 ```{r model-feature-matrix}
-# ---------------------------
-# Feature matrix creation
-# ---------------------------
-# Select only predictor columns from the training set
-# 'predictor_cols' contains the names of all input features (excluding the target)
-x_train <- train %>% 
-  select(all_of(predictor_cols))
-
-# Do the same for the test set
-x_test  <- test %>% 
-  select(all_of(predictor_cols))
-
-
-# ------------------------------------------------------------
-# Convert to design matrices (dummy encoding for categorical variables)
-# ------------------------------------------------------------
-
-# Convert the training data frame to a design matrix using model.matrix
-# '~ . -1' creates a formula that includes all variables (.) but removes the intercept (-1)
-# This will automatically dummy-encode categorical variables into binary columns (one-hot encoding)
-
-# Combine train and test predictors before encoding
-x_all <- rbind(x_train, x_test)
-
-# Create design matrix once (ensures consistent dummy columns)
-dm_all <- model.matrix(~ . -1, data = x_all)
-
-
-
-# Split back into train and test matrices
-dm_train <- dm_all[1:nrow(x_train), ]
-
-dm_test  <- dm_all[(nrow(x_train)+1):nrow(x_all), ]
-# ------------------------------------------------------------
-# Debugging check to confirm alignment
-# ------------------------------------------------------------
-# Output number of rows in design matrix vs. number of labels
-# This is a sanity check to ensure that the feature matrix (dm_train) has the same number of rows
-#   as the target label vector (y_train), which is essential for training
-cat("Rows in dm_train:", nrow(dm_train), "Length of y_train:", length(y_train), "\n")
-
-# Same check for the test set
-cat("Rows in dm_test:", nrow(dm_test), "Length of y_test:", length(y_test), "\n")
+# # ---------------------------
+# # Feature matrix creation
+# # ---------------------------
+# # Select only predictor columns from the training set
+# # 'predictor_cols' contains the names of all input features (excluding the target)
+# x_train <- train %>% 
+#   select(all_of(predictor_cols))
+# 
+# # Do the same for the test set
+# x_test  <- test %>% 
+#   select(all_of(predictor_cols))
+# 
+# 
+# # ------------------------------------------------------------
+# # Convert to design matrices (dummy encoding for categorical variables)
+# # ------------------------------------------------------------
+# 
+# # Convert the training data frame to a design matrix using model.matrix
+# # '~ . -1' creates a formula that includes all variables (.) but removes the intercept (-1)
+# # This will automatically dummy-encode categorical variables into binary columns (one-hot encoding)
+# 
+# # Combine train and test predictors before encoding
+# x_all <- rbind(x_train, x_test)
+# 
+# # Create design matrix once (ensures consistent dummy columns)
+# dm_all <- model.matrix(~ . -1, data = x_all)
+# 
+# 
+# 
+# # Split back into train and test matrices
+# dm_train <- dm_all[1:nrow(x_train), ]
+# 
+# dm_test  <- dm_all[(nrow(x_train)+1):nrow(x_all), ]
+# # ------------------------------------------------------------
+# # Debugging check to confirm alignment
+# # ------------------------------------------------------------
+# # Output number of rows in design matrix vs. number of labels
+# # This is a sanity check to ensure that the feature matrix (dm_train) has the same number of rows
+# #   as the target label vector (y_train), which is essential for training
+# cat("Rows in dm_train:", nrow(dm_train), "Length of y_train:", length(y_train), "\n")
+# 
+# # Same check for the test set
+# cat("Rows in dm_test:", nrow(dm_test), "Length of y_test:", length(y_test), "\n")
 
 ```
 
@@ -478,13 +483,13 @@ cat("Rows in dm_test:", nrow(dm_test), "Length of y_test:", length(y_test), "\n"
 # DMatrix creation
 #   :( REQUIRED
 # ---------------------------
-
-dtrain <- xgb.DMatrix(data = dm_train, 
-                      label = y_train)
-
-
-dtest  <- xgb.DMatrix(data = dm_test,
-                      label = y_test)
+# 
+# dtrain <- xgb.DMatrix(data = dm_train, 
+#                       label = y_train)
+# 
+# 
+# dtest  <- xgb.DMatrix(data = dm_test,
+#                       label = y_test)
 ```
 
 ```{r crossval-earlystop}
@@ -523,101 +528,109 @@ dtest  <- xgb.DMatrix(data = dm_test,
 ```
 
 ```{r xgbmodel}
+
+#Matt edit, commented out for now
 # ---------------------------
 # Final Multi-Class XGBoost Model
 # ---------------------------
 
-# Set hyperparameters (based on CV up there)
-final_params <- list(
-  objective = "multi:softprob",   # Multiclass classification: predict probability for each class
-  eval_metric = "mlogloss",       # Use multiclass log-loss as evaluation metric
-  eta = 0.1,                      # Learning rate: step size shrinkage to prevent overfitting
-  max_depth = 6,                  # Maximum depth of trees (controls model complexity)
-  min_child_weight = 1,           # Minimum sum of instance weights (hessian) needed in a child (controls overfitting)
-  subsample = 0.8,                # Subsample ratio of training instances (row sampling, adds randomness)
-  colsample_bytree = 0.8,         # Fraction of features sampled per tree (adds randomness)
-  gamma = 0,                      # Minimum loss reduction required for a split (regularization parameter)
-  num_class = num_class)           # Total number of target classes (required for multi-class setup)
-
-
-# Use optimal nrounds from CV
-final_nrounds <- 68  # Best number of boosting rounds determined by earlier cross-validation
-
-# Train final model with early stopping on evaluation set
-final_model <- xgb.train(
-  params = final_params,          # Pass hyperparameters
-  data = dtrain,                  # Training data (DMatrix)
-  nrounds = final_nrounds,        # Number of boosting rounds (iterations)
-  watchlist = list(train = dtrain, eval = dtest),  # Monitor train and test sets during training
-  early_stopping_rounds = 25,     # Stop training if no improvement for 25 consecutive rounds
-  verbose = 1,                    # Print training log (progress per round)
-  maximize = FALSE)               # We are minimizing logloss (not maximizing accuracy)
+# # Set hyperparameters (based on CV up there)
+# final_params <- list(
+#   objective = "multi:softprob",   # Multiclass classification: predict probability for each class
+#   eval_metric = "mlogloss",       # Use multiclass log-loss as evaluation metric
+#   eta = 0.1,                      # Learning rate: step size shrinkage to prevent overfitting
+#   max_depth = 6,                  # Maximum depth of trees (controls model complexity)
+#   min_child_weight = 1,           # Minimum sum of instance weights (hessian) needed in a child (controls overfitting)
+#   subsample = 0.8,                # Subsample ratio of training instances (row sampling, adds randomness)
+#   colsample_bytree = 0.8,         # Fraction of features sampled per tree (adds randomness)
+#   gamma = 0,                      # Minimum loss reduction required for a split (regularization parameter)
+#   num_class = num_class)           # Total number of target classes (required for multi-class setup)
+# 
+# 
+# # Use optimal nrounds from CV
+# final_nrounds <- 68  # Best number of boosting rounds determined by earlier cross-validation
+# 
+# # Train final model with early stopping on evaluation set
+# final_model <- xgb.train(
+#   params = final_params,          # Pass hyperparameters
+#   data = dtrain,                  # Training data (DMatrix)
+#   nrounds = final_nrounds,        # Number of boosting rounds (iterations)
+#   watchlist = list(train = dtrain, eval = dtest),  # Monitor train and test sets during training
+#   early_stopping_rounds = 25,     # Stop training if no improvement for 25 consecutive rounds
+#   verbose = 1,                    # Print training log (progress per round)
+#   maximize = FALSE)               # We are minimizing logloss (not maximizing accuracy)
 ```
 
 ```{r model-test-set-eval}
-# ---------------------------
-# Test set evaluation
-# ---------------------------
 
-# Predict probabilities on test set
-pred_test_prob <- predict(final_model, dtest)  
-# -> Returns a flat vector of probabilities for all classes stacked row-wise
-
-# Convert probability vector into a matrix (rows = observations, cols = classes)
-pred_test_matrix <- matrix(pred_test_prob, 
-                           nrow = nrow(dm_test),   # Number of test samples
-                           ncol = num_class,       # Number of classes
-                           byrow = TRUE)           # Fill by rows (each row = one observation)
-
-# Convert probabilities to predicted classes
-pred_test_class <- max.col(pred_test_matrix) - 1L  
-# -> max.col finds index of highest probability (predicted class)
-# -> Subtract 1 since XGBoost class indices start at 0
-
-# Convert numeric labels back to factors for confusion matrix
-y_test_factor <- factor(y_test, levels = 0:(num_class-1), labels = levels_y)  
-pred_test_factor <- factor(pred_test_class, levels = 0:(num_class-1), labels = levels_y)  
-# -> Factors needed for caret's confusionMatrix
+#MATT EDIT: COmmented out for now
+# # ---------------------------
+# # Test set evaluation
+# # ---------------------------
+# 
+# # Predict probabilities on test set
+# pred_test_prob <- predict(final_model, dtest)  
+# # -> Returns a flat vector of probabilities for all classes stacked row-wise
+# 
+# # Convert probability vector into a matrix (rows = observations, cols = classes)
+# pred_test_matrix <- matrix(pred_test_prob, 
+#                            nrow = nrow(dm_test),   # Number of test samples
+#                            ncol = num_class,       # Number of classes
+#                            byrow = TRUE)           # Fill by rows (each row = one observation)
+# 
+# # Convert probabilities to predicted classes
+# pred_test_class <- max.col(pred_test_matrix) - 1L  
+# # -> max.col finds index of highest probability (predicted class)
+# # -> Subtract 1 since XGBoost class indices start at 0
+# 
+# # Convert numeric labels back to factors for confusion matrix
+# y_test_factor <- factor(y_test, levels = 0:(num_class-1), labels = levels_y)  
+# pred_test_factor <- factor(pred_test_class, levels = 0:(num_class-1), labels = levels_y)  
+# # -> Factors needed for caret's confusionMatrix
 ```
 
 
 
 ```{r eval-results}
-# Compute confusion matrix and overall accuracy
-cm_test <- confusionMatrix(pred_test_factor, y_test_factor)  
 
-# Prints
-cat("\nFinal Model Test Accuracy:", round(cm_test$overall['Accuracy'], 4), "\n")  
-cat("\nConfusion Matrix (Test Set):\n")  
-print(cm_test$table)  
-# -> Shows prediction performance per class (actual vs predicted counts)
-
-# Compute multi-class AUC per class (one-vs-all)
-test_auc_list <- list()
-for (i in 1:num_class) {
-  binary_labels <- as.numeric(y_test == (i - 1))          
-  # -> Convert labels into binary (one-vs-rest for class i)
-  test_auc_list[[levels_y[i]]] <- roc(binary_labels, pred_test_matrix[, i])$auc  
-  # -> Compute ROC-AUC for that class
-}
-
-
-cat("\nFinal Model Test AUC per class:\n")
-print(round(unlist(test_auc_list), 4))  
-# -> Print AUC values for each class
+#MATT EDIT: Commented out for now
+# # Compute confusion matrix and overall accuracy
+# cm_test <- confusionMatrix(pred_test_factor, y_test_factor)  
+# 
+# # Prints
+# cat("\nFinal Model Test Accuracy:", round(cm_test$overall['Accuracy'], 4), "\n")  
+# cat("\nConfusion Matrix (Test Set):\n")  
+# print(cm_test$table)  
+# # -> Shows prediction performance per class (actual vs predicted counts)
+# 
+# # Compute multi-class AUC per class (one-vs-all)
+# test_auc_list <- list()
+# for (i in 1:num_class) {
+#   binary_labels <- as.numeric(y_test == (i - 1))          
+#   # -> Convert labels into binary (one-vs-rest for class i)
+#   test_auc_list[[levels_y[i]]] <- roc(binary_labels, pred_test_matrix[, i])$auc  
+#   # -> Compute ROC-AUC for that class
+# }
+# 
+# 
+# cat("\nFinal Model Test AUC per class:\n")
+# print(round(unlist(test_auc_list), 4))  
+# # -> Print AUC values for each class
 ```
 
 ```{r model-feature-importance}
-# ---------------------------
-# Feature importance and interpretation
-# ---------------------------
-# Get feature importance
-importance_matrix <- xgb.importance(model = final_model)  
-print(head(importance_matrix, 20))  # Print top 20 most important features ranked by gain
 
-# Plot feature importance
-xgb.plot.importance(importance_matrix, top_n = 20)  
-# -> Visualize top 20 important features
+#MATT EDIT: COmmented out for now
+# # ---------------------------
+# # Feature importance and interpretation
+# # ---------------------------
+# # Get feature importance
+# importance_matrix <- xgb.importance(model = final_model)  
+# print(head(importance_matrix, 20))  # Print top 20 most important features ranked by gain
+# 
+# # Plot feature importance
+# xgb.plot.importance(importance_matrix, top_n = 20)  
+# # -> Visualize top 20 important features
 ```
 
 ===================================================== Neural Net ====================================================
@@ -629,6 +642,12 @@ xgb.plot.importance(importance_matrix, top_n = 20)
 ## This script uses the data preparation already done above and trains an H2O neural net,
 ## evaluates on the test set and shows how to tune hyperparameters with H2O Grid Search.
 ## ---------------------------
+
+#Comment from Matt: I think we need to change this approach so that the NN code can run without the above, because I am not certain that we are keeping much from the XGboost work?
+
+target <- "OAH"
+predictor_cols <- setdiff(names(data), target) #Matt edit, replaced df with data, to be consistent as above
+
 
 # Load h2o and initialize --------------------------------------------------
 # Note: if h2o isn't installed, run: install.packages("h2o")
@@ -643,7 +662,7 @@ h2o.init(nthreads = -1)
 # Convert existing R data.frames to H2O frames --------------------------------
 # We use the `train` and `test` data.frames already prepared earlier in the pipeline.
 # H2O works with its own frame objects; as.h2o() converts R data.frames into H2O frames.
-train_h2o <- as.h2o(train)
+train_h2o <- as.h2o(train) #Matt Comment: now this uses my test and train made before modeling
 test_h2o  <- as.h2o(test)
 ```
 
@@ -653,41 +672,45 @@ test_h2o  <- as.h2o(test)
 x_vars <- predictor_cols  # character vector of predictor column names
 y_var  <- target          # the response column name ("oah")
 
+
 # Ensure response is treated as a categorical (factor) in H2O for classification
 train_h2o[[y_var]] <- as.factor(train_h2o[[y_var]])
 test_h2o[[y_var]]  <- as.factor(test_h2o[[y_var]])
 ```
 
 ```{r neural-net-weights}
-# ---------------------------
-# H2O neural network with class weighting + randomized grid search
-# ---------------------------
-# This block expects the following objects already exist:
-#  - train (R data.frame), test (R data.frame)
-#  - predictor_cols (character vector), target (string), levels_y (factor levels), num_class (int)
-#  - h2o cluster started (h2o.init() called earlier)
-# If train_h2o/test_h2o are not present, the script will create them from train/test.
 
+#Matt Edit: This is causing NA's when I run it. I dont necessarily think we have to weight rare classes more, but weight things equally, so for now I am setting balance classes = T in H2o.
 
-# 1) Create a class-weight column (inverse frequency) to help under-represented classes -
-#    weight_i = N / (K * count(class_i))  -> standard balanced weight
-freq_table <- as.data.frame(table(train[[target]]))
-names(freq_table) <- c("class", "count")
-N_total <- nrow(train)
-K <- num_class
-
-# map class -> weight
-class_counts <- setNames(freq_table$count, freq_table$class)
-class_weights_map <- N_total / (K * class_counts)   # higher weight for rarer classes
-
-# create a vector of weights for each row in train, matching the order of 'train'
-weights_vector <- as.numeric(class_weights_map[as.character(train[[target]])])
-
-# attach weights column into train H2O frame (column name: "class_weights")
-train_h2o[,"class_weights"] <- as.h2o(weights_vector)
-
-# For reproducibility, add the weights to the R 'train' too (keeps them in sync)
-train$class_weights <- weights_vector
+# # ---------------------------
+# # H2O neural network with class weighting + randomized grid search
+# # ---------------------------
+# # This block expects the following objects already exist:
+# #  - train (R data.frame), test (R data.frame)
+# #  - predictor_cols (character vector), target (string), levels_y (factor levels), num_class (int)
+# #  - h2o cluster started (h2o.init() called earlier)
+# # If train_h2o/test_h2o are not present, the script will create them from train/test.
+# 
+# 
+# # 1) Create a class-weight column (inverse frequency) to help under-represented classes -
+# #    weight_i = N / (K * count(class_i))  -> standard balanced weight
+# freq_table <- as.data.frame(table(train[[target]]))
+# names(freq_table) <- c("class", "count")
+# N_total <- nrow(train)
+# K <- num_class
+# 
+# # map class -> weight
+# class_counts <- setNames(freq_table$count, freq_table$class)
+# class_weights_map <- N_total / (K * class_counts)   # higher weight for rarer classes
+# 
+# # create a vector of weights for each row in train, matching the order of 'train'
+# weights_vector <- as.numeric(class_weights_map[as.character(train[[target]])])
+# 
+# # attach weights column into train H2O frame (column name: "class_weights")
+# train_h2o[,"class_weights"] <- as.h2o(weights_vector)
+# 
+# # For reproducibility, add the weights to the R 'train' too (keeps them in sync)
+# train$class_weights <- weights_vector
 ```
 
 ```{r neural-net-weighted-data-train-test-split}
@@ -743,9 +766,9 @@ grid <- h2o.grid(algorithm = "deeplearning",
                  training_frame = train_h2o_split,
                  validation_frame = valid_h2o_split,
                  # Use the weights column computed earlier:
-                 weights_column = "class_weights",
-                 # Make H2O use classes weighting; setting balance_classes=FALSE because we supply weights explicitly
-                 balance_classes = FALSE,
+                 # weights_column = "class_weights",
+                 # # Make H2O use classes weighting; setting balance_classes=FALSE because we supply weights explicitly
+                 balance_classes = T,
                  # Training control
                  epochs = 200,                       # allow many epochs (early stopping will truncate)
                  stopping_metric = "logloss",
