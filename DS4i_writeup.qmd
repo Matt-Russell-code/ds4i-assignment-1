@@ -318,16 +318,21 @@ library(tensorflow)
 #I promise that this code isnt made by Chatgpt I am just using a lot of comments otherwise I dont know what the #$!* is going on :)
 
 
+#Function to let me test for numerous window sizes
+
+
+pre_data <- function(w = 3, h = 1){
+
 #--------Data Preparation-------------------------------------
 
 T <- length(data$Date) #time period length
 
-data_nn <- data %>% 
+data_nn <- data %>%
   select(-c(Date)) #removing date column, OSgrid, location
 
 
-L <- 3 #Rolling window length = 3. So what I am decided is that It can use the previus 3 days on record to train itself
-H <- 1 # predict 1 day ahead
+L <- w #Rolling window length = 3. So what I am decided is that It can use the previus 3 days on record to train itself
+H <- h # predict 1 day ahead
 
 
 #number of samples we can have, so number of time slices, each one iterated one step ahead by H (which is just 1 day in our case)
@@ -341,9 +346,9 @@ N_samp <- T - L - H + 1
 
 #Taking our predictors and covariates into one df, and our labels into another
 
-X.variables <- data_nn %>% 
+X.variables <- data_nn %>%
   select(-OAH)   #x_variables = everything in data other than OAH column
-  
+
 X.variables <- model.matrix(~., data = X.variables)[,-1] # One Hot encoding
 
 y.variable <- data_nn[["OAH"]]  #y_variable = only our OAH column
@@ -378,24 +383,38 @@ y <- integer(N_samp)
 
 
 for (i in 1:N_samp){ #here we are filling in the array with our data
-  
+
   index.window <- i:(i + L - 1) #index wind = ith value in N_samp to I + window minus 1
-  
+
   X[i, , ] <- X.variables[index.window, , drop = F] #filling in the predictors with the corresponding indexes into that window
   y[i] <- y.variable[i + L + H -1] #we predict the ith + L + H y values.
-  
+
 }
 
 
 
 #------------Training and testing split-----------------------------
 
-#We want to preserve time series patterns, so no shuffling 
+#We want to preserve time series patterns, so no shuffling
+
+#old version where everything was in order
 idx <- 1:N_samp
 number.training <- floor(N_samp * 0.8) #train = first 80% of features
 
 tr <- idx[1:number.training] #Training indices
 te <- idx[(number.training + 1):N_samp] #Testing indices
+
+#making 1 = 0 to see if that helps
+
+y <- y - 1 # Now categories are {0,1,2,3,4,5,}
+
+#test for randomness being better (didnt work)
+# idx <- 1:N_samp
+# set.seed(1)
+# tr <- sample(idx, floor(0.8*N_samp))
+# te <- idx[-tr]
+
+
 
 X.train <- X[tr, , , drop = F] #training predictors data array
 X.test <- X[te, , , drop = F ] #testing predictors array
@@ -403,31 +422,43 @@ y.train <- y[tr] #training target
 y.test <- y[te]
 
 
+#Class weights
+class_counts <- table(y.train)
+total <- sum(class_counts)
+n_classes <- length(class_counts)
+
+
+class_weights <- total / (n_classes * class_counts)
+
+# keras expects a named list: names = class index as character
+class_weights <- as.list(class_weights)
+names(class_weights) <- as.character(0:(n_classes-1))
+
 
 
 #----------------Scaling--------------------
 
-#Remeber that we made indexes for our numeric data, which is the data we want to scale. 
+#Remeber that we made indexes for our numeric data, which is the data we want to scale.
 
 #We also need to scale the training data, and scale the testing data according to the training data mu and sd
 
 
 if (length(numeric.indexes) > 0){
-  
+
   mu.numeric <- apply(X.train[, , numeric.indexes, drop = F], 3, mean, na.rm = T)
-  
+
   sd.numeric <- apply(X.train[ , , numeric.indexes, drop = F], 3, sd, na.rm = T)
-  
+
    sd.numeric[sd.numeric == 0 | is.na(sd.numeric)] <- 1 #make sure SD == 1
-  
+
   for (j in seq_along(numeric.indexes)){
-    
+
     k <- numeric.indexes[j]
     X.train[, , k] <- (X.train[ , , k] - mu.numeric[j])/sd.numeric[j]
     X.test[, , k] <- (X.test[ , , k] - mu.numeric[j])/sd.numeric[j]
   }
-  
-  
+
+
 }
 
 # Numeric cols should ne ~N(0,1)
@@ -441,194 +472,29 @@ round(apply(X.train[ , , numeric.indexes, drop = FALSE], 3, sd),   3)
 #Since we are doing a multiclass prediction we need to use softmax
 #This means using the tocategorical() function on y
 
-# y.test <- to_categorical(y.test)
-# save(y.test, file = "y_cat")
-# 
-# y.train <- to_categorical(y.train)
-# save(y.train, file = "y_train" )
-# 
+y.test <- to_categorical(y.test, num_classes = 6)
 
-load("y_train")
-load("y_cat")
+
+y.train <- to_categorical(y.train, num_classes = 6)
+
+list(y.test, y.train, X.train, X.test, class_weights, F_)
+
+
+
+
+
+}
 ```
 
 ```{r}
 
 
-
-#Function to let me test for numerous window sizes
-
-# 
-# pre_data <- function(w = 3, h = 1){
-# 
-# #--------Data Preparation-------------------------------------
-# 
-# T <- length(data$Date) #time period length
-# 
-# data_nn <- data %>%
-#   select(-c(Date)) #removing date column, OSgrid, location
-# 
-# 
-# L <- w #Rolling window length = 3. So what I am decided is that It can use the previus 3 days on record to train itself
-# H <- h # predict 1 day ahead
-# 
-# 
-# #number of samples we can have, so number of time slices, each one iterated one step ahead by H (which is just 1 day in our case)
-# N_samp <- T - L - H + 1
-# 
-# #BRain is broken, but this is what needs to happen, remove OAH and put into vector, one hot enocode x variables and fix the rest wrt Y = OAH and so on
-# 
-# #----------------One hot encoding--------
-# 
-# #This part is quite a process. So big picture, the numeric data needs to be standardised, but when we do one-hot-encoding, it becomes quite messy to avoid standardising the dummy variables. SO we are going to make indices for the numeric columns so we can standardise only them later
-# 
-# #Taking our predictors and covariates into one df, and our labels into another
-# 
-# X.variables <- data_nn %>%
-#   select(-OAH)   #x_variables = everything in data other than OAH column
-# 
-# X.variables <- model.matrix(~., data = X.variables)[,-1] # One Hot encoding
-# 
-# y.variable <- data_nn[["OAH"]]  #y_variable = only our OAH column
-# 
-# numeric.variables <- names(data_nn)[sapply(data_nn, is.numeric)]
-# numeric.variables <- setdiff(numeric.variables, "OAH")
-# 
-# numeric.indexes <- which(colnames(X.variables) %in% numeric.variables) #okay so the colnames are the same so we can find the indexes in x variables which are numeric with this code <--
-# 
-# #dummy variable indexes
-# dummy.indexes <- setdiff(1:(ncol(X.variables)), numeric.indexes)
-# 
-# 
-# #Number features
-# 
-# F_ <- ncol(X.variables)
-# 
-# #--------------Making Array---------------------#
-# 
-# 
-# #Arrays - this is the confusing part. Keras needs an array for this to work. In our case we can think of this as turning our data into a stack of data sheets. each sheet is for a particular feature. THen there are N_sampl columns, and each is shifted by L
-# 
-# X <- array( NA_real_, #just an empty array, which will subsequently be filled
-#            dim = c(N_samp,L, F_  ),
-#            )
-# 
-# y <- integer(N_samp)
-# 
-# 
-# 
-# 
-# 
-# 
-# for (i in 1:N_samp){ #here we are filling in the array with our data
-# 
-#   index.window <- i:(i + L - 1) #index wind = ith value in N_samp to I + window minus 1
-# 
-#   X[i, , ] <- X.variables[index.window, , drop = F] #filling in the predictors with the corresponding indexes into that window
-#   y[i] <- y.variable[i + L + H -1] #we predict the ith + L + H y values.
-# 
-# }
-# 
-# 
-# 
-# #------------Training and testing split-----------------------------
-# 
-# #We want to preserve time series patterns, so no shuffling
-# 
-# #old version where everything was in order
-# idx <- 1:N_samp
-# number.training <- floor(N_samp * 0.8) #train = first 80% of features
-# 
-# tr <- idx[1:number.training] #Training indices
-# te <- idx[(number.training + 1):N_samp] #Testing indices
-# 
-# #making 1 = 0 to see if that helps
-# 
-# y <- y - 1 # Now categories are {0,1,2,3,4,5,}
-# 
-# #test for randomness being better (didnt work)
-# # idx <- 1:N_samp
-# # set.seed(1)
-# # tr <- sample(idx, floor(0.8*N_samp))
-# # te <- idx[-tr]
-# 
-# 
-# 
-# X.train <- X[tr, , , drop = F] #training predictors data array
-# X.test <- X[te, , , drop = F ] #testing predictors array
-# y.train <- y[tr] #training target
-# y.test <- y[te]
-# 
-# 
-# #Class weights
-# class_counts <- table(y.train)
-# total <- sum(class_counts)
-# n_classes <- length(class_counts)
-# 
-# 
-# class_weights <- total / (n_classes * class_counts)
-# 
-# # keras expects a named list: names = class index as character
-# class_weights <- as.list(class_weights)
-# names(class_weights) <- as.character(0:(n_classes-1))
-# 
-# 
-# 
-# #----------------Scaling--------------------
-# 
-# #Remeber that we made indexes for our numeric data, which is the data we want to scale.
-# 
-# #We also need to scale the training data, and scale the testing data according to the training data mu and sd
-# 
-# 
-# if (length(numeric.indexes) > 0){
-# 
-#   mu.numeric <- apply(X.train[, , numeric.indexes, drop = F], 3, mean, na.rm = T)
-# 
-#   sd.numeric <- apply(X.train[ , , numeric.indexes, drop = F], 3, sd, na.rm = T)
-# 
-#    sd.numeric[sd.numeric == 0 | is.na(sd.numeric)] <- 1 #make sure SD == 1
-# 
-#   for (j in seq_along(numeric.indexes)){
-# 
-#     k <- numeric.indexes[j]
-#     X.train[, , k] <- (X.train[ , , k] - mu.numeric[j])/sd.numeric[j]
-#     X.test[, , k] <- (X.test[ , , k] - mu.numeric[j])/sd.numeric[j]
-#   }
-# 
-# 
-# }
-# 
-# # Numeric cols should ne ~N(0,1)
-# round(apply(X.train[ , , numeric.indexes, drop = FALSE], 3, mean), 3)
-# round(apply(X.train[ , , numeric.indexes, drop = FALSE], 3, sd),   3)
-# 
-# 
-# 
-# #Getting there !
-# 
-# #Since we are doing a multiclass prediction we need to use softmax
-# #This means using the tocategorical() function on y
-# 
-# y.test <- to_categorical(y.test, num_classes = 6)
-# 
-# 
-# y.train <- to_categorical(y.train, num_classes = 6)
-# 
-# list(y.test, y.train, X.train, X.test, class_weights, F_)
-# 
-# 
-# 
-# 
-# 
-# }
-
 ```
 
 ```{r Keras_Matthew_modelling}
-
+#set window = 3 days, h = 1
 w_ <- pre_data(w = 3, h = 1)
-
+gc()
 y.test <- w_[[1]]
 y.train <- w_[[2]]
 X.train <- w_[[3]]
@@ -686,176 +552,6 @@ plot(history)
 ```
 
 ```{r}
-
-
-
-# 
-# #Function to let me test for numerous window sizes
-# 
-# 
-# pre_data <- function(w, h = 1){
-# 
-# #--------Data Preparation-------------------------------------
-# 
-# T <- length(data$Date) #time period length
-# 
-# data_nn <- data %>% 
-#   select(-c(Date, OSgrid, Location)) #removing date column, OSgrid, location
-# 
-# 
-# L <- w #Rolling window length = 3. So what I am decided is that It can use the previus 3 days on record to train itself
-# H <- h # predict 1 day ahead
-# 
-# 
-# #number of samples we can have, so number of time slices, each one iterated one step ahead by H (which is just 1 day in our case)
-# N_samp <- T - L - H + 1
-# 
-# #BRain is broken, but this is what needs to happen, remove OAH and put into vector, one hot enocode x variables and fix the rest wrt Y = OAH and so on
-# 
-# #----------------One hot encoding--------
-# 
-# #This part is quite a process. So big picture, the numeric data needs to be standardised, but when we do one-hot-encoding, it becomes quite messy to avoid standardising the dummy variables. SO we are going to make indices for the numeric columns so we can standardise only them later
-# 
-# #Taking our predictors and covariates into one df, and our labels into another
-# 
-# X.variables <- data_nn %>% 
-#   select(-OAH)   #x_variables = everything in data other than OAH column
-#   
-# X.variables <- model.matrix(~., data = X.variables)[,-1] # One Hot encoding
-# 
-# y.variable <- data_nn[["OAH"]]  #y_variable = only our OAH column
-# 
-# numeric.variables <- names(data_nn)[sapply(data_nn, is.numeric)]
-# numeric.variables <- setdiff(numeric.variables, "OAH")
-# 
-# numeric.indexes <- which(colnames(X.variables) %in% numeric.variables) #okay so the colnames are the same so we can find the indexes in x variables which are numeric with this code <--
-# 
-# #dummy variable indexes
-# dummy.indexes <- setdiff(1:(ncol(X.variables)), numeric.indexes)
-# 
-# 
-# #Number features
-# 
-# F_ <- ncol(X.variables)
-# 
-# #--------------Making Array---------------------#
-# 
-# 
-# #Arrays - this is the confusing part. Keras needs an array for this to work. In our case we can think of this as turning our data into a stack of data sheets. each sheet is for a particular feature. THen there are N_sampl columns, and each is shifted by L
-# 
-# X <- array( NA_real_, #just an empty array, which will subsequently be filled
-#            dim = c(N_samp,L, F_  ),
-#            )
-# 
-# y <- integer(N_samp)
-# 
-# 
-# 
-# 
-# 
-# 
-# for (i in 1:N_samp){ #here we are filling in the array with our data
-#   
-#   index.window <- i:(i + L - 1) #index wind = ith value in N_samp to I + window minus 1
-#   
-#   X[i, , ] <- X.variables[index.window, , drop = F] #filling in the predictors with the corresponding indexes into that window
-#   y[i] <- y.variable[i + L + H -1] #we predict the ith + L + H y values.
-#   
-# }
-# 
-# 
-# 
-# #------------Training and testing split-----------------------------
-# 
-# #We want to preserve time series patterns, so no shuffling 
-# 
-# #old version where everything was in order
-# idx <- 1:N_samp
-# number.training <- floor(N_samp * 0.8) #train = first 80% of features
-# 
-# tr <- idx[1:number.training] #Training indices
-# te <- idx[(number.training + 1):N_samp] #Testing indices
-# 
-# #making 1 = 0 to see if that helps
-# 
-# y <- y - 1 # Now categories are {0,1,2,3,4,5,}
-# 
-# #test for randomness being better (didnt work)
-# # idx <- 1:N_samp
-# # set.seed(1)
-# # tr <- sample(idx, floor(0.8*N_samp))
-# # te <- idx[-tr]
-# 
-# 
-# 
-# X.train <- X[tr, , , drop = F] #training predictors data array
-# X.test <- X[te, , , drop = F ] #testing predictors array
-# y.train <- y[tr] #training target
-# y.test <- y[te]
-# 
-# 
-# #Class weights
-# class_counts <- table(y.train)
-# total <- sum(class_counts)
-# n_classes <- length(class_counts)
-# 
-# 
-# class_weights <- total / (n_classes * class_counts)
-# 
-# # keras expects a named list: names = class index as character
-# class_weights <- as.list(class_weights)
-# names(class_weights) <- as.character(0:(n_classes-1))
-# 
-# 
-# 
-# #----------------Scaling--------------------
-# 
-# #Remeber that we made indexes for our numeric data, which is the data we want to scale. 
-# 
-# #We also need to scale the training data, and scale the testing data according to the training data mu and sd
-# 
-# 
-# if (length(numeric.indexes) > 0){
-#   
-#   mu.numeric <- apply(X.train[, , numeric.indexes, drop = F], 3, mean, na.rm = T)
-#   
-#   sd.numeric <- apply(X.train[ , , numeric.indexes, drop = F], 3, sd, na.rm = T)
-#   
-#    sd.numeric[sd.numeric == 0 | is.na(sd.numeric)] <- 1 #make sure SD == 1
-#   
-#   for (j in seq_along(numeric.indexes)){
-#     
-#     k <- numeric.indexes[j]
-#     X.train[, , k] <- (X.train[ , , k] - mu.numeric[j])/sd.numeric[j]
-#     X.test[, , k] <- (X.test[ , , k] - mu.numeric[j])/sd.numeric[j]
-#   }
-#   
-#   
-# }
-# 
-# # Numeric cols should ne ~N(0,1)
-# round(apply(X.train[ , , numeric.indexes, drop = FALSE], 3, mean), 3)
-# round(apply(X.train[ , , numeric.indexes, drop = FALSE], 3, sd),   3)
-# 
-# 
-# 
-# #Getting there !
-# 
-# #Since we are doing a multiclass prediction we need to use softmax
-# #This means using the tocategorical() function on y
-# 
-# y.test <- to_categorical(y.test, num_classes = 6)
-# 
-# 
-# y.train <- to_categorical(y.train, num_classes = 6)
-# 
-# list(y.test, y.train, X.train, X.test, class_weights, F_)
-# 
-# 
-# 
-# 
-# 
-# }
 
 
 ```
