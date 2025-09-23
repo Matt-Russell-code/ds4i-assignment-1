@@ -18,6 +18,8 @@ library(kableExtra)
 library(tidyverse)
 library(ggplot2)
 library(ggpubr)
+library(lubridate)
+library(caret)
 
 #theme for ggplot2, let me know if you do not like this theme and we can change it :)
 
@@ -72,12 +74,40 @@ knitr::include_graphics("av.jpg")
 
 ```{r read_data}
 
-library(lubridate)
+
 data = read.csv("scotland_avalanche_forecasts_2009_2025.csv")
+
+# row_unique_counts <- apply(
+#   df[ , sapply(df, is.character)],  
+#   1,                                
+#   function(row) length(unique(row)) 
+# )
 
 
 data <- data %>% 
   mutate(across(where(is.character), as.factor))
+
+c <- colnames(data)
+r <- data.frame(var = character(),
+                no = numeric())
+
+for (i in c){
+  
+  if (is.factor(data[, i])){
+  
+  x <- length(unique(data[,i]))
+  
+  r <- rbind(r, data.frame(var = i,
+                           no = x))
+    
+  }
+  
+  
+}
+
+6 + 6 + 7 + 7 
+
+
 
 ```
 
@@ -258,7 +288,9 @@ data <- data %>%
   mutate(dayofseason = row_number()) %>% 
   arrange(Date, Area)
 
+  
 
+36 - 4 + 26
 
 ```
 
@@ -266,7 +298,7 @@ data <- data %>%
 
 #Drop the top 3 variables wtih the most missing values
 data <- data %>% 
-  select(- c(AV.Cat, Ski.Pen, Summit.Wind.Dir, Obs, Location))
+  select(- c(AV.Cat, Ski.Pen, Summit.Wind.Dir, Obs, Location, OSgrid))
 
 data <- na.omit(data) #remove remaining missing
 
@@ -288,21 +320,8 @@ test <- data[-train.idx,] #Testing Data
 
 ```
 
-```{r dimension_reduction}
 
-
-
-
-
-```
-
-```{r keras_matthew_feedforward}
-
-
-
-```
-
-```{r Keras_Matthew}
+```{r Keras_data_preprocessing_function}
 #considerations for future
 
 # justifying our dropping of Missing values ie columns and others
@@ -311,6 +330,8 @@ test <- data[-train.idx,] #Testing Data
 
 library("keras3")
 library(tensorflow)
+
+
 
 #for this to work I need to convert the data into an array 
 # form is (N (length), L (Time frame), F (Features))
@@ -328,8 +349,7 @@ pre_data <- function(w = 3, h = 1){
 T <- length(data$Date) #time period length
 
 data_nn <- data %>%
-  select(-c(Date)) #removing date column, OSgrid, location
-
+  select(-c(Date)) #removing date column
 
 L <- w #Rolling window length = 3. So what I am decided is that It can use the previus 3 days on record to train itself
 H <- h # predict 1 day ahead
@@ -338,7 +358,7 @@ H <- h # predict 1 day ahead
 #number of samples we can have, so number of time slices, each one iterated one step ahead by H (which is just 1 day in our case)
 N_samp <- T - L - H + 1
 
-#BRain is broken, but this is what needs to happen, remove OAH and put into vector, one hot enocode x variables and fix the rest wrt Y = OAH and so on
+
 
 #----------------One hot encoding--------
 
@@ -489,199 +509,265 @@ list(y.test, y.train, X.train, X.test, class_weights, F_)
 ```{r}
 
 
-```
-
-```{r Keras_Matthew_modelling}
-#set window = 3 days, h = 1
-w_ <- pre_data(w = 3, h = 1)
-gc()
-y.test <- w_[[1]]
-y.train <- w_[[2]]
-X.train <- w_[[3]]
-X.test <- w_[[4]]
-cl_weights <- w_[[5]]
-F_ <- w_[[6]]
-
-
-
-#------------Finally : the modeling part--------------------
-
-set.seed(1)
-tf$keras$utils$set_random_seed(123L)
-
-input <- layer_input(shape = c(dim(X.train)[2], F_)) # Shape = (L, F)
-
-output <- input %>%
-  layer_conv_1d(filters = 16, kernel_size = 5, padding = "same", activation = "relu") %>%
-  layer_dropout(rate = 0.5) %>%
-  layer_conv_1d(filters = 32, kernel_size = 5, padding = "same", activation = "relu") %>% 
-  layer_global_average_pooling_1d()%>%
-  layer_dropout(rate = 0.5) %>%
-  layer_dense(units = 6, activation = "softmax")
-  
-
-model <- keras_model(inputs = input, outputs = output)
-
-model %>%  compile(
-  optimizer = "adam",
-  loss = "categorical_crossentropy",
-  metrics = "accuracy"
-)
-
-
-
-#Training
-#200 epochs better
-history <- model %>% 
-  fit(X.train, y.train,
-      epochs = 200,
-      batch_size = 64,
-      verbose = 0,
-      validation_split = 0.2,
-      shuffle = F)
-      #class_weight = cl_weights)
-
-
-metrics <- model %>% evaluate(X.test, y.test)
-
-metrics
-
-plot(history)
 
 
 ```
 
-```{r}
+```{r }
+# 
+# #set window = 3 days, h = 1
+# #Windows to test, 3, 7, 30, 120
+# w_ <- pre_data(w = 3, h = 1)
+# gc()
+# y.test <- w_[[1]]
+# y.train <- w_[[2]]
+# X.train <- w_[[3]]
+# X.test <- w_[[4]]
+# cl_weights <- w_[[5]]
+# F_ <- w_[[6]]
+# 
+# 
+# 
+# #------------Finally : the modeling part--------------------
+# 
+# set.seed(1)
+# tf$keras$utils$set_random_seed(123L)
+# 
+# input <- layer_input(shape = c(dim(X.train)[2], F_)) # Shape = (L, F)
+# 
+# output <- input %>%
+#   layer_conv_1d(filters = 16, kernel_size = 3, padding = "same", activation = "relu") %>%
+#   layer_dropout(rate = 0.7) %>%
+#   layer_conv_1d(filters = 32, kernel_size = 3, padding = "same", activation = "relu") %>% 
+#   layer_global_average_pooling_1d()%>%
+#   layer_dropout(rate = 0.5) %>%
+#   layer_dense(units = 6, activation = "softmax")
+#   
+# 
+# model <- keras_model(inputs = input, outputs = output)
+# 
+# model %>%  compile(
+#   optimizer = "adam",
+#   loss = "categorical_crossentropy",
+#   metrics = "accuracy"
+# )
+# 
+# 
+# 
+# #Training
+# #200 epochs better
+# history <- model %>% 
+#   fit(X.train, y.train,
+#       epochs = 200,
+#       batch_size = 64,
+#       verbose = 0,
+#       validation_split = 0.2,
+#       shuffle = F,
+#       class_weight = cl_weights)
+# 
+# 
+# metrics <- model %>% evaluate(X.test, y.test)
+# 
+# metrics
+# 
+# plot(history)
+# 
+# pred_probs <- model |> predict(X.test)
+# pred_class <- apply(pred_probs, 1, which.max)   # 1–6
+# true_class <- apply(y.test, 1, which.max)
+# 
+# head(true_class)
+# library(caret)
+# confusionMatrix(as.factor(pred_class), as.factor(true_class))
+# 
+# 
+# load("test1")
+# 
+# 
+# gc()
+
+```
+
+```{r RNN}
+
+# set.seed(1)
+# tf$keras$utils$set_random_seed(123L)
+# 
+# 
+# input <- layer_input(shape = c(3, F_))
+# 
+# 
+# output <- input |>
+#   layer_lstm(units = 64, return_sequences = TRUE) |>
+#   layer_dropout(0.3) |>
+#   layer_lstm(units = 64) |>
+#   layer_dropout(0.3) |>
+#   layer_dense(units = 6, activation = "softmax")
+# 
+# model <- keras_model(input, output)
+# model |> compile(optimizer = "adam",
+#                  loss = "categorical_crossentropy",
+#                  metrics = "accuracy")
+# 
+# history <- model |> fit(X.train, y.train,
+#                         epochs = 50, batch_size = 64,
+#                         validation_split = 0.2, verbose = 0)
+# 
+# 
+# 
+# metrics <- model %>% evaluate(X.test, y.test)
+# 
+# 
+# pred_probs <- model |> predict(X.test)
+# pred_class <- apply(pred_probs, 1, which.max)   # 1–6
+# true_class <- apply(y.test, 1, which.max)  # 1..K
+# 
+# 
+# 
+# confusionMatrix(as.factor(pred_class), as.factor(true_class))
+# 
+
 
 
 ```
 
-```{r}
+```{r keras_grid_search}
 #testing c-d-c
 
 #vary window size hasnt made significant changes
 #Adding weights to control for imbalance didnt help
 
-# w_7 <- pre_data(w = 3, h = 1)
-# 
-# y.test <- w_7[[1]]
-# y.train <- w_7[[2]]
-# X.train <- w_7[[3]]
-# X.test <- w_7[[4]]
-# cl_weights <- w_7[[5]]
-# F_ <- w_7[[6]]
-# # ---------------- Grid search for your existing architecture ----------------
-# 
-# # Repro seeds (same as you set)
-# set.seed(1)
-# tf$keras$utils$set_random_seed(123L)
-# 
-# # Define the grid (adjust values if you want a bigger/smaller search)
-# grid <- expand.grid(
-#   filters1   = c( 32, 64),
-#   filters2   = c( 32, 64),
-#   kernel_sz  = c( 9, 16),
-#   drop1      = c(0.3, 0.5),
-#   drop2      = c(0.3, 0.5),
-#   stringsAsFactors = FALSE
-# )
-# 
-# results <- data.frame(
-#   filters1 = integer(), filters2 = integer(),
-#   kernel_sz = integer(), drop1 = double(), drop2 = double(),
-#   val_accuracy = double(), test_loss = double(), test_accuracy = double(),
-#   stringsAsFactors = FALSE
-# )
-# 
-# histories <- vector("list", nrow(grid))  # optional: keep training histories
-# 
-# for (i in seq_len(nrow(grid))) {
-#   cat(sprintf("\n[%d/%d] f1=%d, f2=%d, k=%d, d1=%.2f, d2=%.2f\n",
-#               i, nrow(grid),
-#               grid$filters1[i], grid$filters2[i],
-#               grid$kernel_sz[i], grid$drop1[i], grid$drop2[i]))
-# 
-#   # Clear TF/Keras state between runs to avoid graph/memory accumulation
-#   tensorflow::tf$keras$backend$clear_session()
-# 
-#   # Re-seed before each run to keep trials comparable
-#   set.seed(1)
-#   tf$keras$utils$set_random_seed(123L)
-# 
-#   # ----- Build your SAME model, with grid parameters plugged in -----
-#   input <- layer_input(shape = c(dim(X.train)[2], F_)) # (L, F)
-# 
-#   output <- input %>%
-#     layer_conv_1d(filters = grid$filters1[i],
-#                   kernel_size = grid$kernel_sz[i],
-#                   padding = "same", activation = "relu") %>%
-#     layer_dropout(rate = grid$drop1[i]) %>%
-#     layer_conv_1d(filters = grid$filters2[i],
-#                   kernel_size = grid$kernel_sz[i],
-#                   padding = "same", activation = "relu") %>%
-#     layer_global_average_pooling_1d() %>%
-#     layer_dropout(rate = grid$drop2[i]) %>%
-#     layer_dense(units = 6, activation = "softmax")
-# 
-#   model <- keras_model(inputs = input, outputs = output)
-# 
-#   model %>% compile(
-#     optimizer = "adam",
-#     loss = "categorical_crossentropy",
-#     metrics = "accuracy"
-#   )
-# 
-#   # ----- Train (identical settings you had) -----
-#   history <- model %>% fit(
-#     X.train, y.train,
-#     epochs = 60,
-#     batch_size = 64,
-#     verbose = 0,
-#     validation_split = 0.2,
-#     shuffle = FALSE
-#     # = cl_weights
-#   )
-# 
-#   # Collect validation accuracy from the last epoch
-#   val_acc <- tail(history$metrics$val_accuracy, 1)
-#   if (length(val_acc) == 0) {
-#     # Fallback name in case of different metric key
-#     val_acc <- tail(history$metrics$val_acc, 1)
-#   }
-# 
-#   # Evaluate on test set (same as your code)
-#   test_metrics <- model %>% evaluate(X.test, y.test, verbose = 0)
-# 
-#   # test_metrics is usually a named numeric vector: c(loss=..., accuracy=...)
-#   test_loss <- as.numeric(test_metrics[[1]])
-#   test_acc  <- if (!is.null(names(test_metrics)) && "accuracy" %in% names(test_metrics)) {
-#     as.numeric(test_metrics[["accuracy"]])
-#   } else {
-#     as.numeric(test_metrics[[2]])
-#   }
-# 
-#   # Store results
-#   results[i, ] <- list(
-#     grid$filters1[i], grid$filters2[i],
-#     grid$kernel_sz[i], grid$drop1[i], grid$drop2[i],
-#     as.numeric(val_acc), test_loss, test_acc
-#   )
-#   histories[[i]] <- history
-# }
-# 
-# # Sort by best validation accuracy (descending)
-# results <- results[order(-results$val_accuracy), ]
-# 
-# print(results)
-# 
-# # The best config (row 1). If you want to refit using it, use results[1, ] values.
-# best <- results[1, ]
-# cat("\nBest by val_accuracy:\n")
-# print(best)
-# 
+keras_search <- function(window){
+
+W_ <- pre_data(w = window, h = 1)
+
+y.test <- W_[[1]]
+y.train <- W_[[2]]
+X.train <- W_[[3]]
+X.test <- W_[[4]]
+cl_weights <- W_[[5]]
+F_ <- W_[[6]]
+# ---------------- Grid search for your existing architecture ----------------
+
+# Repro seeds (same as you set)
+set.seed(1)
+tf$keras$utils$set_random_seed(123L)
+
+# Define the grid (adjust values if you want a bigger/smaller search)
+grid <- expand.grid(
+  filters1   = c( 32, 64),
+  filters2   = c( 32, 64),
+  kernel_sz  = c( 9, 16),
+  drop1      = c(0.3, 0.5),
+  drop2      = c(0.3, 0.5),
+  stringsAsFactors = FALSE
+)
+
+results <- data.frame(
+  filters1 = integer(), filters2 = integer(),
+  kernel_sz = integer(), drop1 = double(), drop2 = double(),
+  val_accuracy = double(), test_loss = double(), test_accuracy = double(),
+  stringsAsFactors = FALSE
+)
+
+histories <- vector("list", nrow(grid))  # optional: keep training histories
+
+for (i in seq_len(nrow(grid))) {
+  cat(sprintf("\n[%d/%d] f1=%d, f2=%d, k=%d, d1=%.2f, d2=%.2f\n",
+              i, nrow(grid),
+              grid$filters1[i], grid$filters2[i],
+              grid$kernel_sz[i], grid$drop1[i], grid$drop2[i]))
+
+  # Clear TF/Keras state between runs to avoid graph/memory accumulation
+  tensorflow::tf$keras$backend$clear_session()
+
+  # Re-seed before each run to keep trials comparable
+  set.seed(1)
+  tf$keras$utils$set_random_seed(123L)
+
+  # ----- Build your SAME model, with grid parameters plugged in -----
+  input <- layer_input(shape = c(dim(X.train)[2], F_)) # (L, F)
+
+  output <- input %>%
+    layer_conv_1d(filters = grid$filters1[i],
+                  kernel_size = grid$kernel_sz[i],
+                  padding = "same", activation = "relu") %>%
+    layer_dropout(rate = grid$drop1[i]) %>%
+    layer_conv_1d(filters = grid$filters2[i],
+                  kernel_size = grid$kernel_sz[i],
+                  padding = "same", activation = "relu") %>%
+    layer_global_average_pooling_1d() %>%
+    layer_dropout(rate = grid$drop2[i]) %>%
+    layer_dense(units = 6, activation = "softmax")
+
+  model <- keras_model(inputs = input, outputs = output)
+
+  model %>% compile(
+    optimizer = "adam",
+    loss = "categorical_crossentropy",
+    metrics = "accuracy"
+  )
+
+  # ----- Train (identical settings you had) -----
+  history <- model %>% fit(
+    X.train, y.train,
+    epochs = 60,
+    batch_size = 64,
+    verbose = 0,
+    validation_split = 0.2,
+    shuffle = FALSE
+    # = cl_weights
+  )
+
+  # Collect validation accuracy from the last epoch
+  val_acc <- tail(history$metrics$val_accuracy, 1)
+  if (length(val_acc) == 0) {
+    # Fallback name in case of different metric key
+    val_acc <- tail(history$metrics$val_acc, 1)
+  }
+
+  # Evaluate on test set 
+  test_metrics <- model %>% evaluate(X.test, y.test, verbose = 0)
+
+  # test_metrics is usually a named numeric vector: c(loss=..., accuracy=...)
+  test_loss <- as.numeric(test_metrics[[1]])
+  test_acc  <- if (!is.null(names(test_metrics)) && "accuracy" %in% names(test_metrics)) {
+    as.numeric(test_metrics[["accuracy"]])
+  } else {
+    as.numeric(test_metrics[[2]])
+  }
+
+  # Store results
+  results[i, ] <- list(
+    grid$filters1[i], grid$filters2[i],
+    grid$kernel_sz[i], grid$drop1[i], grid$drop2[i],
+    as.numeric(val_acc), test_loss, test_acc
+  )
+  histories[[i]] <- history
+}
+
+# Sort by best validation accuracy 
+results <- results[order(-results$val_accuracy), ]
+
+print(results)
+
+# The best 
+best <- results[1, ]
+
+rm(W_) #For saving memory
+gc()
+
+return(results)
+
+}
+
+
+
+ 
 # #save(results, file = "huge_search1_c-d-c-d")
 search1 <- load("huge_search1_c-d-c-d")
 
+results
 ```
 
 ```{r ridiculous_keras_search}
