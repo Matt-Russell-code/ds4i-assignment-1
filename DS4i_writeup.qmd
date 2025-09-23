@@ -62,6 +62,46 @@ knitr::include_graphics("av.jpg")
 
 ## Literature Review
 
+Snow avalanches are a recognised hazard in snow-prone mountain regions worldwide. Unlike in many alpine regions, avalanches in Scotland rarely impact large settlements and infrastructure, however, pose significant risk to recreational users in the Scottish Highlands (Diggins, 2009; Ward, 1980). Winter activities, such as climbing, walking, and skiing are increasingly popular, leading to greater human exposure to avalanche-prone terrain and resulting in numerous injuries and occasional fatalities each year (Scottish Avalanche Information Service \[SAIS\], 2024). This has prompted several studies to examine Scottish snowpack conditions and avalanche forecasting strategies, with the earliest studies conducted between 1970 and 1980 (Langmuir, 1970; Spink, 1970; Beattie, 1976; Ward, 1980; Ward & Beattie, 1985). However, these early studies were largely descriptive, relying on snow-pit measurements and expert judgements to identify snow properties and weather conditions correlated with avalanche risk. Building on this foundation, Ward (1984) applied one of the first predictive forecasting models for avalanches in Scotland.
+
+Numerous studies emphasise the inherent complexity of avalanche modelling where predictions are based on multiple interacting factors (Choubin et al., 2019; Herwijen et al., 2016; Hendrick et al., 2023; Pozdnoukhov et al., 2008; Singh & Ganju, 2008). This complexity is only heightened in regions with highly variable weather patterns (Sharma & Ganju, 1999). In response, early statistical methods such as nearest neighbours became a popular technique to support (not replace) forecasters in predicting avalanche outcomes through relating current weather conditions to past avalanche events (Blagovechshenskiy et al., 2023; Kala et al., 2025; Pozdnoukhov et al., 2018; Singh & Ganju, 2008). However, this approach is susceptible to overfitting and struggles with complex and high-dimensional data (Kala et al., 2025; Pozdnoukhov et al., 2018; Singh & Ganju, 2018). Using a dataset from Lochaber, Scotland, Pozdnoukhov et al. (2008) reported that support vector machines (SVMs) showed a broadly similar performance to a baseline nearest neighbours method, however, had the added advantage of handling high dimensionality datasets and produced more descriptive forecasts. SVMs have been explored and shown success in aiding avalanche risk forecasting in other regions including Iran, India, Switzerland, and Tibet (Choubin et al., 2019; Rahmati et al., 2019; Schirmer et al., 2009; Tiwari et al., 2021; Wen et al., 2022). 
+
+Over recent years, more complex machine learning (ML) algorithms such as regression trees, random forests, and neural networks have demonstrated strong predictive performance in avalanche forecasting (Blagovechshenskiy et al., 2023; Choubin et al., 2019; Gauthier et al., 2025; Hendrick et al., 2023; Rahmati et al., 2019; Singh & Ganju, 2018; Tiwari et al., 2021; Wen et al., 2022). Avalanche datasets are often high-dimensional, and using human forecaster judgement to select which features to include can be highly subjective and variable (Helbig et al., 2015; Pozdnoukhov et al., 2008). Hybrid approaches, which combine ML with expert-guided feature selection, have shown practical value (Gauthier et al., 2025). However, fully data-driven forecasting methods, particularly neural networks, offer important advantages.
+
+Simulating the work of a human brain, neural networks are deep learning algorithms consisting of interconnected nodes/neurons that can model complex and nonlinear relationships between inputs and outputs (Blagovechshenskiy et al., 2023; Sharma et al., 2023; Tu, 1996). Their ability to process all input variables simultaneously allows them to implicitly learn interactions and patterns in the data without prior knowledge on which variables are most important (Blagovechshenskiy et al., 2023; Fromm & Schonberger, 2022; Sharma et al., 2023). Studies in avalanche forecasting from regions such as Switzerland, Kazakhstan, and  India have demonstrated that neural networks not only achieve strong predictive performance, but can also assess the relative importance of each variable to avalanche risk (Fromm & Schonberger; Sharma et al., 2023; Singh & Ganju, 2008). This ability makes them particularly well suited for high-dimensional datasets, such as those encountered in avalanche forecasting, as well as in contexts where prior domain knowledge is limited or when the most relevant predictors are unknown.
+
+Despite advances in data-driven avalanche forecasting worldwide, research specific to Scotland remains limited. This scarcity lies in three domains: 
+
+\(1\) The small number of published forecasting studies (only 9 relevant peer-reviewed papers exist on Scopus, with the most recent study conducted in 2011 (keywords: ( "avalanche forecasting" OR "avalanche prediction" ) AND Scotland)
+
+\(2\) The restricted range of statistical approaches explored (only KNN and SVM) (Joachim et al., 2004; Pozdnoukhov et al., 2008; Pozdnoukhov et al., 2011; Purves et al., 2003)
+
+\(3\) The focus on only a few regions in Scotland (primarily the Cairngorms and Lochaber regions)
+
+This limited research interest likely stems from the highly localised nature of avalanche risk in Scotland, which generally occurs in remote areas and impacts only a small subset of individuals (Diggins, 2009; SAIS, 2024). Nevertheless, improved avalanche forecasting is argued to be increasingly important under changing climate conditions and global warming, which may alter snowpack properties and avalanche risk and frequency (Gauthier et al., 2025; Werritty & Sugden, 2013). A detailed discussion of climate change, however, is beyond the scope of this paper. As such, the present study aims to extend forecasting research in Scotland both spatially and methodologically by applying a neural network (or two or three?????) across the six distinct regions of Creah Meagaidh, Glencoe, Lochaber, Northern Cairngorms, Southern Cairngorms, and Torridon.
+
+\<insert paragraph explaining modelling approaches of prev papers + this project’s modelling approaches. I.e. the neural net architecture\>
+
+Hypothesis???? We can workshop together
+
+## Context and Dataset
+
+Scotland experiences a mild, wet, and temperate maritime climate due to the strong influence of the North Atlantic Ocean and persistent south-westerly winds (Pozdnoukhov et al., 2008; Scottish Government, 2011). These conditions result in rapid temperature changes, frequent heavy precipitation (falling as either snow or rain in the winter), and strong winds. With the highest peak, Ben Nevis in Lochaber (1345 m), mountains are low compared to alpine ranges (\~ 4000 m), resulting in a snowpack that is typically shallower, wetter, and more variable in comparison (Britannica, 2025; Pozdnoukhov et al., 2008; WSL Institute for Snow and Avalanche Research SLF, 2016). Aspects such as rapid freeze-thaw cycles, rain-on-snow, and wind redistribution further destabilise snow structure and stability, creating avalanche risks that can arise and disappear within a short time (Diggins, 2009; Pozdnoukhov et al., 2008; Purves et al., 2003; Scottish Government, 2011). Snowpack conditions also differ regionally; while the West is characterised as strongly maritime, with mild and wet winters, the North and East experience colder and drier conditions (MetOffice, 2010). As such, Scotland’s climate is highly variable both spatially and temporally, adding to the complexity of predicting avalanche risk.
+
+This paper uses a 15-year archive of avalanche forecasts from Scotland across the six areas of Creah Meagaidh, Glencoe, Lochaber, Northern Cairngorms, Southern Cairngorms, and Torridon, produced by the Scottish Avalanche Information Service (see Figure ? below). 
+
+```{r map}
+
+```
+
+Data cover the Scottish winters (November to April) from the December 2009 to March 2025. Predictor variables are categorised into three main groups, including (1) position and topography, (2) weather, and (3) snowpack test, all collected at the forecast location. Each observation also includes the date and the forecast area. For a full overview of the predictors, see Table ?.
+
+\*\*table of predictors
+
+```{r pred_tab}
+
+```
+
 ## Exploratory Data Analysis
 
 ```{r}
@@ -105,7 +145,7 @@ for (i in c){
   
 }
 
-6 + 6 + 7 + 7 
+
 
 
 
@@ -218,51 +258,6 @@ count_na/nrow(b)
 
 ```
 
-```{r imputation}
-#Come back to this later
-
-# 
-# #I am not grouping by Date, OsGrid, Obs or OAH (As thats our target variable)
-# groupings <- groupings[-c(1, 3, 5, 7)]
-# 
-# #Cell mean imputation
-# 
-# #Imputing Training data first
-# train.imp <- train %>%
-#   group_by(Area, FAH) %>% #cant group by precip code, or location, too many missing
-#   mutate(
-#     across(where(is.integer),
-#            ~ replace_na(., as.integer(round(mean(., na.rm = TRUE))))),
-#     across(where(is.double),
-#            ~ replace_na(., mean(., na.rm = TRUE)))
-#   ) %>% #after this, some variables 
-#   ungroup() %>% 
-#   mutate(Aspect = round(mean(Aspect, na.rm = T),), #remaining, just taking the mean
-#          Max.Temp.Grad = round(mean(Max.Temp.Grad, na.rm = T)),
-#          Max.Hardness.Grad = round(mean(Max.Hardness.Grad, na.rm  = T))) 
-# 
-# train.imp <- train.imp[-which(is.na(train.imp$OAH)),] #removing remaining missing
-#   
-# 
-# #Imputing Test data in the same manner
-# test.imp <- test %>%
-#   group_by(Area, FAH) %>% #cant group by precip code, or location, too many missing
-#   mutate(
-#     across(where(is.integer),
-#            ~ replace_na(., as.integer(round(mean(., na.rm = TRUE))))),
-#     across(where(is.double),
-#            ~ replace_na(., mean(., na.rm = TRUE)))
-#   ) %>% #after this, some variables 
-#   ungroup() %>% 
-#   mutate(Aspect = round(mean(Aspect, na.rm = T),), #remaining, just taking the mean
-#          Max.Temp.Grad = round(mean(Max.Temp.Grad, na.rm = T)),
-#          Max.Hardness.Grad = round(mean(Max.Hardness.Grad, na.rm  = T))) 
-# 
-# test.imp <- train.imp[-which(is.na(test.imp$OAH)),] #removing remaining missing
-
-
-```
-
 ```{r date_time}
 
 #adding date variable
@@ -302,7 +297,7 @@ data <- data %>%
 
 data <- na.omit(data) #remove remaining missing
 
-#data <- data[,!(names(data)) == "Obs"]
+#any(is.na(data))
 
 
 
@@ -316,6 +311,7 @@ train.idx <- sample(1:nrow(data),
 
 train <- data[train.idx,] #Training data
 test <- data[-train.idx,] #Testing Data
+
 
 
 ```
@@ -822,7 +818,7 @@ rm(res_window_120,  res_window_3, res_window_30)
 # print(results)
 # 
 # final_cnn_search  <-  results
-save(final_cnn_search, file =  "final_cnn_serach")
+#save(final_cnn_search, file =  "final_cnn_serach")
 
 
 load("final_cnn_serach")
@@ -907,6 +903,7 @@ load("final_cnn_model")
 test_metrics <- model %>% evaluate(X.test, y.test, verbose = 0)
 
 test_metrics$accuracy
+
 
 
 ```
@@ -1088,5 +1085,770 @@ rnn_window_120 <- res_window_120%>%
 
 
 ## Modelling
+
+## Modelling
+
+```{r libs-and-seed}
+# Load libraries for data wrangling, visualization, preprocessing, and modeling
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(janitor)
+library(caTools)
+library(caret)
+library(e1071)
+library(readr)
+library(tidyverse)
+library(janitor)
+library(lubridate)
+library(skimr)
+library(naniar)
+library(GGally)
+library(corrplot)
+library(factoextra)
+library(cluster)
+library(rsample)
+library(recipes)
+library(scales)
+library(cowplot)
+library(pROC)
+library(reshape2)
+
+# Load the required libraries so their functions are available for use.
+library(xgboost)   # Core API for training and using XGBoost models.
+library(caret)     # High-level interface for model training, tuning, and evaluation.
+library(pROC)      # Provides functions for ROC curve plotting and AUC computation.
+library(pdp)       # Used to generate Partial Dependence Plots for model interpretation.
+
+# Set the random seed for reproducibility.
+# Ensures that random processes like resampling and model training are consistent across runs.
+set.seed(123)
+```
+
+```{r data-loading}
+# # Load raw data from CSV
+# df_raw <- read_csv("scotland_avalanche_forecasts_2009_2025.csv")
+# 
+# # Clean column names -> snake_case
+# df <- df_raw %>% clean_names()
+# 
+# # Fix Cols
+# df <- df %>% mutate(date = parse_date_time(date, orders = c("ymd HMS", "ymd HM", "ymd"), tz = "Europe/London"),
+#                     fah = as.factor(fah),
+#                     oah = as.factor(oah),
+#                     area = as.factor(area),
+#                     obs = as.factor(obs))
+# 
+# 
+# # Inspect structure of cleaned dataset
+# head(df)
+```
+
+```{r target-var-distr}
+# ggplot(df, aes(x = oah)) + geom_bar() + labs(title = "Observed Avalanche Hazard (OAH)") + theme_minimal()
+# 
+# library(ggplot2)
+# library(dplyr)
+# 
+# # First, prepare the data with counts and percentages
+# df_counts <- df %>%
+#   count(oah) %>%
+#   mutate(percent = n / sum(n) * 100)
+# 
+# # Plot
+# ggplot(df_counts, aes(x = reorder(oah, -n), y = n, fill = oah)) +
+#   geom_bar(stat = "identity", show.legend = FALSE) +
+#   geom_text(aes(label = paste0(n, " (", round(percent, 1), "%)")), 
+#             vjust = -0.5, size = 4) +
+#   labs(
+#     title = "Observed Avalanche Hazard (OAH)",
+#     x = "Hazard Level",
+#     y = "Count"
+#   ) +
+#   theme_minimal(base_size = 14) +
+#   theme(
+#     plot.title = element_text(face = "bold", hjust = 0.5),
+#     axis.title.y = element_text(margin = margin(r = 10))
+#   ) +
+#   scale_y_continuous(expand = expansion(mult = c(0, 0.1)))
+
+
+# ggplot(train, aes(x = oah)) + geom_bar() + labs(title = "Observed Avalanche Hazard (OAH)") + theme_minimal()
+
+# ggplot(test, aes(x = oah)) + geom_bar() + labs(title = "Observed Avalanche Hazard (OAH)") + theme_minimal()
+```
+
+```{r data-preparation}
+## ---------------------------
+# Data preparation 
+## ---------------------------
+# Define target column
+#target <- "OAH" #changed from oah to OAH
+
+# ---------------------------
+# Train-test split
+# ---------------------------
+#set.seed(123)
+#MATT EDIT: commenting this out because we are going to use my data above made before modeling going forward
+# split <- sample.split(df[[target]], SplitRatio = 0.7)
+# train <- subset(df, split == TRUE)
+# test  <- subset(df, split == FALSE)
+```
+
+```{r drop-missing}
+# ---------------------------
+# Drop rows with missing values in both target and predictors
+# ---------------------------
+# Our predictors, col names
+# setdiff(a, b): Returns elements in a that are not in b.
+
+#predictor_cols <- setdiff(names(data), target) #Matt edit, replaced df with data, to be consistent as above
+
+#Explanation:
+# train[, c(target, predictor_cols)]: Selects columns from train that are either the target or one of the predictors.
+# complete.cases(...): Returns a logical vector indicating which rows have no missing values (NA) across the selected columns.
+# train[ ..., ]: Subsets the train data to only those rows that have complete data in both the target and predictors.
+# Result:
+#   Removes rows with missing values in any of the important columns (target or predictors) from the training set.
+# train <- train[complete.cases(train[, c(target, predictor_cols)]), ]
+# test  <- test[complete.cases(test[, c(target, predictor_cols)]), ]
+```
+
+```{r target-var-factor-encoding}
+# ---------------------------
+# Target variable conversion
+#   Change the Target Variable (y) in our data into factor with all levels,
+#   making sure all data has levels from whole data even if it doesn't show in train or test
+#   because of the split.
+# ---------------------------
+
+#Matt comment: The data was converted to factors right at the begining of the data set so I dont think this is a necessary step. The test and training have the same factors levels.
+
+# # Extract all possible levels (classes) of the target variable from the full dataset
+# # This ensures consistency in factor levels across training and test sets, even if some classes are missing in one set.
+# target_levels <- levels(factor(data[[target]])) #matt edit changed to "OAH" to make this more clear
+# 
+# # Convert the target variable in the training set to a factor with levels set to target_levels
+# # This makes sure the factor levels are in the same order as in the full dataset (important for classification labels).
+# train[[target]] <- factor(train[[target]], levels = target_levels)
+# 
+# # Do the same for the test set
+# test[[target]]  <- factor(test[[target]],  levels = target_levels)
+```
+
+```{r target-var-encoding}
+# # ------------------------------------------------------
+# # Numeric encoding for XGBoost (0-based indexing)
+# # XGB Model needs all our factor variables encoded into numerical values,
+# # so we change all y levels into numbers, STARTING FROM 0 ...so -1L
+# # ------------------------------------------------------
+# 
+# # Convert the factor target in training set to integer values, then subtract 1
+# # XGBoost expects class labels as integers starting from 0, so this makes sure labels are 0-based.
+# y_train <- as.integer(train[[target]]) - 1L
+# 
+# # Same conversion for test set
+# y_test  <- as.integer(test[[target]]) - 1L
+# 
+# # Store the original class labels (factor levels)
+# # Useful later to map predictions back to human-readable class names (e.g., for confusion matrix or reporting).
+# levels_y <- target_levels
+# 
+# # Count the number of unique classes
+# # This is needed when setting the "num_class" parameter in the XGBoost model (for multi-class classification).
+# num_class <- length(levels_y)
+
+```
+
+```{r model-feature-matrix}
+# # ---------------------------
+# # Feature matrix creation
+# # ---------------------------
+# # Select only predictor columns from the training set
+# # 'predictor_cols' contains the names of all input features (excluding the target)
+# x_train <- train %>% 
+#   select(all_of(predictor_cols))
+# 
+# # Do the same for the test set
+# x_test  <- test %>% 
+#   select(all_of(predictor_cols))
+# 
+# 
+# # ------------------------------------------------------------
+# # Convert to design matrices (dummy encoding for categorical variables)
+# # ------------------------------------------------------------
+# 
+# # Convert the training data frame to a design matrix using model.matrix
+# # '~ . -1' creates a formula that includes all variables (.) but removes the intercept (-1)
+# # This will automatically dummy-encode categorical variables into binary columns (one-hot encoding)
+# 
+# # Combine train and test predictors before encoding
+# x_all <- rbind(x_train, x_test)
+# 
+# # Create design matrix once (ensures consistent dummy columns)
+# dm_all <- model.matrix(~ . -1, data = x_all)
+# 
+# 
+# 
+# # Split back into train and test matrices
+# dm_train <- dm_all[1:nrow(x_train), ]
+# 
+# dm_test  <- dm_all[(nrow(x_train)+1):nrow(x_all), ]
+# # ------------------------------------------------------------
+# # Debugging check to confirm alignment
+# # ------------------------------------------------------------
+# # Output number of rows in design matrix vs. number of labels
+# # This is a sanity check to ensure that the feature matrix (dm_train) has the same number of rows
+# #   as the target label vector (y_train), which is essential for training
+# cat("Rows in dm_train:", nrow(dm_train), "Length of y_train:", length(y_train), "\n")
+# 
+# # Same check for the test set
+# cat("Rows in dm_test:", nrow(dm_test), "Length of y_test:", length(y_test), "\n")
+
+```
+
+```{r dmatrix}
+# ---------------------------
+# DMatrix creation
+#   :( REQUIRED
+# ---------------------------
+# 
+# dtrain <- xgb.DMatrix(data = dm_train, 
+#                       label = y_train)
+# 
+# 
+# dtest  <- xgb.DMatrix(data = dm_test,
+#                       label = y_test)
+```
+
+```{r crossval-earlystop}
+# ---------------------------
+# Cross-validated early stopping for multi-class XGBoost
+# ---------------------------
+
+# # Define the set of hyperparameters for XGBoost cross-validation
+# cv_params <- list(
+# objective = "multi:softprob", # Predict probabilities for each class (required for multi-class)
+# eval_metric = "mlogloss", # Use multi-class logarithmic loss as evaluation metric
+# eta = 0.1, # Learning rate: smaller values improve generalization
+# max_depth = 6, # Maximum depth of each tree (controls model complexity)
+# min_child_weight = 1, # Minimum sum of instance weights needed in a child node
+# subsample = 0.8, # Fraction of training data used for each tree (prevents overfitting)
+# colsample_bytree = 0.8, # Fraction of features used for each tree (prevents overfitting)
+# gamma = 0, # Minimum loss reduction to make a split
+# num_class = num_class # Number of classes in the target variable
+# )
+# 
+# # Perform k-fold cross-validation with early stopping
+# cv <- xgb.cv(
+# params = cv_params, # Hyperparameters defined above
+# data = dtrain, # Training data in DMatrix format
+# nrounds = 2000, # Maximum number of boosting iterations
+# nfold = 5, # Number of folds for cross-validation
+# stratified = TRUE, # Ensure class proportions are preserved in folds
+# early_stopping_rounds = 25, # Stop if no improvement after 25 rounds
+# verbose = 1, # Print progress during training
+# maximize = FALSE # Minimize the logloss metric
+# )
+# 
+# # Extract the optimal number of boosting rounds
+# best_nrounds <- cv$best_iteration
+# cat('Best nrounds from xgb.cv:', best_nrounds, "\n")
+```
+
+```{r xgbmodel}
+
+#Matt edit, commented out for now
+# ---------------------------
+# Final Multi-Class XGBoost Model
+# ---------------------------
+
+# # Set hyperparameters (based on CV up there)
+# final_params <- list(
+#   objective = "multi:softprob",   # Multiclass classification: predict probability for each class
+#   eval_metric = "mlogloss",       # Use multiclass log-loss as evaluation metric
+#   eta = 0.1,                      # Learning rate: step size shrinkage to prevent overfitting
+#   max_depth = 6,                  # Maximum depth of trees (controls model complexity)
+#   min_child_weight = 1,           # Minimum sum of instance weights (hessian) needed in a child (controls overfitting)
+#   subsample = 0.8,                # Subsample ratio of training instances (row sampling, adds randomness)
+#   colsample_bytree = 0.8,         # Fraction of features sampled per tree (adds randomness)
+#   gamma = 0,                      # Minimum loss reduction required for a split (regularization parameter)
+#   num_class = num_class)           # Total number of target classes (required for multi-class setup)
+# 
+# 
+# # Use optimal nrounds from CV
+# final_nrounds <- 68  # Best number of boosting rounds determined by earlier cross-validation
+# 
+# # Train final model with early stopping on evaluation set
+# final_model <- xgb.train(
+#   params = final_params,          # Pass hyperparameters
+#   data = dtrain,                  # Training data (DMatrix)
+#   nrounds = final_nrounds,        # Number of boosting rounds (iterations)
+#   watchlist = list(train = dtrain, eval = dtest),  # Monitor train and test sets during training
+#   early_stopping_rounds = 25,     # Stop training if no improvement for 25 consecutive rounds
+#   verbose = 1,                    # Print training log (progress per round)
+#   maximize = FALSE)               # We are minimizing logloss (not maximizing accuracy)
+```
+
+```{r model-test-set-eval}
+
+#MATT EDIT: COmmented out for now
+# # ---------------------------
+# # Test set evaluation
+# # ---------------------------
+# 
+# # Predict probabilities on test set
+# pred_test_prob <- predict(final_model, dtest)  
+# # -> Returns a flat vector of probabilities for all classes stacked row-wise
+# 
+# # Convert probability vector into a matrix (rows = observations, cols = classes)
+# pred_test_matrix <- matrix(pred_test_prob, 
+#                            nrow = nrow(dm_test),   # Number of test samples
+#                            ncol = num_class,       # Number of classes
+#                            byrow = TRUE)           # Fill by rows (each row = one observation)
+# 
+# # Convert probabilities to predicted classes
+# pred_test_class <- max.col(pred_test_matrix) - 1L  
+# # -> max.col finds index of highest probability (predicted class)
+# # -> Subtract 1 since XGBoost class indices start at 0
+# 
+# # Convert numeric labels back to factors for confusion matrix
+# y_test_factor <- factor(y_test, levels = 0:(num_class-1), labels = levels_y)  
+# pred_test_factor <- factor(pred_test_class, levels = 0:(num_class-1), labels = levels_y)  
+# # -> Factors needed for caret's confusionMatrix
+```
+
+```{r eval-results}
+
+#MATT EDIT: Commented out for now
+# # Compute confusion matrix and overall accuracy
+# cm_test <- confusionMatrix(pred_test_factor, y_test_factor)  
+# 
+# # Prints
+# cat("\nFinal Model Test Accuracy:", round(cm_test$overall['Accuracy'], 4), "\n")  
+# cat("\nConfusion Matrix (Test Set):\n")  
+# print(cm_test$table)  
+# # -> Shows prediction performance per class (actual vs predicted counts)
+# 
+# # Compute multi-class AUC per class (one-vs-all)
+# test_auc_list <- list()
+# for (i in 1:num_class) {
+#   binary_labels <- as.numeric(y_test == (i - 1))          
+#   # -> Convert labels into binary (one-vs-rest for class i)
+#   test_auc_list[[levels_y[i]]] <- roc(binary_labels, pred_test_matrix[, i])$auc  
+#   # -> Compute ROC-AUC for that class
+# }
+# 
+# 
+# cat("\nFinal Model Test AUC per class:\n")
+# print(round(unlist(test_auc_list), 4))  
+# # -> Print AUC values for each class
+```
+
+```{r model-feature-importance}
+
+#MATT EDIT: COmmented out for now
+# # ---------------------------
+# # Feature importance and interpretation
+# # ---------------------------
+# # Get feature importance
+# importance_matrix <- xgb.importance(model = final_model)  
+# print(head(importance_matrix, 20))  # Print top 20 most important features ranked by gain
+# 
+# # Plot feature importance
+# xgb.plot.importance(importance_matrix, top_n = 20)  
+# # -> Visualize top 20 important features
+```
+
+===================================================== Neural Net ====================================================
+
+```{r h2o-initialise}
+## ---------------------------
+## H2O Deep Learning (Neural Network) workflow
+## Built from existing objects: `train`, `test`, `predictor_cols`, `target`, `levels_y`, `num_class`
+## This script uses the data preparation already done above and trains an H2O neural net,
+## evaluates on the test set and shows how to tune hyperparameters with H2O Grid Search.
+## ---------------------------
+
+#Comment from Matt: I think we need to change this approach so that the NN code can run without the above, because I am not certain that we are keeping much from the XGboost work?
+
+target <- "OAH"
+predictor_cols <- setdiff(names(data), target) #Matt edit, replaced df with data, to be consistent as above
+
+
+# Load h2o and initialize --------------------------------------------------
+# Note: if h2o isn't installed, run: install.packages("h2o")
+library(h2o)
+# Start (or connect to) an H2O cluster. This creates an in-memory instance used for training.
+# nthreads = -1 will use all available cores.
+h2o.init(nthreads = -1)
+
+```
+
+```{r turn-to-h2o-format}
+# Convert existing R data.frames to H2O frames --------------------------------
+# We use the `train` and `test` data.frames already prepared earlier in the pipeline.
+# H2O works with its own frame objects; as.h2o() converts R data.frames into H2O frames.
+train_h2o <- as.h2o(train) #Matt Comment: now this uses my test and train made before modeling
+test_h2o  <- as.h2o(test)
+```
+
+```{r feature-modification-h2o}
+# Define features (x) and response (y) -------------------------------------
+# Using the same predictor list used for XGBoost so we reuse feature engineering already performed.
+x_vars <- predictor_cols  # character vector of predictor column names
+y_var  <- target          # the response column name ("oah")
+
+
+# Ensure response is treated as a categorical (factor) in H2O for classification
+train_h2o[[y_var]] <- as.factor(train_h2o[[y_var]])
+test_h2o[[y_var]]  <- as.factor(test_h2o[[y_var]])
+```
+
+```{r neural-net-weights}
+
+#Matt Edit: This is causing NA's when I run it. I dont necessarily think we have to weight rare classes more, but weight things equally, so for now I am setting balance classes = T in H2o.
+
+# # ---------------------------
+# # H2O neural network with class weighting + randomized grid search
+# # ---------------------------
+# # This block expects the following objects already exist:
+# #  - train (R data.frame), test (R data.frame)
+# #  - predictor_cols (character vector), target (string), levels_y (factor levels), num_class (int)
+# #  - h2o cluster started (h2o.init() called earlier)
+# # If train_h2o/test_h2o are not present, the script will create them from train/test.
+# 
+# 
+# # 1) Create a class-weight column (inverse frequency) to help under-represented classes -
+# #    weight_i = N / (K * count(class_i))  -> standard balanced weight
+# freq_table <- as.data.frame(table(train[[target]]))
+# names(freq_table) <- c("class", "count")
+# N_total <- nrow(train)
+# K <- num_class
+# 
+# # map class -> weight
+# class_counts <- setNames(freq_table$count, freq_table$class)
+# class_weights_map <- N_total / (K * class_counts)   # higher weight for rarer classes
+# 
+# # create a vector of weights for each row in train, matching the order of 'train'
+# weights_vector <- as.numeric(class_weights_map[as.character(train[[target]])])
+# 
+# # attach weights column into train H2O frame (column name: "class_weights")
+# train_h2o[,"class_weights"] <- as.h2o(weights_vector)
+# 
+# # For reproducibility, add the weights to the R 'train' too (keeps them in sync)
+# train$class_weights <- weights_vector
+```
+
+```{r neural-net-weighted-data-train-test-split}
+# Split training H2O frame into train/validation for early stopping ---------
+# We'll keep a validation frame to enable early stopping during H2O training.
+# Use an 80/20 split of the existing training data.
+#    We keep a validation frame so early stopping works.
+set.seed(123)
+
+splits <- h2o.splitFrame(train_h2o, ratios = 0.8, seed = 123)
+
+train_h2o_split <- splits[[1]]
+valid_h2o_split <- splits[[2]]
+```
+
+```{r neural-net-hyper-params}
+# Define hyperparameter search space (RandomDiscrete)
+#    Note: large search space with many models will run long; adjust max_models for runtime.
+hyper_params <- list(
+  hidden = list(
+    c(128,128),
+    c(128,64),
+    c(64,32,16),
+    c(64,32)),
+  activation =  c("RectifierWithDropout"),
+  l2 = c(0, 1e-4),
+  rate = c(0.01, 0.001),                # learning rates (smaller = slower but better generalization)
+  input_dropout_ratio = c(0.1, 0.3, 0.5))     # apply some input dropout regularization
+```
+
+```{r neural-net-search-criteria}
+# Because hidden_dropout_ratios must match hidden layer length, we will set a default dropout
+# and not include it in the hyperparameter space (keeps models from failing due to mismatched lengths)
+
+search_criteria <- list(
+  strategy = "RandomDiscrete",
+  max_models = 30,    # change to 40-60 if you want a longer run (4-5 hours) — careful with RAM
+  seed = 123,
+  max_runtime_secs = 60*60*4)  # optional: cap runtime to ~4 hours (comment out if you prefer model count)
+
+```
+
+```{r h2o-grid-search}
+# Launch grid search using class weights (weights_column) ---------------------
+#    Note: epochs increased to allow deeper training; early stopping will limit wasted epochs.
+grid_id <- "h2o_nn_balanced_grid"
+
+grid <- h2o.grid(algorithm = "deeplearning",
+                 grid_id = grid_id,
+                 x = predictor_cols,
+                 y = target,
+                 training_frame = train_h2o_split,
+                 validation_frame = valid_h2o_split,
+                 # Use the weights column computed earlier:
+                 # weights_column = "class_weights",
+                 # # Make H2O use classes weighting; setting balance_classes=FALSE because we supply weights explicitly
+                 balance_classes = T,
+                 # Training control
+                 epochs = 200,                       # allow many epochs (early stopping will truncate)
+                 stopping_metric = "logloss",
+                 stopping_tolerance = 1e-4,
+                 stopping_rounds = 10,
+                 # optimization / regularization defaults; some are overridden by hyperparams
+                 distribution = "multinomial",
+                 #activation = "RectifierWithDropout",
+                 adaptive_rate = TRUE,
+                 # small-ish default l1/l2 (grid will explore others)
+                 l1 = 0, l2 = 0,
+                 # Use relatively small mini-batch default (H2O autodetects)
+                 reproducible = T,   # reproducible=TRUE may slow things on multi-core machines
+                 seed = 123,
+                 # hyperparameter space and search criteria:
+                 hyper_params = hyper_params,
+                 search_criteria = search_criteria)
+
+# Review the grid search summary (sorted by validation logloss) ---------------
+grid_perf <- h2o.getGrid(grid_id = grid_id, sort_by = "logloss", decreasing = FALSE)
+print(grid_perf)
+
+
+```
+
+```{r get-best-model}
+# Pull the best model (lowest validation logloss) ----------------------------
+best_model_id <- grid_perf@model_ids[[1]]
+best_model <- h2o.getModel(best_model_id)
+
+cat("Best model id:", best_model_id, "\n")
+print(best_model)
+
+h2o.performance(best_model)
+#save(grid_perf,  file = "grid1")   first   round
+
+#plot of performance
+
+perf.df <- as.data.frame(grid_perf@summary_table) 
+
+
+ggplot(data = perf.df, aes(x = hidden, y = logloss, colour = as.factor(input_dropout_ratio))) + 
+  geom_point(size = 2)+
+  labs(y = "logloss")
+
+ggplot(data = perf.df, aes(x = hidden, y = logloss, colour = as.factor(l1))) + 
+  geom_point(size = 2)+
+  labs(y = "logloss")
+
+ggplot(data = perf.df, aes(x = hidden, y = logloss, colour = as.factor(l2))) + 
+  geom_point(size = 2)+
+  labs(y = "logloss")
+
+
+h2o.performance(best_model)
+
+
+ggplot(perf.df, aes(x = factor(l1), y = factor(l2), fill = logloss)) +
+  geom_tile() +
+  facet_wrap(~ hidden) +
+  scale_fill_viridis_c() +
+  theme_minimal() +
+  labs(title = "Effect of L1/L2 by Architecture")
+
+
+ggplot(perf.df, aes(x = rate, y = logloss, color = factor(input_dropout_ratio))) +
+  geom_point() +
+  facet_wrap(~ hidden) +
+  theme_minimal() +
+  labs(title = "Learning Rate vs Logloss by Architecture & Dropout")
+
+
+```
+
+```{r best-model-eval}
+
+levels_y <- levels(train$OAH)
+# Evaluate the best model on the held-out test set ---------------------------
+best_pred_h2o <- h2o.predict(best_model, test_h2o)   # returns 'predict' + per-class probabilities
+best_pred_df <- as.data.frame(best_pred_h2o)
+
+# predicted class labels (as factor)
+pred_labels_best <- factor(best_pred_df$predict)
+true_labels_best <- factor(as.vector(test_h2o[[target]]))
+
+# confusion matrix & caret metrics
+cm_best <- confusionMatrix(pred_labels_best, true_labels_best)  #adding the  levels
+print(cm_best)
+cat("Test Accuracy (best H2O NN):", round(cm_best$overall['Accuracy'],4), "\n")
+
+cm_best$overall
+mean(pred_labels_best==true_labels_best)
+```
+
+```{r per-class-auc}
+# NEEDS DEBUGGIN!
+
+
+# Compute per-class AUC (one-vs-all) using predicted probabilities ------------
+# probability columns in best_pred_df must match levels_y order; H2O uses level names as columns
+# prob_matrix <- as.matrix(best_pred_df[, levels_y])
+# 
+# auc_list <- sapply(seq_along(levels_y), function(i) {
+#   cls <- levels_y[i]
+#   bin_true <- as.numeric(true_labels_best == cls)
+#   scores <- prob_matrix[, cls]
+#   if (length(unique(bin_true)) < 2) return(NA)   # if a class not present in test
+#   auc_val <- as.numeric(roc(bin_true, scores)$auc)
+#   return(round(auc_val,4))
+# })
+# 
+# names(auc_list) <- levels_y
+# 
+# print(auc_list)
+```
+
+```{r top-three-predicted-classes}
+# NEEDS DEBUGGIN!
+
+# # Top-K (e.g. Top-3) hit ratio - useful in practice -------------------------
+# # calculate if true label is in top-3 predicted probabilities
+# topk <- function(prob_row, k = 3) {
+#   ord <- order(prob_row, decreasing = TRUE)
+#   return(names(prob_row)[ord[1:k]])
+# }
+# 
+# probs_df <- as.data.frame(prob_matrix)
+# 
+# in_topk <- mapply(function(i, true_lbl) {
+#   topk_preds <- topk(as.numeric(probs_df[i, ]), k = 3)
+#   true_lbl %in% topk_preds
+# }, i = seq_len(nrow(probs_df)), true_lbl = as.character(true_labels_best))
+# 
+# 
+# top3_hit_ratio <- mean(in_topk, na.rm = TRUE)
+# 
+# cat("Top-3 hit ratio (best model):", round(top3_hit_ratio,4), "\n")
+```
+
+```{r save-best-model}
+# Save the best model to disk  -----------------------------------
+model_path <- h2o.saveModel(best_model, path = getwd(), force = TRUE)
+cat("Saved best model to:", model_path, "\n")
+
+#------------------------------------ Notes  -----------------------------------------------------------
+# - If you encounter OOM / memory errors: reduce `max_models` or reduce hidden layer sizes
+#   or set max_runtime_secs in search_criteria to limit the run-time.
+# - Because we used per-row weights, the model actively penalizes mistakes on rare classes.
+# - If you want even stronger balancing, you can set balance_classes = TRUE as well,
+#   or apply targeted over-sampling (SMOTE) on the R side before converting to H2O.
+# - For an ensemble: keep a few of the top grid models and use h2o.stackedEnsemble() to combine them.
+```
+
+```{r best-model-metrics}
+# ---------- Robust metrics, top-k, AUCs, calibration ----------
+
+#Get predicted DF and true labels (from best_pred_df / test_h2o)
+# If we don't have best_pred_df, compute it:
+# best_pred_h2o <- h2o.predict(best_model, test_h2o)
+# best_pred_df <- as.data.frame(best_pred_h2o)
+
+pred_df <- best_pred_df   # data.frame containing "predict" and per-class probability columns named by levels_y
+true_labels <- factor(as.vector(test_h2o[[target]]), levels = levels_y)
+
+
+library(caret)
+cm_best <- confusionMatrix(table(pred_labels_best, true_labels_best))
+
+
+# Extract only probability columns (exclude "predict")
+prob_cols <- pred_df[, setdiff(colnames(pred_df), "predict")]
+
+# Confusion matrix (caret)
+pred_factor <- factor(pred_df$predict, levels = levels_y)
+cm <- confusionMatrix(pred_factor, true_labels)
+print(cm)   # this is safe
+```
+
+```{r neural-net-per-class-metrices}
+# Per-class precision, recall, F1, macro-F1 (safe numeric conversions)
+byClass <- as.data.frame(cm$byClass)
+
+# caret's byClass could have columns like 'Sensitivity','Specificity','Pos Pred Value' etc.
+# Ensure numeric columns are numeric:
+num_cols <- sapply(byClass, is.numeric)
+if (!all(num_cols)) {
+  # coerce columns that look like numbers but are factors/characters
+  for (cname in names(byClass)) {
+    byClass[[cname]] <- suppressWarnings(as.numeric(as.character(byClass[[cname]])))
+  }
+}
+
+precision <- byClass$`Pos Pred Value`       # precision
+recall    <- byClass$Sensitivity            # recall
+f1 <- 2 * (precision * recall) / (precision + recall)
+f1[is.na(f1)] <- 0
+metrics_tbl <- data.frame(
+  class = rownames(byClass),
+  precision = round(precision,4),
+  recall = round(recall,4),
+  F1 = round(f1,4))
+
+print(metrics_tbl)
+cat("Macro F1:", round(mean(f1, na.rm = TRUE),4), "\n")
+```
+
+```{r top-hits}
+# Top-K hit ratios (Top-1, Top-2, Top-3)
+topk_hit <- function(probs_df, true_labels, k=3) {
+  n <- nrow(probs_df)
+  hits <- logical(n)
+  for (i in seq_len(n)) {
+    row_probs <- as.numeric(probs_df[i, ])
+    names(row_probs) <- colnames(probs_df)
+    topk_names <- names(sort(row_probs, decreasing = TRUE))[1:k]
+    hits[i] <- as.character(true_labels[i]) %in% topk_names
+  }
+  mean(hits, na.rm = TRUE)
+}
+
+cat("Top-1 hit:", round(topk_hit(prob_cols, true_labels, 1),4), "\n")
+cat("Top-2 hit:", round(topk_hit(prob_cols, true_labels, 2),4), "\n")
+cat("Top-3 hit:", round(topk_hit(prob_cols, true_labels, 3),4), "\n")
+```
+
+```{r calibration-plot-perclass}
+# Calibration plot per class (reliability diagram) - example for one class
+calibration_plot_one <- function(class_label, prob_df, true_labels, n_bins = 10) {
+  scores <- prob_df[[class_label]]
+  true_bin <- as.numeric(true_labels == class_label)
+  df_cal <- data.frame(scores = scores, true = true_bin)
+  df_cal$bin <- cut(df_cal$scores, breaks = seq(0,1,length.out = n_bins+1), include.lowest = TRUE)
+  agg <- aggregate(cbind(mean_prob = scores, obs_rate = true) ~ bin, data = df_cal, FUN = mean)
+  agg$bin_mid <- (seq(0,1,length.out = n_bins+1)[-1] + seq(0,1,length.out = n_bins+1)[- (n_bins+1)])/2
+  ggplot(agg, aes(x = mean_prob, y = obs_rate)) +
+    geom_point() + geom_line() + geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "gray") +
+    labs(title = paste("Calibration for", class_label), x = "Mean predicted probability", y = "Observed frequency")
+}
+
+# Example: plot calibration for 'Moderate' (change to any class)
+if ("Moderate" %in% colnames(prob_cols)) {
+  print(calibration_plot_one("Moderate", prob_cols, true_labels, n_bins = 10))
+}
+```
+
+```{r neural-net-save-metrics}
+# Save metrics to file 
+write.csv(metrics_tbl, "h2o_nn_per_class_metrics.csv", row.names = FALSE)
+```
+
+```{r}
+h2o.varimp(best_model)
+
+h2o.varimp_plot(best_model)
+```
 
 ## Discussion
