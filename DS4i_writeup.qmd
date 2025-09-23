@@ -474,7 +474,7 @@ if (length(numeric.indexes) > 0){
 
 }
 
-# Numeric cols should ne ~N(0,1)
+
 round(apply(X.train[ , , numeric.indexes, drop = FALSE], 3, mean), 3)
 round(apply(X.train[ , , numeric.indexes, drop = FALSE], 3, sd),   3)
 
@@ -517,9 +517,9 @@ X.train <- W_[[3]]
 X.test <- W_[[4]]
 cl_weights <- W_[[5]]
 F_ <- W_[[6]]
-# ---------------- Grid search for your existing architecture ----------------
+# ---------------- Grid search for existing architecture ----------------
 
-# Repro seeds (same as you set)
+
 set.seed(1)
 tf$keras$utils$set_random_seed(123L)
 
@@ -551,11 +551,11 @@ for (i in seq_len(nrow(grid))) {
   # Clear TF/Keras state between runs to avoid graph/memory accumulation
   tensorflow::tf$keras$backend$clear_session()
 
-  # Re-seed before each run to keep trials comparable
+  
   set.seed(1)
   tf$keras$utils$set_random_seed(123L)
 
-  # ----- Build your SAME model, with grid parameters plugged in -----
+ 
   input <- layer_input(shape = c(dim(X.train)[2], F_)) # (L, F)
 
   output <- input %>%
@@ -578,7 +578,7 @@ for (i in seq_len(nrow(grid))) {
     metrics = "accuracy"
   )
 
-  # ----- Train (identical settings you had) -----
+  # ----- Train -----
   history <- model %>% fit(
     X.train, y.train,
     epochs = 60,
@@ -589,10 +589,10 @@ for (i in seq_len(nrow(grid))) {
     # = cl_weights
   )
 
-  # Collect validation accuracy from the last epoch
+  # collect validation accuracy from the last epoch
   val_acc <- tail(history$metrics$val_accuracy, 1)
   if (length(val_acc) == 0) {
-    # Fallback name in case of different metric key
+   
     val_acc <- tail(history$metrics$val_acc, 1)
   }
 
@@ -607,7 +607,7 @@ for (i in seq_len(nrow(grid))) {
     as.numeric(test_metrics[[2]])
   }
 
-  # Store results
+  # store results
   results[i, ] <- list(
     grid$filters1[i], grid$filters2[i],
     grid$kernel_sz[i], grid$drop1[i], grid$drop2[i],
@@ -616,7 +616,7 @@ for (i in seq_len(nrow(grid))) {
   histories[[i]] <- history
 }
 
-# Sort by best validation accuracy 
+# sort by best validation accuracy 
 results <- results[order(-results$val_accuracy), ]
 
 print(results)
@@ -713,7 +713,7 @@ rm(res_window_120,  res_window_3, res_window_30)
 # X.test <- W_[[4]]
 # cl_weights <- W_[[5]]
 # F_ <- W_[[6]]
-# # ---------------- Grid search for your existing architecture ----------------
+# 
 # 
 # # Repro seeds 
 # set.seed(1)
@@ -747,11 +747,11 @@ rm(res_window_120,  res_window_3, res_window_30)
 #   # Clear TF/Keras state between runs to avoid graph/memory accumulation
 #   tensorflow::tf$keras$backend$clear_session()
 # 
-#   # Re-seed before each run to keep trials comparable
+#  
 #   set.seed(1)
 #   tf$keras$utils$set_random_seed(123L)
 # 
-#   # ----- Build your SAME model, with grid parameters plugged in -----
+#  
 #   input <- layer_input(shape = c(dim(X.train)[2], F_)) # (L, F)
 # 
 #   output <- input %>%
@@ -774,7 +774,7 @@ rm(res_window_120,  res_window_3, res_window_30)
 #     metrics = "accuracy"
 #   )
 # 
-#   # ----- Train (identical settings you had) -----
+#   # ----- Train -----
 #   history <- model %>% fit(
 #     X.train, y.train,
 #     epochs = 60,
@@ -795,7 +795,7 @@ rm(res_window_120,  res_window_3, res_window_30)
 #   # Evaluate on test set 
 #   test_metrics <- model %>% evaluate(X.test, y.test, verbose = 0)
 # 
-#   # test_metrics is usually a named numeric vector: c(loss=..., accuracy=...)
+#   # test_metrics is usually a named numeric vector: 
 #   test_loss <- as.numeric(test_metrics[[1]])
 #   test_acc  <- if (!is.null(names(test_metrics)) && "accuracy" %in% names(test_metrics)) {
 #     as.numeric(test_metrics[["accuracy"]])
@@ -922,13 +922,13 @@ X.train <- W_[[3]]
 X.test <- W_[[4]]
 cl_weights <- W_[[5]]
 F_ <- W_[[6]]
-# ---------------- Grid search for your existing architecture ----------------
+# ---------------- Grid search architecture ----------------
 
-# Repro seeds (same as you set)
+# 
 set.seed(1)
 tf$keras$utils$set_random_seed(123L)
 
-# Define the grid (adjust values if you want a bigger/smaller search)
+# grid
 grid <- expand.grid(
   filters1   = c( 32, 64),
   filters2   = c( 32, 64),
@@ -945,7 +945,7 @@ results <- data.frame(
   stringsAsFactors = FALSE
 )
 
-histories <- vector("list", nrow(grid))  # optional: keep training histories
+histories <- vector("list", nrow(grid))  #  keep training histories
 
 for (i in seq_len(nrow(grid))) {
   cat(sprintf("\n[%d/%d] f1=%d, f2=%d, k=%d, d1=%.2f, d2=%.2f\n",
@@ -956,7 +956,7 @@ for (i in seq_len(nrow(grid))) {
   # Clear TF/Keras state between runs to avoid graph/memory accumulation
   tensorflow::tf$keras$backend$clear_session()
 
-  # Re-seed before each run to keep trials comparable
+  # r-seed before each run to keep trials comparable
   set.seed(1)
   tf$keras$utils$set_random_seed(123L)
 
@@ -978,7 +978,7 @@ for (i in seq_len(nrow(grid))) {
     metrics = "accuracy"
   )
 
-  # ----- Train (identical settings you had) -----
+  # ----- Train -----
   history <- model %>% fit(
     X.train, y.train,
     epochs = 60,
@@ -992,14 +992,14 @@ for (i in seq_len(nrow(grid))) {
   # Collect validation accuracy from the last epoch
   val_acc <- tail(history$metrics$val_accuracy, 1)
   if (length(val_acc) == 0) {
-    # Fallback name in case of different metric key
+    # Fallback name 
     val_acc <- tail(history$metrics$val_acc, 1)
   }
 
   # Evaluate on test set 
   test_metrics <- model %>% evaluate(X.test, y.test, verbose = 0)
 
-  # test_metrics is usually a named numeric vector: c(loss=..., accuracy=...)
+  # test_metrics is usually a named numeric 
   test_loss <- as.numeric(test_metrics[[1]])
   test_acc  <- if (!is.null(names(test_metrics)) && "accuracy" %in% names(test_metrics)) {
     as.numeric(test_metrics[["accuracy"]])
@@ -1016,7 +1016,7 @@ for (i in seq_len(nrow(grid))) {
   histories[[i]] <- history
 }
 
-# Sort by best validation accuracy 
+
 results <- results[order(-results$val_accuracy), ]
 
 print(results)
