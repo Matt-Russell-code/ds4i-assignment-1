@@ -60,6 +60,46 @@ knitr::include_graphics("av.jpg")
 
 ## Literature Review
 
+Snow avalanches are a recognised hazard in snow-prone mountain regions worldwide. Unlike in many alpine regions, avalanches in Scotland rarely impact large settlements and infrastructure, however, pose significant risk to recreational users in the Scottish Highlands (Diggins, 2009; Ward, 1980). Winter activities, such as climbing, walking, and skiing are increasingly popular, leading to greater human exposure to avalanche-prone terrain and resulting in numerous injuries and occasional fatalities each year (Scottish Avalanche Information Service \[SAIS\], 2024). This has prompted several studies to examine Scottish snowpack conditions and avalanche forecasting strategies, with the earliest studies conducted between 1970 and 1980 (Langmuir, 1970; Spink, 1970; Beattie, 1976; Ward, 1980; Ward & Beattie, 1985). However, these early studies were largely descriptive, relying on snow-pit measurements and expert judgements to identify snow properties and weather conditions correlated with avalanche risk. Building on this foundation, Ward (1984) applied one of the first predictive forecasting models for avalanches in Scotland.
+
+Numerous studies emphasise the inherent complexity of avalanche modelling where predictions are based on multiple interacting factors (Choubin et al., 2019; Herwijen et al., 2016; Hendrick et al., 2023; Pozdnoukhov et al., 2008; Singh & Ganju, 2008). This complexity is only heightened in regions with highly variable weather patterns (Sharma & Ganju, 1999). In response, early statistical methods such as nearest neighbours became a popular technique to support (not replace) forecasters in predicting avalanche outcomes through relating current weather conditions to past avalanche events (Blagovechshenskiy et al., 2023; Kala et al., 2025; Pozdnoukhov et al., 2018; Singh & Ganju, 2008). However, this approach is susceptible to overfitting and struggles with complex and high-dimensional data (Kala et al., 2025; Pozdnoukhov et al., 2018; Singh & Ganju, 2018). Using a dataset from Lochaber, Scotland, Pozdnoukhov et al. (2008) reported that support vector machines (SVMs) showed a broadly similar performance to a baseline nearest neighbours method, however, had the added advantage of handling high dimensionality datasets and produced more descriptive forecasts. SVMs have been explored and shown success in aiding avalanche risk forecasting in other regions including Iran, India, Switzerland, and Tibet (Choubin et al., 2019; Rahmati et al., 2019; Schirmer et al., 2009; Tiwari et al., 2021; Wen et al., 2022). 
+
+Over recent years, more complex machine learning (ML) algorithms such as regression trees, random forests, and neural networks have demonstrated strong predictive performance in avalanche forecasting (Blagovechshenskiy et al., 2023; Choubin et al., 2019; Gauthier et al., 2025; Hendrick et al., 2023; Rahmati et al., 2019; Singh & Ganju, 2018; Tiwari et al., 2021; Wen et al., 2022). Avalanche datasets are often high-dimensional, and using human forecaster judgement to select which features to include can be highly subjective and variable (Helbig et al., 2015; Pozdnoukhov et al., 2008). Hybrid approaches, which combine ML with expert-guided feature selection, have shown practical value (Gauthier et al., 2025). However, fully data-driven forecasting methods, particularly neural networks, offer important advantages.
+
+Simulating the work of a human brain, neural networks are deep learning algorithms consisting of interconnected nodes/neurons that can model complex and nonlinear relationships between inputs and outputs (Blagovechshenskiy et al., 2023; Sharma et al., 2023; Tu, 1996). Their ability to process all input variables simultaneously allows them to implicitly learn interactions and patterns in the data without prior knowledge on which variables are most important (Blagovechshenskiy et al., 2023; Fromm & Schonberger, 2022; Sharma et al., 2023). Studies in avalanche forecasting from regions such as Switzerland, Kazakhstan, and  India have demonstrated that neural networks not only achieve strong predictive performance, but can also assess the relative importance of each variable to avalanche risk (Fromm & Schonberger; Sharma et al., 2023; Singh & Ganju, 2008). This ability makes them particularly well suited for high-dimensional datasets, such as those encountered in avalanche forecasting, as well as in contexts where prior domain knowledge is limited or when the most relevant predictors are unknown.
+
+Despite advances in data-driven avalanche forecasting worldwide, research specific to Scotland remains limited. This scarcity lies in three domains: 
+
+\(1\) The small number of published forecasting studies (only 9 relevant peer-reviewed papers exist on Scopus, with the most recent study conducted in 2011 (keywords: ( "avalanche forecasting" OR "avalanche prediction" ) AND Scotland)
+
+\(2\) The restricted range of statistical approaches explored (only KNN and SVM) (Joachim et al., 2004; Pozdnoukhov et al., 2008; Pozdnoukhov et al., 2011; Purves et al., 2003)
+
+\(3\) The focus on only a few regions in Scotland (primarily the Cairngorms and Lochaber regions)
+
+This limited research interest likely stems from the highly localised nature of avalanche risk in Scotland, which generally occurs in remote areas and impacts only a small subset of individuals (Diggins, 2009; SAIS, 2024). Nevertheless, improved avalanche forecasting is argued to be increasingly important under changing climate conditions and global warming, which may alter snowpack properties and avalanche risk and frequency (Gauthier et al., 2025; Werritty & Sugden, 2013). A detailed discussion of climate change, however, is beyond the scope of this paper. As such, the present study aims to extend forecasting research in Scotland both spatially and methodologically by applying a neural network (or two or three?????) across the six distinct regions of Creah Meagaidh, Glencoe, Lochaber, Northern Cairngorms, Southern Cairngorms, and Torridon.
+
+\<insert paragraph explaining modelling approaches of prev papers + this project’s modelling approaches. I.e. the neural net architecture\>
+
+Hypothesis???? We can workshop together
+
+## Context and Dataset
+
+Scotland experiences a mild, wet, and temperate maritime climate due to the strong influence of the North Atlantic Ocean and persistent south-westerly winds (Pozdnoukhov et al., 2008; Scottish Government, 2011). These conditions result in rapid temperature changes, frequent heavy precipitation (falling as either snow or rain in the winter), and strong winds. With the highest peak, Ben Nevis in Lochaber (1345 m), mountains are low compared to alpine ranges (\~ 4000 m), resulting in a snowpack that is typically shallower, wetter, and more variable in comparison (Britannica, 2025; Pozdnoukhov et al., 2008; WSL Institute for Snow and Avalanche Research SLF, 2016). Aspects such as rapid freeze-thaw cycles, rain-on-snow, and wind redistribution further destabilise snow structure and stability, creating avalanche risks that can arise and disappear within a short time (Diggins, 2009; Pozdnoukhov et al., 2008; Purves et al., 2003; Scottish Government, 2011). Snowpack conditions also differ regionally; while the West is characterised as strongly maritime, with mild and wet winters, the North and East experience colder and drier conditions (MetOffice, 2010). As such, Scotland’s climate is highly variable both spatially and temporally, adding to the complexity of predicting avalanche risk.
+
+This paper uses a 15-year archive of avalanche forecasts from Scotland across the six areas of Creah Meagaidh, Glencoe, Lochaber, Northern Cairngorms, Southern Cairngorms, and Torridon, produced by the Scottish Avalanche Information Service (see Figure ? below). 
+
+```{r map}
+
+```
+
+Data cover the Scottish winters (November to April) from the December 2009 to March 2025. Predictor variables are categorised into three main groups, including (1) position and topography, (2) weather, and (3) snowpack test, all collected at the forecast location. Each observation also includes the date and the forecast area. For a full overview of the predictors, see Table ?.
+
+\*\*table of predictors
+
+```{r pred_tab}
+
+```
+
 ## Exploratory Data Analysis
 
 ```{r}
