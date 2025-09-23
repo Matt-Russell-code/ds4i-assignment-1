@@ -1041,43 +1041,49 @@ return(results)
 
 #Window = 3 
 
-rnn_window_3 <- keras_search(window = 3)
-save(rnn_window_3, file =  "res_window_3")
+#rnn_window_3 <- keras_search(window = 3)
+#save(rnn_window_3, file =  "rnn_window_3")
 
 #Window  = 7
-rnn_window_7 <- keras_search(window = 7)
-save(rnn_window_7, file =  "res_window_7")
+#rnn_window_7 <- keras_search(window = 7)
+#save(rnn_window_7, file =  "rnn_window_7")
 
 #Window = 30
-rnn_window_30 <- keras_search(window = 30)
-save(rnn_window_30, file =  "res_window_30")
+#rnn_window_30 <- keras_search(window = 30)
+#save(rnn_window_30, file =  "rnn_window_30")
  
 
 #Window = 120
-rnn_window_120 <- keras_search(window = 120)
-save(rnn_window_120, file =  "res_window_120")
+#rnn_window_120 <- keras_search(window = 120)
+#save(rnn_window_120, file =  "rnn_window_120")
 
 load("rnn_window_3")
 load( "rnn_window_7")
 load("rnn_window_30")
 load("rnn_window_120")
 
-rnn_window_3 <- res_window_3 %>% 
+rnn_window_3 <- rnn_window_3 %>% 
   mutate(model_no = row_number(),
          window  = 3)
 
-rnn_window_7 <- res_window_7 %>% 
+rnn_window_7 <- rnn_window_7 %>% 
   mutate(model_no = row_number(),
          window  = 7)
 
-rnn_window_30 <- res_window_30 %>% 
+rnn_window_30 <- rnn_window_30 %>% 
   mutate(model_no = row_number(),
          window  = 30)
 
-rnn_window_120 <- res_window_120%>% 
+rnn_window_120 <- rnn_window_120%>% 
   mutate(model_no = row_number(),
          window  = 120)
 
+
+results_rnn_search <- rbind(rnn_window_3, rnn_window_30, rnn_window_7,  rnn_window_120)
+ggplot(data = results_cnn_search, aes( x  = model_no, y  = val_accuracy, colour = as.factor(window)))+
+  geom_point()+
+  labs(x = "Model Number (arranged by  validation accuracy)")
+max(results_rnn_search$test_accuracy)
 
 ```
 
