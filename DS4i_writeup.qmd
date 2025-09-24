@@ -1692,6 +1692,7 @@ grid <- h2o.grid(algorithm = "deeplearning",
 grid_perf <- h2o.getGrid(grid_id = grid_id, sort_by = "logloss", decreasing = FALSE)
 print(grid_perf)
 
+save(grid_perf, file = "h2o_grid_perf")
 
 ```
 
