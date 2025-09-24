@@ -635,26 +635,27 @@ return(results)
 ```{r keras_search}
 #Window = 3 
 
-res_window_3 <- keras_search(window = 3)
-save(res_window_3, file =  "res_window_3")
-
-#Window  = 7
-res_window_7 <- keras_search(window = 7)
-save(res_window_7, file =  "res_window_7")
-
-#Window = 30
-res_window_30 <- keras_search(window = 30)
-save(res_window_30, file =  "res_window_30")
-  
-
-#Window = 120
-res_window_120 <- keras_search(window = 120)
-save(res_window_120, file =  "res_window_120")
+# res_window_3 <- keras_search(window = 3)
+# save(res_window_3, file =  "res_window_3")
+# 
+# #Window  = 7
+# res_window_7 <- keras_search(window = 7)
+# save(res_window_7, file =  "res_window_7")
+# 
+# #Window = 30
+# res_window_30 <- keras_search(window = 30)
+# save(res_window_30, file =  "res_window_30")
+#   
+# 
+# #Window = 120
+# res_window_120 <- keras_search(window = 120)
+# save(res_window_120, file =  "res_window_120")
 
 load("res_window_3")
 load("res_window_7")
 load("res_window_30")
 load("res_window_120")
+
 
 res_window_3 <- res_window_3 %>% 
   mutate(model_no = row_number(),
@@ -1153,7 +1154,7 @@ max(results_rnn_search$test_accuracy)
   
   #save(rnn_final_search, file = "rnn_final_search")
   
-  print(results)
+  load(rnn_final_search)
 
 ```
 
