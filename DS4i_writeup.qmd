@@ -644,7 +644,7 @@ return(results)
 # 
 # #Window = 30
 # res_window_30 <- keras_search(window = 30)
-# save(res_window_30, file =  "res_window_30")
+
 #   
 # 
 # #Window = 120
@@ -690,19 +690,19 @@ ggplot(data = results_cnn_search, aes( x  = model_no, y  = val_accuracy, colour 
 
 
 ```{r}
-#we will go with a window of roughly  7  days
-rm(res_window_120,  res_window_3, res_window_30)
-
-
-##I  am going to do one more expanded search, just with a window  of 7 days
-#
+# #we will go with a window of roughly  7  days
+# rm(res_window_120,  res_window_3, res_window_30)
+# 
+# 
+# ##I  am going to do one more expanded search, just with a window  of 7 days
+# #
 # res_window_7[which.max(res_window_7$val_accuracy),]
 # 
 # #serach
 # 
 # 
 # 
-# W_ <- pre_data(w = 3, h = 1)
+# W_ <- pre_data(w = 7, h = 1)
 # 
 # y.test <- W_[[1]]
 # y.train <- W_[[2]]
@@ -712,7 +712,7 @@ rm(res_window_120,  res_window_3, res_window_30)
 # F_ <- W_[[6]]
 # 
 # 
-# # Repro seeds 
+# # Repro seeds
 # set.seed(1)
 # tf$keras$utils$set_random_seed(123L)
 # 
@@ -744,11 +744,11 @@ rm(res_window_120,  res_window_3, res_window_30)
 #   # Clear TF/Keras state between runs to avoid graph/memory accumulation
 #   tensorflow::tf$keras$backend$clear_session()
 # 
-#  
+# 
 #   set.seed(1)
 #   tf$keras$utils$set_random_seed(123L)
 # 
-#  
+# 
 #   input <- layer_input(shape = c(dim(X.train)[2], F_)) # (L, F)
 # 
 #   output <- input %>%
@@ -789,10 +789,10 @@ rm(res_window_120,  res_window_3, res_window_30)
 #     val_acc <- tail(history$metrics$val_acc, 1)
 #   }
 # 
-#   # Evaluate on test set 
+#   # Evaluate on test set
 #   test_metrics <- model %>% evaluate(X.test, y.test, verbose = 0)
 # 
-#   # test_metrics is usually a named numeric vector: 
+#   # test_metrics is usually a named numeric vector:
 #   test_loss <- as.numeric(test_metrics[[1]])
 #   test_acc  <- if (!is.null(names(test_metrics)) && "accuracy" %in% names(test_metrics)) {
 #     as.numeric(test_metrics[["accuracy"]])
@@ -809,13 +809,13 @@ rm(res_window_120,  res_window_3, res_window_30)
 #   histories[[i]] <- history
 # }
 # 
-# # Sort by best validation accuracy 
+# # Sort by best validation accuracy
 # results <- results[order(-results$val_accuracy), ]
 # 
 # print(results)
 # 
 # final_cnn_search  <-  results
-#save(final_cnn_search, file =  "final_cnn_serach")
+# save(final_cnn_search, file =  "final_cnn_serach")
 
 
 load("final_cnn_serach")
@@ -830,6 +830,8 @@ gc()
 
 
 ```{r}
+
+
 
 
 res <- final_cnn_search %>%
@@ -863,16 +865,19 @@ ggplot(res %>% slice(1:top_n),
 ```{r}
 # #best model  had 16 filters with 2 layers,  and kernel size 15,  0.7 dropout between layers
 # 
-# #Fit  final model on full  training data
-# 
+#Fit  final model on full  training data
+
+
+
+
 #   input <- layer_input(shape = c(dim(X.train)[2], F_)) # (L, F)
 # 
 #   output <- input %>%
-#     layer_conv_1d(filters = 16, kernel_size = 15, padding = "same", activation = "relu") %>%
+#     layer_conv_1d(filters = 32, kernel_size = 15, padding = "same", activation = "relu") %>%
 #     layer_dropout(rate = 0.7) %>%
 #     layer_conv_1d(filters = 16, kernel_size = 15, padding = "same", activation = "relu") %>%
 #     layer_global_average_pooling_1d() %>%
-#     layer_dropout(rate = 0.7) %>%
+#     layer_dropout(rate = 0.5) %>%
 #     layer_dense(units = 6, activation = "softmax")
 # 
 #   model <- keras_model(inputs = input, outputs = output)
@@ -893,15 +898,27 @@ ggplot(res %>% slice(1:top_n),
 #     # = cl_weights
 #   )
 # 
-# final_cnn_model  <- model    
-# save(final_cnn_model,  file = "final_cnn_model")
-load("final_cnn_model")
+# final_cnn_model  <- model
+# 
+# 
+# 
+# 
+# 
+# final_cnn_model
+# 
+# test_metrics <- model %>% evaluate(X.test, y.test, verbose = 0)
+# 
+# test_metrics$accuracy
+# 
+# 
+# 
+# pred_cnn  <- predict(final_cnn_model, X.test)
+# 
+# pred_cnn <- max.col(pred_cnn)
+# 
+# save(pred_cnn, file   = "pred_cnn")
 
-test_metrics <- model %>% evaluate(X.test, y.test, verbose = 0)
-
-test_metrics$accuracy
-
-
+load("pred_cnn")
 
 ```
 
@@ -909,103 +926,103 @@ test_metrics$accuracy
 
 ```{r  RNN}
 #sam as above but for RNN model
-keras_search_rnn <- function(window){
-
-  W_ <- pre_data(w = window, h = 1)
-
-  y.test <- W_[[1]]
-  y.train <- W_[[2]]
-  X.train <- W_[[3]]
-  X.test <- W_[[4]]
-  cl_weights <- W_[[5]]
-  F_ <- W_[[6]]
-
-  set.seed(1)
-  tf$keras$utils$set_random_seed(123L)
-
-  
-  grid <- expand.grid(
-    units1 = c(32, 64),   # LSTM units in layer 1
-    units2 = c(32, 64),   # LSTM units in layer 2
-    drop1  = c(0.3, 0.5),
-    drop2  = c(0.3, 0.5),
-    stringsAsFactors = FALSE
-  )
-
-  results <- data.frame(
-    units1 = integer(), units2 = integer(),
-    drop1 = double(), drop2 = double(),
-    val_accuracy = double(),
-    test_loss = double(), test_accuracy = double(),
-    stringsAsFactors = FALSE
-  )
-
-  histories <- vector("list", nrow(grid))
-
-  for (i in seq_len(nrow(grid))) {
-    cat(sprintf("\n[%d/%d] u1=%d, u2=%d, d1=%.2f, d2=%.2f\n",
-                i, nrow(grid),
-                grid$units1[i], grid$units2[i],
-                grid$drop1[i], grid$drop2[i]))
-
-    tensorflow::tf$keras$backend$clear_session()
-    set.seed(1)
-    tf$keras$utils$set_random_seed(123L)
-
-    input <- layer_input(shape = c(dim(X.train)[2], F_)) # (timesteps, features)
-
-    output <- input %>%
-      layer_lstm(units = grid$units1[i], return_sequences = TRUE) %>%
-      layer_dropout(rate = grid$drop1[i]) %>%
-      layer_lstm(units = grid$units2[i], return_sequences = FALSE) %>%
-      layer_dropout(rate = grid$drop2[i]) %>%
-      layer_dense(units = 6, activation = "softmax")
-
-    model <- keras_model(inputs = input, outputs = output)
-
-    model %>% compile(
-      optimizer = "adam",
-      loss = "categorical_crossentropy",
-      metrics = "accuracy"
-    )
-
-    history <- model %>% fit(
-      X.train, y.train,
-      epochs = 60,
-      batch_size = 64,
-      verbose = 0,
-      validation_split = 0.2,
-      shuffle = FALSE
-    )
-
-    # val acc from last epoch
-    val_acc <- tail(history$metrics$val_accuracy, 1)
-    if (length(val_acc) == 0) val_acc <- tail(history$metrics$val_acc, 1)
-
-    test_metrics <- model %>% evaluate(X.test, y.test, verbose = 0)
-    test_loss <- as.numeric(test_metrics[[1]])
-    test_acc  <- if (!is.null(names(test_metrics)) && "accuracy" %in% names(test_metrics)) {
-      as.numeric(test_metrics[["accuracy"]])
-    } else {
-      as.numeric(test_metrics[[2]])
-    }
-
-    results[i, ] <- list(
-      grid$units1[i], grid$units2[i],
-      grid$drop1[i], grid$drop2[i],
-      as.numeric(val_acc), test_loss, test_acc
-    )
-    histories[[i]] <- history
-  }
-
-  results <- results[order(-results$val_accuracy), ]
-  print(results)
-
-  rm(W_) 
-  gc()
-  return(results)
-}
-
+# keras_search_rnn <- function(window){
+# 
+#   W_ <- pre_data(w = window, h = 1)
+# 
+#   y.test <- W_[[1]]
+#   y.train <- W_[[2]]
+#   X.train <- W_[[3]]
+#   X.test <- W_[[4]]
+#   cl_weights <- W_[[5]]
+#   F_ <- W_[[6]]
+# 
+#   set.seed(1)
+#   tf$keras$utils$set_random_seed(123L)
+# 
+#   
+#   grid <- expand.grid(
+#     units1 = c(32, 64),   # LSTM units in layer 1
+#     units2 = c(32, 64),   # LSTM units in layer 2
+#     drop1  = c(0.3, 0.5),
+#     drop2  = c(0.3, 0.5),
+#     stringsAsFactors = FALSE
+#   )
+# 
+#   results <- data.frame(
+#     units1 = integer(), units2 = integer(),
+#     drop1 = double(), drop2 = double(),
+#     val_accuracy = double(),
+#     test_loss = double(), test_accuracy = double(),
+#     stringsAsFactors = FALSE
+#   )
+# 
+#   histories <- vector("list", nrow(grid))
+# 
+#   for (i in seq_len(nrow(grid))) {
+#     cat(sprintf("\n[%d/%d] u1=%d, u2=%d, d1=%.2f, d2=%.2f\n",
+#                 i, nrow(grid),
+#                 grid$units1[i], grid$units2[i],
+#                 grid$drop1[i], grid$drop2[i]))
+# 
+#     tensorflow::tf$keras$backend$clear_session()
+#     set.seed(1)
+#     tf$keras$utils$set_random_seed(123L)
+# 
+#     input <- layer_input(shape = c(dim(X.train)[2], F_)) # (timesteps, features)
+# 
+#     output <- input %>%
+#       layer_lstm(units = grid$units1[i], return_sequences = TRUE) %>%
+#       layer_dropout(rate = grid$drop1[i]) %>%
+#       layer_lstm(units = grid$units2[i], return_sequences = FALSE) %>%
+#       layer_dropout(rate = grid$drop2[i]) %>%
+#       layer_dense(units = 6, activation = "softmax")
+# 
+#     model <- keras_model(inputs = input, outputs = output)
+# 
+#     model %>% compile(
+#       optimizer = "adam",
+#       loss = "categorical_crossentropy",
+#       metrics = "accuracy"
+#     )
+# 
+#     history <- model %>% fit(
+#       X.train, y.train,
+#       epochs = 60,
+#       batch_size = 64,
+#       verbose = 0,
+#       validation_split = 0.2,
+#       shuffle = FALSE
+#     )
+# 
+#     # val acc from last epoch
+#     val_acc <- tail(history$metrics$val_accuracy, 1)
+#     if (length(val_acc) == 0) val_acc <- tail(history$metrics$val_acc, 1)
+# 
+#     test_metrics <- model %>% evaluate(X.test, y.test, verbose = 0)
+#     test_loss <- as.numeric(test_metrics[[1]])
+#     test_acc  <- if (!is.null(names(test_metrics)) && "accuracy" %in% names(test_metrics)) {
+#       as.numeric(test_metrics[["accuracy"]])
+#     } else {
+#       as.numeric(test_metrics[[2]])
+#     }
+# 
+#     results[i, ] <- list(
+#       grid$units1[i], grid$units2[i],
+#       grid$drop1[i], grid$drop2[i],
+#       as.numeric(val_acc), test_loss, test_acc
+#     )
+#     histories[[i]] <- history
+#   }
+# 
+#   results <- results[order(-results$val_accuracy), ]
+#   print(results)
+# 
+#   rm(W_) 
+#   gc()
+#   return(results)
+# }
+# 
 
 
 ```
@@ -1051,7 +1068,7 @@ rnn_window_120 <- rnn_window_120%>%
 
 
 results_rnn_search <- rbind(rnn_window_3, rnn_window_30, rnn_window_7,  rnn_window_120)
-ggplot(data = results_cnn_search, aes( x  = model_no, y  = val_accuracy, colour = as.factor(window)))+
+ggplot(data = results_rnn_search, aes( x  = model_no, y  = val_accuracy, colour = as.factor(window)))+
   geom_point()+
   labs(x = "Model Number (arranged by  validation accuracy)")
 max(results_rnn_search$test_accuracy)
@@ -1061,101 +1078,146 @@ max(results_rnn_search$test_accuracy)
 
 ```{r}
 
-  # W_ <- pre_data(w = 7, h = 1) #using 7 days again
-  # 
-  # y.test <- W_[[1]]
-  # y.train <- W_[[2]]
-  # X.train <- W_[[3]]
-  # X.test <- W_[[4]]
-  # cl_weights <- W_[[5]]
-  # F_ <- W_[[6]]
-  # 
-  # set.seed(1)
-  # tf$keras$utils$set_random_seed(123L)
-  # 
-  # 
-  # grid <- expand.grid(
-  #   units1 = c(16,32, 64),   # LSTM units in layer 1
-  #   units2 = c(16, 32, 64),   # LSTM units in layer 2
-  #   drop1  = c(0.3, 0.5, 0.7),
-  #   drop2  = c(0.3, 0.5, 0.7),
-  #   stringsAsFactors = FALSE
-  # )
-  # 
-  # results <- data.frame(
-  #   units1 = integer(), units2 = integer(),
-  #   drop1 = double(), drop2 = double(),
-  #   val_accuracy = double(),
-  #   test_loss = double(), test_accuracy = double(),
-  #   stringsAsFactors = FALSE
-  # )
-  # 
-  # histories <- vector("list", nrow(grid))
-  # 
-  # for (i in seq_len(nrow(grid))) {
-  #   cat(sprintf("\n[%d/%d] u1=%d, u2=%d, d1=%.2f, d2=%.2f\n",
-  #               i, nrow(grid),
-  #               grid$units1[i], grid$units2[i],
-  #               grid$drop1[i], grid$drop2[i]))
-  # 
-  #   tensorflow::tf$keras$backend$clear_session()
-  #   set.seed(1)
-  #   tf$keras$utils$set_random_seed(123L)
-  # 
-  #   input <- layer_input(shape = c(dim(X.train)[2], F_)) # (timesteps, features)
-  # 
-  #   output <- input %>%
-  #     layer_lstm(units = grid$units1[i], return_sequences = TRUE) %>%
-  #     layer_dropout(rate = grid$drop1[i]) %>%
-  #     layer_lstm(units = grid$units2[i], return_sequences = FALSE) %>%
-  #     layer_dropout(rate = grid$drop2[i]) %>%
-  #     layer_dense(units = 6, activation = "softmax")
-  # 
-  #   model <- keras_model(inputs = input, outputs = output)
-  # 
-  #   model %>% compile(
-  #     optimizer = "adam",
-  #     loss = "categorical_crossentropy",
-  #     metrics = "accuracy"
-  #   )
-  # 
-  #   history <- model %>% fit(
-  #     X.train, y.train,
-  #     epochs = 60,
-  #     batch_size = 64,
-  #     verbose = 0,
-  #     validation_split = 0.2,
-  #     shuffle = FALSE
-  #   )
-  # 
-  #   # val acc from last epoch
-  #   val_acc <- tail(history$metrics$val_accuracy, 1)
-  #   if (length(val_acc) == 0) val_acc <- tail(history$metrics$val_acc, 1)
-  # 
-  #   test_metrics <- model %>% evaluate(X.test, y.test, verbose = 0)
-  #   test_loss <- as.numeric(test_metrics[[1]])
-  #   test_acc  <- if (!is.null(names(test_metrics)) && "accuracy" %in% names(test_metrics)) {
-  #     as.numeric(test_metrics[["accuracy"]])
-  #   } else {
-  #     as.numeric(test_metrics[[2]])
-  #   }
-  # 
-  #   results[i, ] <- list(
-  #     grid$units1[i], grid$units2[i],
-  #     grid$drop1[i], grid$drop2[i],
-  #     as.numeric(val_acc), test_loss, test_acc
-  #   )
-  #   histories[[i]] <- history
-  # }
-  # 
-  # results <- results[order(-results$val_accuracy), ]
-  # 
-  # rnn_final_search <- results
-  # 
-  # save(rnn_final_search, file = "rnn_final_search")
+# W_ <- pre_data(w = 30, h = 1) #using 30 days
+# 
+# y.test <- W_[[1]]
+# y.train <- W_[[2]]
+# X.train <- W_[[3]]
+# X.test <- W_[[4]]
+# cl_weights <- W_[[5]]
+# F_ <- W_[[6]]
+# 
+# set.seed(1)
+# tf$keras$utils$set_random_seed(123L)
+# 
+# 
+# grid <- expand.grid(
+#   units1 = c(16,32, 64),   # LSTM units in layer 1
+#   units2 = c(16, 32, 64),   # LSTM units in layer 2
+#   drop1  = c(0.3, 0.5, 0.7),
+#   drop2  = c(0.3, 0.5, 0.7),
+#   stringsAsFactors = FALSE
+# )
+# 
+# results <- data.frame(
+#   units1 = integer(), units2 = integer(),
+#   drop1 = double(), drop2 = double(),
+#   val_accuracy = double(),
+#   test_loss = double(), test_accuracy = double(),
+#   stringsAsFactors = FALSE
+# )
+# 
+# histories <- vector("list", nrow(grid))
+# 
+# for (i in seq_len(nrow(grid))) {
+#   cat(sprintf("\n[%d/%d] u1=%d, u2=%d, d1=%.2f, d2=%.2f\n",
+#               i, nrow(grid),
+#               grid$units1[i], grid$units2[i],
+#               grid$drop1[i], grid$drop2[i]))
+# 
+#   tensorflow::tf$keras$backend$clear_session()
+#   set.seed(1)
+#   tf$keras$utils$set_random_seed(123L)
+# 
+#   input <- layer_input(shape = c(dim(X.train)[2], F_)) # (timesteps, features)
+# 
+#   output <- input %>%
+#     layer_lstm(units = grid$units1[i], return_sequences = TRUE) %>%
+#     layer_dropout(rate = grid$drop1[i]) %>%
+#     layer_lstm(units = grid$units2[i], return_sequences = FALSE) %>%
+#     layer_dropout(rate = grid$drop2[i]) %>%
+#     layer_dense(units = 6, activation = "softmax")
+# 
+#   model <- keras_model(inputs = input, outputs = output)
+# 
+#   model %>% compile(
+#     optimizer = "adam",
+#     loss = "categorical_crossentropy",
+#     metrics = "accuracy"
+#   )
+# 
+#   history <- model %>% fit(
+#     X.train, y.train,
+#     epochs = 60,
+#     batch_size = 64,
+#     verbose = 0,
+#     validation_split = 0.2,
+#     shuffle = FALSE
+#   )
+# 
+#   # val acc from last epoch
+#   val_acc <- tail(history$metrics$val_accuracy, 1)
+#   if (length(val_acc) == 0) val_acc <- tail(history$metrics$val_acc, 1)
+# 
+#   test_metrics <- model %>% evaluate(X.test, y.test, verbose = 0)
+#   test_loss <- as.numeric(test_metrics[[1]])
+#   test_acc  <- if (!is.null(names(test_metrics)) && "accuracy" %in% names(test_metrics)) {
+#     as.numeric(test_metrics[["accuracy"]])
+#   } else {
+#     as.numeric(test_metrics[[2]])
+#   }
+# 
+#   results[i, ] <- list(
+#     grid$units1[i], grid$units2[i],
+#     grid$drop1[i], grid$drop2[i],
+#     as.numeric(val_acc), test_loss, test_acc
+#   )
+#   histories[[i]] <- history
+# }
+# 
+# results <- results[order(-results$val_accuracy), ]
+# 
+# rnn_final_search <- results
+# 
+# save(rnn_final_search, file = "rnn_final_search")
   
-  load("rnn_final_search")
+load("rnn_final_search")
 
+```
+
+
+```{r}
+
+
+rnn_final_search[1,]
+#fitting final rnn_mdoel = 64, 16 0.7.  0.5
+
+
+# 
+#     input <- layer_input(shape = c(dim(X.train)[2], F_)) # (timesteps, features)
+# 
+#     output <- input %>%
+#       layer_lstm(units = 64, return_sequences = TRUE) %>%
+#       layer_dropout(rate = 0.7) %>%
+#       layer_lstm(units = 16, return_sequences = FALSE) %>%
+#       layer_dropout(rate = 0.5) %>%
+#       layer_dense(units = 6, activation = "softmax")
+# 
+#     final_rnn_model <- keras_model(inputs = input, outputs = output)
+# 
+#     final_rnn_model %>% compile(
+#       optimizer = "adam",
+#       loss = "categorical_crossentropy",
+#       metrics = "accuracy"
+#     )
+# 
+# 
+# 
+# 
+# 
+# 
+# # true_labels <- apply(y.test, 1, max)
+# pred_rnn  <- predict(final_rnn_model, X.test)
+# 
+# 
+# 
+# pred_rnn <- max.col(pred_rnn)
+# 
+# save(pred_rnn,  file = "pred_rnn")
+
+load("pred_rnn")
+
+#pred_rnn
 ```
 
 
@@ -1658,42 +1720,45 @@ search_criteria <- list(
 ```{r h2o-grid-search}
 # Launch grid search using class weights (weights_column) ---------------------
 #    Note: epochs increased to allow deeper training; early stopping will limit wasted epochs.
-grid_id <- "h2o_nn_balanced_grid"
 
-grid <- h2o.grid(algorithm = "deeplearning",
-                 grid_id = grid_id,
-                 x = predictor_cols,
-                 y = target,
-                 training_frame = train_h2o_split,
-                 validation_frame = valid_h2o_split,
-                 # Use the weights column computed earlier:
-                 # weights_column = "class_weights",
-                 # # Make H2O use classes weighting; setting balance_classes=FALSE because we supply weights explicitly
-                 balance_classes = T,
-                 # Training control
-                 epochs = 200,                       # allow many epochs (early stopping will truncate)
-                 stopping_metric = "logloss",
-                 stopping_tolerance = 1e-4,
-                 stopping_rounds = 10,
-                 # optimization / regularization defaults; some are overridden by hyperparams
-                 distribution = "multinomial",
-                 #activation = "RectifierWithDropout",
-                 adaptive_rate = TRUE,
-                 # small-ish default l1/l2 (grid will explore others)
-                 l1 = 0, l2 = 0,
-                 # Use relatively small mini-batch default (H2O autodetects)
-                 reproducible = T,   # reproducible=TRUE may slow things on multi-core machines
-                 seed = 123,
-                 # hyperparameter space and search criteria:
-                 hyper_params = hyper_params,
-                 search_criteria = search_criteria)
 
-# Review the grid search summary (sorted by validation logloss) ---------------
-grid_perf <- h2o.getGrid(grid_id = grid_id, sort_by = "logloss", decreasing = FALSE)
-print(grid_perf)
+# grid_id <- "h2o_nn_balanced_grid"
+# 
+# grid <- h2o.grid(algorithm = "deeplearning",
+#                  grid_id = grid_id,
+#                  x = predictor_cols,
+#                  y = target,
+#                  training_frame = train_h2o_split,
+#                  validation_frame = valid_h2o_split,
+#                  # Use the weights column computed earlier:
+#                  # weights_column = "class_weights",
+#                  # # Make H2O use classes weighting; setting balance_classes=FALSE because we supply weights explicitly
+#                  balance_classes = T,
+#                  # Training control
+#                  epochs = 200,                       # allow many epochs (early stopping will truncate)
+#                  stopping_metric = "logloss",
+#                  stopping_tolerance = 1e-4,
+#                  stopping_rounds = 10,
+#                  # optimization / regularization defaults; some are overridden by hyperparams
+#                  distribution = "multinomial",
+#                  #activation = "RectifierWithDropout",
+#                  adaptive_rate = TRUE,
+#                  # small-ish default l1/l2 (grid will explore others)
+#                  l1 = 0, l2 = 0,
+#                  # Use relatively small mini-batch default (H2O autodetects)
+#                  reproducible = T,   # reproducible=TRUE may slow things on multi-core machines
+#                  seed = 123,
+#                  # hyperparameter space and search criteria:
+#                  hyper_params = hyper_params,
+#                  search_criteria = search_criteria)
+# 
+# # Review the grid search summary (sorted by validation logloss) ---------------
+# grid_perf <- h2o.getGrid(grid_id = grid_id, sort_by = "logloss", decreasing = FALSE)
+# print(grid_perf)
+# 
+# save(grid_perf, file = "h2o_grid_perf")
 
-save(grid_perf, file = "h2o_grid_perf")
-
+load("h2o_grid_perf")
 ```
 
 ```{r get-best-model}
@@ -1705,35 +1770,34 @@ cat("Best model id:", best_model_id, "\n")
 print(best_model)
 
 h2o.performance(best_model)
-#save(grid_perf,  file = "grid1")   first   round
+
+save(best_model, file = "FFN_final_model")
+
+load("FFN_final_model")
+
+
 
 #plot of performance
 
 perf.df <- as.data.frame(grid_perf@summary_table) 
 
 
-ggplot(data = perf.df, aes(x = hidden, y = logloss, colour = as.factor(input_dropout_ratio))) + 
-  geom_point(size = 2)+
-  labs(y = "logloss")
-
-ggplot(data = perf.df, aes(x = hidden, y = logloss, colour = as.factor(l1))) + 
-  geom_point(size = 2)+
-  labs(y = "logloss")
-
-ggplot(data = perf.df, aes(x = hidden, y = logloss, colour = as.factor(l2))) + 
-  geom_point(size = 2)+
-  labs(y = "logloss")
+# ggplot(data = perf.df, aes(x = hidden, y = logloss, colour = as.factor(input_dropout_ratio))) + 
+#   geom_point(size = 2)+
+#   labs(y = "logloss")
+# 
+# ggplot(data = perf.df, aes(x = hidden, y = logloss, colour = as.factor(l1))) + 
+#   geom_point(size = 2)+
+#   labs(y = "logloss")
+# 
+# ggplot(data = perf.df, aes(x = hidden, y = logloss, colour = as.factor(l2))) + 
+#   geom_point(size = 2)+
+#   labs(y = "logloss")
 
 
 h2o.performance(best_model)
 
 
-ggplot(perf.df, aes(x = factor(l1), y = factor(l2), fill = logloss)) +
-  geom_tile() +
-  facet_wrap(~ hidden) +
-  scale_fill_viridis_c() +
-  theme_minimal() +
-  labs(title = "Effect of L1/L2 by Architecture")
 
 
 ggplot(perf.df, aes(x = rate, y = logloss, color = factor(input_dropout_ratio))) +
@@ -1833,7 +1897,7 @@ cat("Saved best model to:", model_path, "\n")
 # best_pred_df <- as.data.frame(best_pred_h2o)
 
 pred_df <- best_pred_df   # data.frame containing "predict" and per-class probability columns named by levels_y
-true_labels <- factor(as.vector(test_h2o[[target]]), levels = levels_y)
+true_labels <- factor(as.vector(test_h2o[[target]]))
 
 
 library(caret)
@@ -1844,7 +1908,7 @@ cm_best <- confusionMatrix(table(pred_labels_best, true_labels_best))
 prob_cols <- pred_df[, setdiff(colnames(pred_df), "predict")]
 
 # Confusion matrix (caret)
-pred_factor <- factor(pred_df$predict, levels = levels_y)
+pred_factor <- factor(pred_df$predict)
 cm <- confusionMatrix(pred_factor, true_labels)
 print(cm)   # this is safe
 ```
@@ -1924,7 +1988,31 @@ write.csv(metrics_tbl, "h2o_nn_per_class_metrics.csv", row.names = FALSE)
 ```{r}
 h2o.varimp(best_model)
 
-h2o.varimp_plot(best_model)
+h2o.varimp_plot(best_model, num_of_features = 50)
+```
+## Results
+
+```{r}
+
+#Hi Sanana ! :)
+
+#Here  are all the  model  and prediction objects
+
+#FFN
+
+best_model #H20 FFN final  model chosen
+cnn_final_model #cnn model 
+rnn_final_model #final  rnn model
+
+best_pred_df  #h20 ffn model predictions on test data
+pred_cnn
+pred_rnn
+
+labels_cnn <-  max.col(y.test) #these  are the lables  for  the cnn and rnn (different  train/test)
+labels_nn <- test$OAH #these  are the   labels  for  the  FFN
+
+
+
 ```
 
 ## Discussion
