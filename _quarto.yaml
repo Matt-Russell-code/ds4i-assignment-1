@@ -1,0 +1,22 @@
+project:
+  type: website
+  render:
+    - "*.qmd"
+    - "!DS4i_writeup.qmd"
+    - "!project_tenplate.qmd"
+output-dir: docs
+
+website:
+  title: "Avalanche Forecasting in Scotland"
+  navbar:
+    left:
+    - href: home.qmd
+      text: Home
+    - href: llm.qmd
+      text: LLM Use
+    
+format:
+  html:
+    theme: cosmo
+    #css: styles.css
+    toc: true
