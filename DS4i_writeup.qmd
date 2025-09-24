@@ -92,6 +92,68 @@ This paper uses a 15-year archive of avalanche forecasts from Scotland across th
 
 ```{r map}
 
+
+
+library(dplyr)
+library(ggplot2)
+library(ggrepel)
+library(maps)
+
+# palette 
+hazard_cols <- c(
+  "Low"            = "#d4f0f0",
+  "Moderate"       = "#91bfdb",
+  "Considerable -" = "#fc8d59",
+  "Considerable +" = "#d73027",
+  "High"           = "#7f0000"
+)
+hazard_levels <- names(hazard_cols)
+data <- data %>% mutate(OAH = factor(as.character(OAH), levels = hazard_levels, ordered = TRUE))
+
+# label positions 
+area_labels <- data %>%
+  filter(!is.na(longitude), !is.na(latitude), !is.na(Area)) %>%
+  group_by(Area) %>%
+  summarise(lon = median(longitude, na.rm = TRUE),
+            lat = median(latitude,  na.rm = TRUE),
+            .groups = "drop")
+
+# tight bounding box from points
+d_pts <- data %>% filter(!is.na(longitude), !is.na(latitude), !is.na(OAH))
+pad_x <- 0.25; pad_y <- 0.20
+xlim_use <- range(d_pts$longitude, na.rm = TRUE) + c(-pad_x, pad_x)
+ylim_use <- range(d_pts$latitude,  na.rm = TRUE) + c(-pad_y, pad_y)
+
+# plot
+ggplot() +
+  borders("world", regions = "UK", fill = "grey92", colour = "grey70") +
+  geom_point(
+    data = d_pts,
+    aes(x = longitude, y = latitude, color = OAH),
+    size = 1.8, alpha = 0.85
+  ) +
+  ggrepel::geom_text_repel(
+    data = area_labels,
+    aes(x = lon, y = lat, label = Area),
+    size = 3, seed = 941,
+    box.padding = 0.15, point.padding = 0.1,
+    min.segment.length = 0, max.overlaps = 20
+  ) +
+  scale_color_manual(values = hazard_cols, drop = FALSE, name = "OAH") +
+  coord_quickmap(xlim = xlim_use, ylim = ylim_use, expand = FALSE) +
+  labs(
+    title = " Figure 1: Observed Avalanche Hazard (OAH) — Scotland",
+    subtitle = "Point observations coloured by hazard level; SAIS areas labelled",
+    x = NULL, y = NULL
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    panel.grid.major = element_line(color = "grey95"),
+    legend.position  = "right",
+    plot.title       = element_text(face = "bold")
+  )
+
+
 ```
 
 Data cover the Scottish winters (November to April) from the December 2009 to March 2025. Predictor variables are categorised into three main groups, including (1) position and topography, (2) weather, and (3) snowpack test, all collected at the forecast location. Each observation also includes the date and the forecast area. For a full overview of the predictors, see Table ?.
@@ -104,9 +166,426 @@ Data cover the Scottish winters (November to April) from the December 2009 to Ma
 
 ## Exploratory Data Analysis
 
+### a. Feature Map Correlations
+
+```{r feature-map-correlations}
+
+
+library(dplyr)
+library(ggplot2)
+
+dat <- data
+dat <- dplyr::ungroup(dat)  # in case it's a grouped tibble
+
+#  Keep only numeric columns, drop seasonal values
+num_df <- dat %>%
+  select(where(is.numeric)) %>%
+  select(
+    -any_of(c("fah_i", "oah_i", "season_id")),   # <- explicitly drop season_id
+    -matches("^(dayofseason|season(_year|_d)?|seasonality|month|year|hour)$", ignore.case = TRUE)
+  )
+
+#  must have at least 2 numeric vars
+if (ncol(num_df) < 2L) stop("Not enough numeric columns for correlation analysis.")
+
+#  Drop zero-variance columns
+ok_cols <- vapply(num_df, function(x) sd(x, na.rm = TRUE) > 0, logical(1))
+num_df  <- num_df[, ok_cols, drop = FALSE]
+
+#  Correlation matrix (Pearson; pairwise complete)
+corr_mat <- cor(num_df, use = "pairwise.complete.obs", method = "pearson")
+
+# Long form 
+corr_long <- as.data.frame(as.table(corr_mat)) %>%
+  rename(var1 = Var1, var2 = Var2, r = Freq) %>%
+  filter(as.character(var1) != as.character(var2)) %>%
+  mutate(abs_r = abs(r))
+
+# Heatmap — colours only
+p_corr <- ggplot(as.data.frame(as.table(corr_mat)),
+                 aes(Var1, Var2, fill = Freq)) +
+  geom_tile() +
+  scale_fill_gradient2(limits = c(-1, 1)) +
+  labs(title = "Figure 2: Map of Feature Correlations",
+       x = NULL, y = NULL, fill = "r") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        panel.grid = element_blank())
+
+p_corr
+
+```
+
+Figure 2 provide an overview of how the variables in the dataset relate to one another. The plot shows that many features are moderately to strongly correlated, while others appear largely independent. This pattern indicates that the dataset contains groups of variables that move together, suggesting potential redundancy. From a modelling perspective, these interdependencies are important because highly correlated features can increase complexity, making it harder for models to distinguish unique contributions. However, they can also capture the multifactorial nature of avalanche risk. In terms of modelling neural networks, the presence of correlated variables is not inherently problematic, as the model can learn non-linear interactions. However, strong correlations increase the risk of overfitting if the network simply memorises patterns rather than generalising.
+
 ```{r}
 
+# Table for top pairs of highly correlated variables
+library(dplyr)
 
+top_pairs <- corr_long %>%
+  rowwise() %>%
+  mutate(pair = paste(sort(c(var1, var2)), collapse = "_")) %>%
+  ungroup() %>%
+  distinct(pair, .keep_all = TRUE) %>%
+  arrange(desc(abs_r)) %>%
+  slice(1:5) %>%
+  select(var1, var2, r, abs_r)
+
+if (knitr::is_html_output()) {
+ 
+  DT::datatable(
+    top_pairs,
+    caption = htmltools::tags$caption(
+      style = 'caption-side: top; text-align: left;',
+      'Table 2: Most highly correlated variable pairs (numeric variables only)'
+    ),
+    options = list(pageLength = 10, order = list(list(4, 'desc'))),
+    rownames = FALSE,
+    class = 'compact stripe hover'
+  ) |>
+    DT::formatRound(c('r', 'abs_r'), 3)
+} else {
+  # Static table that shows NOW in the editor preview
+  knitr::kable(
+    top_pairs,
+    caption = "Table 2: Most highly correlated variable pairs (numeric variables only)",
+    digits = 3,
+    align = c('l','l','r','r')
+  )
+}
+
+
+```
+
+Table 2 shows the strongest correlations among numeric variables. The highest is between summit air temperature and air temperature (r=0.846), which indicates strong redundancy. This is important as air temperature has consistently been identified in the literature as a key driver of avalanche conditions (Ward,1980; Pozdnoukhouv et al., 2018) , meaning it will likely be an important predictor in the final neural network model . Other correlations with absolute r values less than 0.80 are moderately strong but still useful for neural networks, which are well suited to handling multiple interdependent inputs. The pair between insolation and settlement (r= 0.647) is worth acknowledging, as the literature does acknowledge the role of human exposure and settlement patterns in avalanche risk, making this link notable though less central to forecasting accuracy. Only very high correlations (such as between summit and standard air temperature) may warrant consideration for reduction to avoid redundancy, while the others remain informative and manageable within a neural network framework.
+
+### b. Precipitation Type
+
+```{r precipitation-plot}
+
+
+library(dplyr)
+library(ggplot2)
+library(scales)
+library(stringr)
+library(forcats)
+
+df <- dplyr::ungroup(data)  
+
+#  Columns
+precip_col <- names(df)[str_detect(tolower(names(df)), "precip")] %>% .[1]
+stopifnot(length(precip_col) == 1)
+oah_col <- names(df)[tolower(names(df)) == "oah"] %>% .[1]
+stopifnot(length(oah_col) == 1)
+
+# Hazard levels + palette
+hazard_levels <- c("Low","Moderate","Considerable -","Considerable +","High")
+df[[oah_col]] <- factor(df[[oah_col]], levels = hazard_levels, ordered = TRUE)
+hazard_cols <- c(
+  "Low"            = "#d4f0f0",
+  "Moderate"       = "#91bfdb",
+  "Considerable -" = "#fc8d59",
+  "Considerable +" = "#d73027",
+  "High"           = "#7f0000"
+)
+
+#Summarise counts/proportions, drop NA in precip
+oah_precip <- df %>%
+  filter(!is.na(.data[[precip_col]]), !is.na(.data[[oah_col]])) %>%
+  count(precip = .data[[precip_col]], oah = .data[[oah_col]], name = "n") %>%
+  group_by(precip) %>%
+  mutate(prop = n / sum(n)) %>%
+  ungroup()
+
+#  Extract leading numbers to identify bins; 
+oah_precip <- oah_precip %>%
+  mutate(bin_num = suppressWarnings(as.numeric(str_extract(as.character(precip), "^-?\\d+")))) %>%
+  filter(!is.na(bin_num), bin_num <= 10)
+
+# Order precipitation bins numerically
+lvl_order <- oah_precip %>%
+  distinct(precip, bin_num) %>%
+  arrange(bin_num, precip) %>%
+  pull(precip) %>%
+  unique()
+
+oah_precip <- oah_precip %>%
+  mutate(precip = factor(precip, levels = lvl_order, ordered = TRUE))
+
+#  Plot
+ggplot(oah_precip, aes(x = precip, y = prop, fill = oah)) +
+  geom_col(position = "fill", width = 0.9) +
+  geom_text(aes(label = percent(prop, accuracy = 1)),
+            position = position_fill(vjust = 0.5),
+            size = 3, colour = "white", fontface = "bold") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  scale_fill_manual(values = hazard_cols, drop = FALSE) +
+  labs(
+    title = "Figure 3: Precipitation type vs Observed Avalanche Hazard (OAH)",
+    x = "Precipitation type/level",
+    y = "Proportion within precipitation type",
+    fill = "OAH"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 30, hjust = 1))
+
+```
+
+Figure 3 shows the distribution of observed avalanche hazard (OAH) levels across different precipitation types. The results reveal a clear trend as low hazard dominates under conditions of none (0) or trace (2) precipitation, whereas higher hazard categories become increasingly prevalent as snowfall intensity increases. Heavy snow is associated with a substantially larger share of “Considerable” and “High” hazard ratings (82%). This supports the findings of previous literature that shows the role of intense precipitation events in destabilising the snowpack (Diggins, 2009; Ward, 1980). This also aligns with existing knowledge of the Scottish climate, where rapid weather shifts and frequent rain or snow-on-snow events contribute to unstable snowpack conditions (Pozdnoukhov et al., 2008; Purves et al., 2003). The results show that the precipitation type is a key driver of avalanche hazards. Neural networks can further explore the relationship between precipitation type and specific snowpack features.
+
+### c. Seasonality
+
+```{r seasons-plot}
+
+library(dplyr)
+library(ggplot2)
+library(patchwork)
+
+
+hazard_cols <- c(
+  "Low"            = "#d4f0f0",
+  "Moderate"       = "#91bfdb",
+  "Considerable -" = "#fc8d59",
+  "Considerable +" = "#d73027",
+  "High"           = "#7f0000"
+)
+
+# Ensure OAH ordered Low -> High
+data <- data %>%
+  mutate(
+    OAH = factor(OAH,
+                 levels = c("Low","Moderate","Considerable -","Considerable +","High"))
+  )
+
+# Define season year: 
+
+data <- data %>%
+  mutate(
+    month_num = lubridate::month(Date),
+    season_year = if_else(month_num >= 11, lubridate::year(Date), lubridate::year(Date) - 1),
+    month_in_season = factor(
+      month_num,
+      levels = c(11, 12, 1, 2, 3, 4, 5),
+      labels = c("Nov","Dec","Jan","Feb","Mar","Apr","May")
+    )
+  )
+
+# Aggregate counts and proportions per month (across all years)
+oah_monthly <- data %>%
+  filter(!is.na(OAH), month_in_season %in% levels(month_in_season)) %>%
+  count(month_in_season, OAH, name = "n") %>%
+  group_by(month_in_season) %>%
+  mutate(month_total = sum(n),
+         prop = n / month_total) %>%
+  ungroup()
+
+# A helper frame for the counts-only series
+month_totals <- oah_monthly %>%
+  distinct(month_in_season, month_total)
+
+
+# Top: proportions
+p_prop <- ggplot(oah_monthly, aes(x = month_in_season, y = prop, fill = OAH)) +
+  geom_col(position = "fill", width = 0.85) +
+  scale_fill_manual(values = hazard_cols, drop = FALSE) +
+  labs(x = NULL, y = "Proportion of forecasts", fill = "OAH") +
+  theme_minimal(base_size = 12) +
+  theme(
+    legend.position = "right",
+    plot.margin = margin(t = 5, r = 10, b = 20, l = 10)   # extra space below
+  )
+
+# Bottom: counts 
+max_n <- max(month_totals$month_total, na.rm = TRUE)
+p_counts <- ggplot(month_totals, aes(x = month_in_season, y = month_total)) +
+  geom_col(width = 0.85, fill = "grey70") +
+  geom_text(aes(label = month_total), vjust = -0.25, size = 3.5) +
+  scale_y_continuous(limits = c(0, max_n * 1.18), expand = expansion(mult = c(0, 0.02))) +
+  labs(x = "Month (Nov–May)", y = "Number of forecasts") +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.margin = margin(t = 22, r = 10, b = 5, l = 10)    # extra space above
+  )
+
+# Combine with a title 
+(p_prop / p_counts) +
+  plot_layout(heights = c(1, 1)) +
+  plot_annotation(
+    title = "Figure 4. Seasonality of Observed Avalanche Hazard (OAH): Nov–May",
+    theme = theme(
+      plot.title = element_text(size = 15, face = "bold"),
+      plot.subtitle = element_text(size = 11)
+    )
+  )
+
+
+
+```
+
+Figure 4 shows the monthly distribution of observed avalanche hazard (OAH) across the extended avalanche season from November to May. Early (Nov–Dec) and late (Apr–May) months show a greater proportion of low and moderate hazards, while the mid-season months (Jan–Mar) contain a higher share of considerable and high hazards. These seasonal patterns show the influence of Scotland's maritime climate where snowpack instability peaks in mid-winter (Diggins, 2009; Podzdnoukhov et al., 2008; Purves et al., 2003). The count data reveal that most forecasts are concentrated between December and March, reinforcing that these months the period of greatest avalanche risk (SAIS, 2024). In terms of implications for modelling, the seasonality shows that hazard levels are not evenly distributed throughout the year, but instead follow a cyclical pattern with concentrated periods of instability. Neural networks are well-suited to this dataset as they can capture complex, changing relationships between weather conditions and other important variables.
+
+### d. Temperature
+
+```{r temperature-plot}
+
+# Plot 1: Boxplot of Air.Temp by OAH (Figure 5)
+data %>%
+  filter(!is.na(Air.Temp), !is.na(OAH)) %>%
+  ggplot(aes(x = OAH, y = Air.Temp, fill = OAH)) +
+  geom_boxplot(outlier.alpha = 0.3) +
+  scale_fill_manual(values = hazard_cols, drop = FALSE, guide = "none") +
+  labs(
+    title = "Figure 5: Distribution of Air Temperature across Observed Avalanche Hazard (OAH)",
+    x = "Observed Avalanche Hazard (OAH)",
+    y = "Air Temperature (°C)"
+  ) +
+  theme(
+    plot.title = element_text(size = 12, face = "bold") # smaller than before
+  )
+
+
+```
+
+Figure 5 shows the distribution of air temperature across observed avalanche hazard (OAH) levels. Higher hazard categories are generally associated with lower air temperatures, with “Considerable -”, “Considerable +”, and “High” hazards centred below 0 °C. “Low” hazard days show medians above freezing and wider variability. The transition at “Moderate” hazard, where temperatures cluster around 0 °C reflects conditions that can either stabilise or destabilise the snowpack, supporting earlier findings that avalanche activity in Scotland is highly sensitive to small and rapid shifts in temperature due to its maritime climate (Ward, 1980; Diggins, 2009; Pozdnoukhov et al., 2008).
+
+The figure highlights air temperature as a critical factor for avalanche hazard, reinforcing the need to include it in forecasting approaches. The observed relationship aligns with prior literature emphasising the destabilising effects of freeze–thaw variability and sub-zero conditions. A neural network model will be able to capture the interactions between temperature and other snowpack features.
+
+### e. FAH vs OAH
+
+```{r OAH-FAH-plot}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(scales)
+library(stringr)
+
+# helpers 
+find_col <- function(df, patterns) {
+  nm <- names(df)
+  hits <- sapply(patterns, function(p) nm[grepl(p, nm, ignore.case = TRUE)], simplify = FALSE)
+  hit <- unique(unlist(hits))
+  if (length(hit)) hit[1] else NULL
+}
+
+parse_datetime_safe <- function(x) {
+  if (inherits(x, "POSIXct") || inherits(x, "Date")) return(as.POSIXct(x))
+  if (!is.character(x)) x <- as.character(x)
+  as.POSIXct(x, tz = "UTC",
+             tryFormats = c("%Y-%m-%d %H:%M:%S",
+                            "%Y-%m-%d %H:%M",
+                            "%Y-%m-%d",
+                            "%d/%m/%Y %H:%M:%S",
+                            "%d/%m/%Y %H:%M",
+                            "%d/%m/%Y",
+                            "%m/%d/%Y %H:%M:%S",
+                            "%m/%d/%Y %H:%M",
+                            "%m/%d/%Y"))
+}
+
+#  hazard levels + normaliser
+hazard_levels <- c("Low","Moderate","Considerable -","Considerable +","High")
+
+norm_hazard <- function(x){
+  x0 <- str_squish(tolower(as.character(x)))
+  case_when(
+    x0 == "low" ~ "Low",
+    x0 == "moderate" ~ "Moderate",
+    x0 %in% c("considerable -","considerable−","considerable–","considerable minus") ~ "Considerable -",
+    x0 %in% c("considerable +","considerable plus")                                   ~ "Considerable +",
+    x0 == "high" ~ "High",
+    TRUE ~ NA_character_
+  )
+}
+
+# ensure FAH/OAH columns exist 
+if (!"fah" %in% names(dat)) {
+  FAH_col <- find_col(dat, c("^FAH$", "forecast.*hazard"))
+  if (!is.null(FAH_col)) dat <- mutate(dat, fah = .data[[FAH_col]])
+}
+if (!"oah" %in% names(dat)) {
+  OAH_col <- find_col(dat, c("^OAH$", "observed.*hazard"))
+  if (!is.null(OAH_col)) dat <- mutate(dat, oah = .data[[OAH_col]])
+}
+
+#  find Date and Area 
+date_col <- find_col(dat, c("^date$", "forecast.*date", "datetime", "time"))
+area_col <- find_col(dat, c("^area$", "region", "zone"))
+
+if (is.null(date_col)) stop("No date-like column found. Expected something like 'Date', 'date', or 'datetime'.")
+dat <- dat %>% mutate(.Date = parse_datetime_safe(.data[[date_col]]))
+if (all(is.na(dat$.Date))) stop("Could not parse dates in the detected date column.")
+
+#  next-day alignment: -
+if (!is.null(area_col)) {
+  dat_shifted <- dat %>%
+    mutate(.Area = .data[[area_col]]) %>%
+    arrange(.Area, .Date) %>%
+    group_by(.Area) %>%
+    mutate(oah_nextday_raw = lead(oah, 1)) %>%
+    ungroup()
+} else {
+  dat_shifted <- dat %>%
+    arrange(.Date) %>%
+    mutate(oah_nextday_raw = lead(oah, 1))
+}
+
+# tidy and normalise labels 
+df <- dat_shifted %>%
+  transmute(
+    FAH = factor(norm_hazard(fah), levels = hazard_levels),
+    OAH_next = factor(norm_hazard(oah_nextday_raw), levels = hazard_levels)
+  ) %>%
+  drop_na(FAH, OAH_next)
+
+# contingency + proportions (each FAH column = 100%) 
+tab_counts <- with(df, table(OAH_next, FAH))
+tab_prop   <- prop.table(tab_counts, 2)
+
+
+# Figure 6 
+df_prop <- as.data.frame(tab_prop) %>%
+  rename(p = Freq, OAH = OAH_next) %>%
+  mutate(on_diag = as.character(OAH) == as.character(FAH))
+
+ggplot(df_prop, aes(x = FAH, y = OAH, fill = p)) +
+  geom_tile(color = "white") +
+  geom_tile(data = dplyr::filter(df_prop, on_diag),
+            color = "black", linewidth = 0.9, fill = NA) +
+  geom_text(aes(label = percent(p, accuracy = 1)), size = 3.2) +
+  scale_fill_gradient(low = "white", high = "#238b45", labels = percent) +
+  labs(
+    title = "Figure 6. FAH (day t) → OAH (day t+1) proportions",
+    subtitle = "Each FAH column sums to 100%; next-day alignment performed within Area (if available)",
+    x = "Forecast Avalanche Hazard (FAH, day t)",
+    y = "Observed Avalanche Hazard (OAH, day t+1)",
+    fill = "Proportion"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 40, hjust = 1),
+        plot.title = element_text(face = "bold", size = 14))
+
+
+
+```
+
+Figure 6 shows the relationship between forecast avalanche hazard (FAH) on day *t* and observed avalanche hazard (OAH) on day *t+1*. Each column sums to 100%, showing how outcomes were distributed given a specific forecast level. There is a strong alignment at the lower hazard categories as forecasts (FAH) of “Low” hazards were accurate in the majority of cases, with 87% of observations (OAH) also recorded as “Low.” This indicates that forecasters were most successful in predicting stable snowpack conditions and low hazard scenarios.
+
+For intermediate levels such as “Moderate” and “Considerable –” the agreement weakens. Only about half of “Moderate” forecasts matched the following day’s observations, with a substantial spillover into “Low” and “Considerable –”. “Considerable –” forecasts split almost evenly between being observed as “Moderate,” “Considerable –,” and “Considerable +.” This pattern shows that there is a challenge in differentiating between neighbouring hazard categories, which may highlight the subjectivity and sensitivity of these intermediate hazard thresholds.
+
+Forecasts of “High” hazard showed weaker reliability. Fewer than one-quarter of these forecasts corresponded to an observed “High” hazard the next day. Most “High” forecasts aligned with “Considerable –” or “Considerable +” outcomes. This shows that there is a tendency towards over-prediction of extreme conditions, or difficulty in anticipating when weather and snowpack instabilities will escalate into truly high-risk scenarios.
+
+The plot shows that the forecast (FAH) is highest in stable, low-risk conditions and lowest at the extremes, with the middle categories marked by uncertainty. This implies that avalanche hazard ratings are best treated as ordinal outcomes for modeeling purposes, where the cost of misclassification is not uniform and depends on how far apart the categories are. Neural networks can capture these patterns well when framed as ordinal classfiers. They can learn that misclassifications most often occur between neighbouring hazard levels, instead of treating all errors equally. Class imbalances will also need to be addressed during model training to ensure the network does not simply default to predicting the most common outcomes.
+
+### f. Regional Dominance??
+
+```{r}
+
+```
+
+### g. Missing Values
+
+```{r}
 
 ```
 
@@ -316,7 +795,6 @@ test <- data[-train.idx,] #Testing Data
 
 ```
 
-
 ```{r Keras_data_preprocessing_function}
 
 library(keras3)
@@ -499,8 +977,6 @@ list(y.test, y.train, X.train, X.test, class_weights, F_)
 }
 ```
 
-
-
 ```{r keras_grid_search}
 #testing c-d-c
 
@@ -680,7 +1156,6 @@ res_window_120 <- res_window_120%>%
 results_cnn_search <- rbind(res_window_3, res_window_30, res_window_7,  res_window_120)
 ```
 
-
 ```{r cnn_window_vis}
 #graph of validation accuracy
 ggplot(data = results_cnn_search, aes( x  = model_no, y  = val_accuracy, colour = as.factor(window)))+
@@ -690,7 +1165,6 @@ ggplot(data = results_cnn_search, aes( x  = model_no, y  = val_accuracy, colour 
 
 
 ```
-
 
 ```{r}
 #we will go with a window of roughly  7  days
@@ -831,7 +1305,6 @@ best
 gc()
 ```
 
-
 ```{r}
 
 
@@ -861,7 +1334,6 @@ ggplot(res %>% slice(1:top_n),
        x = "Config", y = "Val accuracy")
 
 ```
-
 
 ```{r}
 #best model  had 16 filters with 2 layers,  and kernel size 15,  0.7 dropout between layers
@@ -907,8 +1379,6 @@ test_metrics$accuracy
 
 
 ```
-
-
 
 ```{r  RNN}
 #sam as above but for RNN model
@@ -1080,8 +1550,6 @@ rnn_window_120 <- res_window_120%>%
 
 
 ```
-
-
 
 ## Modelling
 
