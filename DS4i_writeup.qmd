@@ -88,9 +88,9 @@ Hypothesis???? We can workshop together
 
 Scotland experiences a mild, wet, and temperate maritime climate due to the strong influence of the North Atlantic Ocean and persistent south-westerly winds (Pozdnoukhov et al., 2008; Scottish Government, 2011). These conditions result in rapid temperature changes, frequent heavy precipitation (falling as either snow or rain in the winter), and strong winds. With the highest peak, Ben Nevis in Lochaber (1345 m), mountains are low compared to alpine ranges (\~ 4000 m), resulting in a snowpack that is typically shallower, wetter, and more variable in comparison (Britannica, 2025; Pozdnoukhov et al., 2008; WSL Institute for Snow and Avalanche Research SLF, 2016). Aspects such as rapid freeze-thaw cycles, rain-on-snow, and wind redistribution further destabilise snow structure and stability, creating avalanche risks that can arise and disappear within a short time (Diggins, 2009; Pozdnoukhov et al., 2008; Purves et al., 2003; Scottish Government, 2011). Snowpack conditions also differ regionally; while the West is characterised as strongly maritime, with mild and wet winters, the North and East experience colder and drier conditions (MetOffice, 2010). As such, Scotland’s climate is highly variable both spatially and temporally, adding to the complexity of predicting avalanche risk.
 
-This paper uses a 15-year archive of avalanche forecasts from Scotland across the six areas of Creah Meagaidh, Glencoe, Lochaber, Northern Cairngorms, Southern Cairngorms, and Torridon, produced by the Scottish Avalanche Information Service (see Figure ? below). 
+This paper uses a 15-year archive of avalanche forecasts from Scotland across the six areas of Creah Meagaidh, Glencoe, Lochaber, Northern Cairngorms, Southern Cairngorms, and Torridon, produced by the Scottish Avalanche Information Service (2025). Figure ? illustrates the spatial distribution of avalanche observations over this time frame, with points marking individual events and labels indicating the locations of these six areas. The overall total observations by area and hazard category (Table ?) reflects the difference in observation frequency rather than absolute avalanche activity: Cairngorms (Northern and Southern) and Lochaber, located in the colder and drier North and East, have the most recorded observations, whereas Torridon in the maritime West has substantially fewer. Across all areas, Low and Moderate hazard levels are the most frequently recorded, while High hazard events are comparatively rare and concentrated primarily in Northern Cairngorms and Lochaber.
 
-```{r map}
+```{r map, echo = FALSE}
 
 
 
@@ -129,7 +129,7 @@ ggplot() +
   borders("world", regions = "UK", fill = "grey92", colour = "grey70") +
   geom_point(
     data = d_pts,
-    aes(x = longitude, y = latitude, color = OAH),
+    aes(x = longitude, y = latitude, fill = OAH),
     size = 1.8, alpha = 0.85
   ) +
   ggrepel::geom_text_repel(
@@ -139,7 +139,7 @@ ggplot() +
     box.padding = 0.15, point.padding = 0.1,
     min.segment.length = 0, max.overlaps = 20
   ) +
-  scale_color_manual(values = hazard_cols, drop = FALSE, name = "OAH") +
+  scale_fill_manual(values = hazard_cols, drop = FALSE, name = "OAH") +
   coord_quickmap(xlim = xlim_use, ylim = ylim_use, expand = FALSE) +
   labs(
     title = " Figure 1: Observed Avalanche Hazard (OAH) — Scotland",
@@ -156,11 +156,46 @@ ggplot() +
 
 ```
 
-Data cover the Scottish winters (November to April) from the December 2009 to March 2025. Predictor variables are categorised into three main groups, including (1) position and topography, (2) weather, and (3) snowpack test, all collected at the forecast location. Each observation also includes the date and the forecast area. For a full overview of the predictors, see Table ?.
+```{r tot-obs-table, echo = FALSE}
 
-\*\*table of predictors
+library(dplyr)
+library(tidyr)
+library(knitr)
 
-```{r pred_tab}
+area_hazard_table <- data %>%
+  group_by(Area) %>%
+  filter(!is.na(Area), !is.na(OAH)) %>%
+  count(Area, OAH) %>% #count all observations per area per avalanche category
+  pivot_wider(
+    names_from = OAH, #hazard levels as columns
+    values_from = n,
+    values_fill = 0
+  ) %>%
+
+  rowwise() %>% #total overall instead of across seasons
+  mutate(Total = sum(c_across(all_of(c("Low", "Moderate", "Considerable -", "Considerable +", "High"))))) %>%
+  ungroup()
+
+
+
+kable(area_hazard_table, caption = "\\emph{Overall total observations by Area and hazard category.}")
+
+
+
+```
+
+Data cover the Scottish winters (November to April) from the December 2009 to March 2025. Predictor variables are categorised into three main groups, including (1) position and topography, (2) weather, and (3) snowpack test, all collected at the forecast location. Each observation also includes the date and the forecast area (metadata). For an overview of the predictors available, see Table ? below.
+
+```{r pred_tab, echo = FALSE}
+
+pred_table <- data.frame(Predictor_Group = c("Metadata", "Position and Topography", "Weather", "Snowpack Test"), Variables = c("date, area", "longitude, latitude, altitude, aspect of slope, incline of slope", "air temperature, wind direction, wind speed, cloud cover, precipitation code, snowdrift, total snow depth, foot penetration, ski penetration, rain observed at 900m elevation, summit air temperature, summit wind direction, summit wind speed", "max. temperature gradient, max. hardness gradient, no.settle, snow.index, insolation, crystals, wetness, AV.Cat, and snow temperature"))
+
+pred_table %>%
+  kable(caption = "\\emph{Overview of predictor variables available in the avalanche forecast dataset.}") %>%
+  column_spec(1, width = "8em") %>%
+  column_spec(2, width = "30em") %>%
+  kable_styling(latex_options = c("striped", "hold_position"))
+
 
 ```
 
@@ -168,7 +203,7 @@ Data cover the Scottish winters (November to April) from the December 2009 to Ma
 
 ### a. Feature Map Correlations
 
-```{r feature-map-correlations}
+```{r feature-map-correlations-code}
 
 
 library(dplyr)
@@ -212,13 +247,9 @@ p_corr <- ggplot(as.data.frame(as.table(corr_mat)),
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         panel.grid = element_blank())
 
-p_corr
-
 ```
 
-Figure 2 provide an overview of how the variables in the dataset relate to one another. The plot shows that many features are moderately to strongly correlated, while others appear largely independent. This pattern indicates that the dataset contains groups of variables that move together, suggesting potential redundancy. From a modelling perspective, these interdependencies are important because highly correlated features can increase complexity, making it harder for models to distinguish unique contributions. However, they can also capture the multifactorial nature of avalanche risk. In terms of modelling neural networks, the presence of correlated variables is not inherently problematic, as the model can learn non-linear interactions. However, strong correlations increase the risk of overfitting if the network simply memorises patterns rather than generalising.
-
-```{r}
+```{r top-pairs-table, echo = FALSE, include = FALSE}
 
 # Table for top pairs of highly correlated variables
 library(dplyr)
@@ -238,7 +269,7 @@ if (knitr::is_html_output()) {
     top_pairs,
     caption = htmltools::tags$caption(
       style = 'caption-side: top; text-align: left;',
-      'Table 2: Most highly correlated variable pairs (numeric variables only)'
+      'Most highly correlated variable pairs (numeric variables only)'
     ),
     options = list(pageLength = 10, order = list(list(4, 'desc'))),
     rownames = FALSE,
@@ -249,7 +280,7 @@ if (knitr::is_html_output()) {
   # Static table that shows NOW in the editor preview
   knitr::kable(
     top_pairs,
-    caption = "Table 2: Most highly correlated variable pairs (numeric variables only)",
+    caption = "Most highly correlated variable pairs (numeric variables only)",
     digits = 3,
     align = c('l','l','r','r')
   )
@@ -258,11 +289,38 @@ if (knitr::is_html_output()) {
 
 ```
 
-Table 2 shows the strongest correlations among numeric variables. The highest is between summit air temperature and air temperature (r=0.846), which indicates strong redundancy. This is important as air temperature has consistently been identified in the literature as a key driver of avalanche conditions (Ward,1980; Pozdnoukhouv et al., 2018) , meaning it will likely be an important predictor in the final neural network model . Other correlations with absolute r values less than 0.80 are moderately strong but still useful for neural networks, which are well suited to handling multiple interdependent inputs. The pair between insolation and settlement (r= 0.647) is worth acknowledging, as the literature does acknowledge the role of human exposure and settlement patterns in avalanche risk, making this link notable though less central to forecasting accuracy. Only very high correlations (such as between summit and standard air temperature) may warrant consideration for reduction to avoid redundancy, while the others remain informative and manageable within a neural network framework.
+The Scottish avalanche dataset contains several features that are moderately to strongly correlated, while others appear largely independent (Figure ?). This pattern suggests a potential redundancy. From a modelling perspective, highly correlated features can increase complexity and obscure unique contributors, however, can also capture the multifactorial nature of avalanche risk. In the context of neural networks, the presence of correlated variables is not inherently problematic, since the model can learn non-linear interactions. However, strong correlations can increase the risk of overfitting if the network memorises patterns rather than generalising to new data.
+
+The highest correlation found was between summit air temperature and air temperature (r = `r top_pairs[1,4]`), indicating strong redundancy. Nevertheless, both variables were retained as each likely capture a different aspect relevant to forecasting (i.e., summit conditions versus broader conditions). Air temperature is an identified key driver of avalanche conditions and is expected to be an important predictor in the final neural network (Fromm & Schonberger, 2022; Gauthier et al., 2025; Pozdnoukhouv et al., 2018; Souckova et al., 2022; Ward,1980). Exploration of air temperature across observed avalanche hazard (OAH) levels further supports its importance in forecasting (Figure ?). Higher hazard categories are generally associated with lower air temperatures, with “Considerable -”, “Considerable +”, and “High” hazards centred below 0 °C. “Low” hazard days show medians above freezing and wider variability. The transition at “Moderate” hazard, where temperatures cluster around 0 °C, reflects conditions that can either stabilise or destabilise the snowpack through freeze-thaw cycles. These patterns highlight Scotland's sensitivity to rapid temperature shifts and their impact on avalanche activity (Diggins, 2009; Pozdnoukhov et al., 2008).
+
+Other correlations with 0.5\<\|r\|\< 0.80 are moderately strong but remain informative and manageable, as neural networks can accommodate interdependent inputs.
+
+```{r correlation-plot, echo = FALSE}
+p_corr
+```
+
+```{r temperature-plot}
+
+# Plot 1: Boxplot of Air.Temp by OAH (Figure 5)
+data %>%
+  filter(!is.na(Air.Temp), !is.na(OAH)) %>%
+  ggplot(aes(x = OAH, y = Air.Temp, fill = OAH)) +
+  geom_boxplot(outlier.alpha = 0.3) +
+  scale_fill_manual(values = hazard_cols, drop = FALSE, guide = "none") +
+  labs(
+    title = "Figure 3: Distribution of Air Temperature across Observed Avalanche Hazard (OAH)",
+    x = "Observed Avalanche Hazard (OAH)",
+    y = "Air Temperature (°C)"
+  ) +
+  theme(
+    plot.title = element_text(size = 12, face = "bold") # smaller than before
+  )
+
+```
 
 ### b. Precipitation Type
 
-```{r precipitation-plot}
+```{r precipitation-plot-code, echo = FALSE}
 
 
 library(dplyr)
@@ -313,6 +371,23 @@ lvl_order <- oah_precip %>%
 oah_precip <- oah_precip %>%
   mutate(precip = factor(precip, levels = lvl_order, ordered = TRUE))
 
+
+```
+
+```{r prop-stat-heavy-snow, echo = FALSE}
+# cumulative prop for highest hazard level
+heavy_snow <- oah_precip %>%
+  filter(bin_num == 10)
+
+cumulative_high <- heavy_snow %>%
+  filter(oah %in% c("Considerable -", "Considerable +", "High")) %>%
+  summarise(cum_prop = sum(prop)) %>%
+  pull(cum_prop)
+```
+
+The distribution of OAH levels varies clearly across different precipitation types (Figure ?). Low hazard predominates under conditions of none (0) or trace (2) precipitation, whereas higher hazard categories become increasingly prevalent as snowfall intensity increases. Heavy snow (level 10) is associated with a substantially larger share of “Considerable” and “High” hazard ratings (`r cumulative_high*100` %). This aligns with existing knowledge of the Scottish climate, where rapid weather shifts and frequent rain or snow-on-snow events contribute to unstable snowpack conditions (Pozdnoukhov et al., 2008; Purves et al., 2003).
+
+```{r precip-plot, echo = FALSE}
 #  Plot
 ggplot(oah_precip, aes(x = precip, y = prop, fill = oah)) +
   geom_col(position = "fill", width = 0.9) +
@@ -322,17 +397,14 @@ ggplot(oah_precip, aes(x = precip, y = prop, fill = oah)) +
   scale_y_continuous(labels = percent_format(accuracy = 1)) +
   scale_fill_manual(values = hazard_cols, drop = FALSE) +
   labs(
-    title = "Figure 3: Precipitation type vs Observed Avalanche Hazard (OAH)",
+    title = "Figure 4: Precipitation type vs Observed Avalanche Hazard (OAH)",
     x = "Precipitation type/level",
     y = "Proportion within precipitation type",
     fill = "OAH"
   ) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 30, hjust = 1))
-
 ```
-
-Figure 3 shows the distribution of observed avalanche hazard (OAH) levels across different precipitation types. The results reveal a clear trend as low hazard dominates under conditions of none (0) or trace (2) precipitation, whereas higher hazard categories become increasingly prevalent as snowfall intensity increases. Heavy snow is associated with a substantially larger share of “Considerable” and “High” hazard ratings (82%). This supports the findings of previous literature that shows the role of intense precipitation events in destabilising the snowpack (Diggins, 2009; Ward, 1980). This also aligns with existing knowledge of the Scottish climate, where rapid weather shifts and frequent rain or snow-on-snow events contribute to unstable snowpack conditions (Pozdnoukhov et al., 2008; Purves et al., 2003). The results show that the precipitation type is a key driver of avalanche hazards. Neural networks can further explore the relationship between precipitation type and specific snowpack features.
 
 ### c. Seasonality
 
@@ -408,52 +480,27 @@ p_counts <- ggplot(month_totals, aes(x = month_in_season, y = month_total)) +
     plot.margin = margin(t = 22, r = 10, b = 5, l = 10)    # extra space above
   )
 
+
+```
+
+Monthly patterns of OAH across the extended avalanche season (November to May) reveal clear seasonal trends (Figure ?). Early (November-December) and late (April-May) months are dominated by low and moderate hazards, while mid-season months (Jan-Mar) contain a higher proportion of considerable and high hazards. Most forecasts occur between December and March, highlighting the period of greatest avalanche risk (SAIS, 2024). These patterns reflect the cyclical nature of snowpack development, with mid-winter weather instability driving higher-risk avalanches (Diggins, 2009; Podzdnoukhov et al., 2008; Purves et al., 2003). For modelling, this seasonality indicates that hazard levels are unevenly distributed, however, neural networks can accommodate complex, changing relationships between weather conditions and other important variables.
+
+```{r season-plots, echo = FALSE}
 # Combine with a title 
 (p_prop / p_counts) +
   plot_layout(heights = c(1, 1)) +
   plot_annotation(
-    title = "Figure 4. Seasonality of Observed Avalanche Hazard (OAH): Nov–May",
+    title = "Figure 5. Seasonality of Observed Avalanche Hazard (OAH): Nov–May",
     theme = theme(
       plot.title = element_text(size = 15, face = "bold"),
       plot.subtitle = element_text(size = 11)
     )
   )
-
-
-
 ```
 
-Figure 4 shows the monthly distribution of observed avalanche hazard (OAH) across the extended avalanche season from November to May. Early (Nov–Dec) and late (Apr–May) months show a greater proportion of low and moderate hazards, while the mid-season months (Jan–Mar) contain a higher share of considerable and high hazards. These seasonal patterns show the influence of Scotland's maritime climate where snowpack instability peaks in mid-winter (Diggins, 2009; Podzdnoukhov et al., 2008; Purves et al., 2003). The count data reveal that most forecasts are concentrated between December and March, reinforcing that these months the period of greatest avalanche risk (SAIS, 2024). In terms of implications for modelling, the seasonality shows that hazard levels are not evenly distributed throughout the year, but instead follow a cyclical pattern with concentrated periods of instability. Neural networks are well-suited to this dataset as they can capture complex, changing relationships between weather conditions and other important variables.
+### d. FAH vs OAH
 
-### d. Temperature
-
-```{r temperature-plot}
-
-# Plot 1: Boxplot of Air.Temp by OAH (Figure 5)
-data %>%
-  filter(!is.na(Air.Temp), !is.na(OAH)) %>%
-  ggplot(aes(x = OAH, y = Air.Temp, fill = OAH)) +
-  geom_boxplot(outlier.alpha = 0.3) +
-  scale_fill_manual(values = hazard_cols, drop = FALSE, guide = "none") +
-  labs(
-    title = "Figure 5: Distribution of Air Temperature across Observed Avalanche Hazard (OAH)",
-    x = "Observed Avalanche Hazard (OAH)",
-    y = "Air Temperature (°C)"
-  ) +
-  theme(
-    plot.title = element_text(size = 12, face = "bold") # smaller than before
-  )
-
-
-```
-
-Figure 5 shows the distribution of air temperature across observed avalanche hazard (OAH) levels. Higher hazard categories are generally associated with lower air temperatures, with “Considerable -”, “Considerable +”, and “High” hazards centred below 0 °C. “Low” hazard days show medians above freezing and wider variability. The transition at “Moderate” hazard, where temperatures cluster around 0 °C reflects conditions that can either stabilise or destabilise the snowpack, supporting earlier findings that avalanche activity in Scotland is highly sensitive to small and rapid shifts in temperature due to its maritime climate (Ward, 1980; Diggins, 2009; Pozdnoukhov et al., 2008).
-
-The figure highlights air temperature as a critical factor for avalanche hazard, reinforcing the need to include it in forecasting approaches. The observed relationship aligns with prior literature emphasising the destabilising effects of freeze–thaw variability and sub-zero conditions. A neural network model will be able to capture the interactions between temperature and other snowpack features.
-
-### e. FAH vs OAH
-
-```{r OAH-FAH-plot}
+```{r OAH-FAH-plot-code, echo = FALSE}
 library(dplyr)
 library(tidyr)
 library(ggplot2)
@@ -548,6 +595,15 @@ df_prop <- as.data.frame(tab_prop) %>%
   rename(p = Freq, OAH = OAH_next) %>%
   mutate(on_diag = as.character(OAH) == as.character(FAH))
 
+```
+
+Lastly, Figure 6 shows the relationship between forecast avalanche hazard (FAH) on day *t* and observed avalanche hazard (OAH) on day *t+1*. Each column sums to 100%, showing how outcomes were distributed given a specific forecast level. Forecasts of "Low" hazard were highly accurate, with `r tab_prop[1,1]*100` % of cases confirmed the following day. This indicates that forecasters were most successful in predicting stable snowpack conditions and low hazard scenarios.
+
+For intermediate levels such as “Moderate” and “Considerable –” the agreement weakens. Only about half of “Moderate” forecasts matched the following day’s observations, with a substantial spillover into “Low” and “Considerable –”. “Considerable –” forecasts split almost evenly between being observed as “Moderate,” “Considerable –,” and “Considerable +.” This pattern shows that there is a challenge in differentiating between neighbouring hazard categories, which may highlight the subjectivity and sensitivity of these intermediate hazard thresholds.
+
+Forecasts of “High” hazard showed weaker reliability. Fewer than one-quarter of these forecasts corresponded to an observed “High” hazard the next day. Most “High” forecasts aligned with “Considerable –” or “Considerable +” outcomes. This shows that there is a tendency towards over-prediction of extreme conditions, or difficulty in anticipating when weather and snowpack instabilities will escalate into truly high-risk scenarios.
+
+```{r OAH-FAH-plot, echo = FALSE}
 ggplot(df_prop, aes(x = FAH, y = OAH, fill = p)) +
   geom_tile(color = "white") +
   geom_tile(data = dplyr::filter(df_prop, on_diag),
@@ -564,26 +620,11 @@ ggplot(df_prop, aes(x = FAH, y = OAH, fill = p)) +
   theme_minimal(base_size = 12) +
   theme(axis.text.x = element_text(angle = 40, hjust = 1),
         plot.title = element_text(face = "bold", size = 14))
-
-
-
 ```
 
-Figure 6 shows the relationship between forecast avalanche hazard (FAH) on day *t* and observed avalanche hazard (OAH) on day *t+1*. Each column sums to 100%, showing how outcomes were distributed given a specific forecast level. There is a strong alignment at the lower hazard categories as forecasts (FAH) of “Low” hazards were accurate in the majority of cases, with 87% of observations (OAH) also recorded as “Low.” This indicates that forecasters were most successful in predicting stable snowpack conditions and low hazard scenarios.
+The plot shows that the forecast (FAH) is highest in stable, low-risk conditions and lowest at the extremes, with the middle categories marked by uncertainty. This implies that avalanche hazard ratings are best treated as ordinal outcomes for modelling purposes, where the cost of misclassification is not uniform and depends on how far apart the categories are. Neural networks can capture these patterns well when framed as ordinal classfiers. They can learn that misclassifications most often occur between neighbouring hazard levels, instead of treating all errors equally. Class imbalances will also need to be addressed during model training to ensure the network does not simply default to predicting the most common outcomes.
 
-For intermediate levels such as “Moderate” and “Considerable –” the agreement weakens. Only about half of “Moderate” forecasts matched the following day’s observations, with a substantial spillover into “Low” and “Considerable –”. “Considerable –” forecasts split almost evenly between being observed as “Moderate,” “Considerable –,” and “Considerable +.” This pattern shows that there is a challenge in differentiating between neighbouring hazard categories, which may highlight the subjectivity and sensitivity of these intermediate hazard thresholds.
-
-Forecasts of “High” hazard showed weaker reliability. Fewer than one-quarter of these forecasts corresponded to an observed “High” hazard the next day. Most “High” forecasts aligned with “Considerable –” or “Considerable +” outcomes. This shows that there is a tendency towards over-prediction of extreme conditions, or difficulty in anticipating when weather and snowpack instabilities will escalate into truly high-risk scenarios.
-
-The plot shows that the forecast (FAH) is highest in stable, low-risk conditions and lowest at the extremes, with the middle categories marked by uncertainty. This implies that avalanche hazard ratings are best treated as ordinal outcomes for modeeling purposes, where the cost of misclassification is not uniform and depends on how far apart the categories are. Neural networks can capture these patterns well when framed as ordinal classfiers. They can learn that misclassifications most often occur between neighbouring hazard levels, instead of treating all errors equally. Class imbalances will also need to be addressed during model training to ensure the network does not simply default to predicting the most common outcomes.
-
-### f. Regional Dominance??
-
-```{r}
-
-```
-
-### g. Missing Values
+### e. Missing Values
 
 ```{r}
 
