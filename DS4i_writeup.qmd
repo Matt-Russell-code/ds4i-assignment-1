@@ -1506,19 +1506,19 @@ load( "rnn_window_7")
 load("rnn_window_30")
 load("rnn_window_120")
 
-rnn_window_3 <- res_window_3 %>% 
+rnn_window_3 <- rnn_window_3 %>% 
   mutate(model_no = row_number(),
          window  = 3)
 
-rnn_window_7 <- res_window_7 %>% 
+rnn_window_7 <- rnn_window_7 %>% 
   mutate(model_no = row_number(),
          window  = 7)
 
-rnn_window_30 <- res_window_30 %>% 
+rnn_window_30 <- rnn_window_30 %>% 
   mutate(model_no = row_number(),
          window  = 30)
 
-rnn_window_120 <- res_window_120%>% 
+rnn_window_120 <- rnn_window_120%>% 
   mutate(model_no = row_number(),
          window  = 120)
 
@@ -2138,27 +2138,28 @@ h2o.varimp_plot(best_model, num_of_features = 50)
 
 ## Results
 
-```{r}
+```{r sanana_work}
 
 #Hi Sanana ! :)
 
 #Here  are all the  model  and prediction objects
 
-#FFN
 
-#best_model #H20 FFN final  model chosen
-#cnn_final_model #cnn model 
-#rnn_final_model #final  rnn model
+#Below are some workings on the prediction objects. Skip past to the below banner that says HERE
 
-#best_pred_df  #h20 ffn model predictions on test data
+
 
 pred_ffn_labels <- best_pred_df[,"predict"]
 # pred_cnn
 # pred_rnn
 
-true_labels <- test$OAH
-pred_ffn_labels <- factor(pred_ffn_labels, levels = levels(true_labels))
+# true_labels <- test$OAH
+# pred_ffn_labels <- factor(pred_ffn_labels, levels = levels(true_labels))
+# save(pred_ffn_labels, file = "pred_ffn_labels")
+# save(true_labels, file = "true_labels")
 
+load("pred_ffn_labels")
+load("true_labels")
 
 
 # Map integers back to labels
@@ -2174,6 +2175,8 @@ pred_rnn_labels <- factor(levels(true_labels)[pred_rnn],
                    levels = levels(true_labels))
 
 
+
+
 # temporal_labels <- max.col(y.test)
 # 
 # temporal_labels <- factor(levels(true_labels)[temporal_labels],
@@ -2183,15 +2186,17 @@ pred_rnn_labels <- factor(levels(true_labels)[pred_rnn],
 
 load("temporal_labels")
 
-#so the  final prediction objects are
-# 
-# pred_cnn_labels
-# pred_rnn_labels
-# pred_ffn_labels
+#---------------------------------------------------HERE-------------------------------------------------------
 
-#labels for  testing  data
-# true_labels # for  FFn
-# temporal_labels  # for cnn  and rnn
+#pred_rnn_labels <---- predictions for RNN loaded above
+#pred_cnn_labels <---- predictions for cnn loaded above
+#pred_ffn_labels <---- predictions for ffn loaded above
+
+
+
+#temporal_labels <----- test set labels for cnn and rnn
+#true_labels <----------- test set for ffn (randomly shuffled)
+
 
 
 
