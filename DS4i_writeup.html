@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>DS4I - Project Writeup</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="DS4i_writeup_files/libs/clipboard/clipboard.min.js"></script>
+<script src="DS4i_writeup_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="DS4i_writeup_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="DS4i_writeup_files/libs/quarto-html/popper.min.js"></script>
+<script src="DS4i_writeup_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="DS4i_writeup_files/libs/quarto-html/anchor.min.js"></script>
+<link href="DS4i_writeup_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="DS4i_writeup_files/libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="DS4i_writeup_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="DS4i_writeup_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="DS4i_writeup_files/libs/bootstrap/bootstrap-bb462d781dde1847d9e3ccf7736099dd.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="DS4i_writeup_files/libs/kePrint-0.0.1/kePrint.js"></script>
+
+<link href="DS4i_writeup_files/libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+
+<link href="DS4i_writeup_files/libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
+
+<script src="DS4i_writeup_files/libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+
+<link href="DS4i_writeup_files/libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet">
+
+<script src="DS4i_writeup_files/libs/datatables-binding-0.33/datatables.js"></script>
+
+<script src="DS4i_writeup_files/libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+
+<link href="DS4i_writeup_files/libs/dt-core-1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
+
+<link href="DS4i_writeup_files/libs/dt-core-1.13.6/css/jquery.dataTables.extra.css" rel="stylesheet">
+
+<script src="DS4i_writeup_files/libs/dt-core-1.13.6/js/jquery.dataTables.min.js"></script>
+
+<link href="DS4i_writeup_files/libs/crosstalk-1.2.1/css/crosstalk.min.css" rel="stylesheet">
+
+<script src="DS4i_writeup_files/libs/crosstalk-1.2.1/js/crosstalk.min.js"></script>
+
+
+
+</head>
+
+<body class="fullcontent quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">DS4I - Project Writeup</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="av.jpg" class="img-fluid figure-img" width="2000"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><span style="font-size:12px">Photo by Nicolas Cool on Unsplash</span></p>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+</section>
+<section id="literature-review" class="level2">
+<h2 class="anchored" data-anchor-id="literature-review">Literature Review</h2>
+<p>Snow avalanches are a recognised hazard in snow-prone mountain regions worldwide. Unlike in many alpine regions, avalanches in Scotland rarely impact large settlements and infrastructure, however, pose significant risk to recreational users in the Scottish Highlands (Diggins, 2009; Ward, 1980). Winter activities, such as climbing, walking, and skiing are increasingly popular, leading to greater human exposure to avalanche-prone terrain and resulting in numerous injuries and occasional fatalities each year (Scottish Avalanche Information Service [SAIS], 2024). This has prompted several studies to examine Scottish snowpack conditions and avalanche forecasting strategies, with the earliest studies conducted between 1970 and 1980 (Langmuir, 1970; Spink, 1970; Beattie, 1976; Ward, 1980; Ward &amp; Beattie, 1985). However, these early studies were largely descriptive, relying on snow-pit measurements and expert judgements to identify snow properties and weather conditions correlated with avalanche risk. Building on this foundation, Ward (1984) applied one of the first predictive forecasting models for avalanches in Scotland.</p>
+<p>Numerous studies emphasise the inherent complexity of avalanche modelling where predictions are based on multiple interacting factors (Choubin et al., 2019; Herwijen et al., 2016; Hendrick et al., 2023; Pozdnoukhov et al., 2008; Singh &amp; Ganju, 2008). This complexity is only heightened in regions with highly variable weather patterns (Sharma &amp; Ganju, 1999). In response, early statistical methods such as nearest neighbours became a popular technique to support (not replace) forecasters in predicting avalanche outcomes through relating current weather conditions to past avalanche events (Blagovechshenskiy et al., 2023; Kala et al., 2025; Pozdnoukhov et al., 2018; Singh &amp; Ganju, 2008). However, this approach is susceptible to overfitting and struggles with complex and high-dimensional data (Kala et al., 2025; Pozdnoukhov et al., 2018; Singh &amp; Ganju, 2018). Using a dataset from Lochaber, Scotland, Pozdnoukhov et al.&nbsp;(2008) reported that support vector machines (SVMs) showed a broadly similar performance to a baseline nearest neighbours method, however, had the added advantage of handling high dimensionality datasets and produced more descriptive forecasts. SVMs have been explored and shown success in aiding avalanche risk forecasting in other regions including Iran, India, Switzerland, and Tibet (Choubin et al., 2019; Rahmati et al., 2019; Schirmer et al., 2009; Tiwari et al., 2021; Wen et al., 2022).&nbsp;</p>
+<p>Over recent years, more complex machine learning (ML) algorithms such as regression trees, random forests, and neural networks have demonstrated strong predictive performance in avalanche forecasting (Blagovechshenskiy et al., 2023; Choubin et al., 2019; Gauthier et al., 2025; Hendrick et al., 2023; Rahmati et al., 2019; Singh &amp; Ganju, 2018; Tiwari et al., 2021; Wen et al., 2022). Avalanche datasets are often high-dimensional, and using human forecaster judgement to select which features to include can be highly subjective and variable (Helbig et al., 2015; Pozdnoukhov et al., 2008). Hybrid approaches, which combine ML with expert-guided feature selection, have shown practical value (Gauthier et al., 2025). However, fully data-driven forecasting methods, particularly neural networks, offer important advantages.</p>
+<p>Simulating the work of a human brain, neural networks are deep learning algorithms consisting of interconnected nodes/neurons that can model complex and nonlinear relationships between inputs and outputs (Blagovechshenskiy et al., 2023; Sharma et al., 2023; Tu, 1996). Their ability to process all input variables simultaneously allows them to implicitly learn interactions and patterns in the data without prior knowledge on which variables are most important (Blagovechshenskiy et al., 2023; Fromm &amp; Schonberger, 2022; Sharma et al., 2023). Studies in avalanche forecasting from regions such as Switzerland, Kazakhstan, and&nbsp; India have demonstrated that neural networks not only achieve strong predictive performance, but can also assess the relative importance of each variable to avalanche risk (Fromm &amp; Schonberger; Sharma et al., 2023; Singh &amp; Ganju, 2008). This ability makes them particularly well suited for high-dimensional datasets, such as those encountered in avalanche forecasting, as well as in contexts where prior domain knowledge is limited or when the most relevant predictors are unknown.</p>
+<p>Despite advances in data-driven avalanche forecasting worldwide, research specific to Scotland remains limited. This scarcity lies in three domains:&nbsp;</p>
+<p>(1) The small number of published forecasting studies (only 9 relevant peer-reviewed papers exist on Scopus, with the most recent study conducted in 2011 (keywords: ( “avalanche forecasting” OR “avalanche prediction” ) AND Scotland)</p>
+<p>(2) The restricted range of statistical approaches explored (only KNN and SVM) (Joachim et al., 2004; Pozdnoukhov et al., 2008; Pozdnoukhov et al., 2011; Purves et al., 2003)</p>
+<p>(3) The focus on only a few regions in Scotland (primarily the Cairngorms and Lochaber regions)</p>
+<p>This limited research interest likely stems from the highly localised nature of avalanche risk in Scotland, which generally occurs in remote areas and impacts only a small subset of individuals (Diggins, 2009; SAIS, 2024). Nevertheless, improved avalanche forecasting is argued to be increasingly important under changing climate conditions and global warming, which may alter snowpack properties and avalanche risk and frequency (Gauthier et al., 2025; Werritty &amp; Sugden, 2013). A detailed discussion of climate change, however, is beyond the scope of this paper. As such, the present study aims to extend forecasting research in Scotland both spatially and methodologically by applying a neural network (or two or three?????) across the six distinct regions of Creah Meagaidh, Glencoe, Lochaber, Northern Cairngorms, Southern Cairngorms, and Torridon.</p>
+<p>&lt;insert paragraph explaining modelling approaches of prev papers + this project’s modelling approaches. I.e. the neural net architecture&gt;</p>
+<p>Hypothesis???? We can workshop together</p>
+</section>
+<section id="context-and-dataset" class="level2">
+<h2 class="anchored" data-anchor-id="context-and-dataset">Context and Dataset</h2>
+<p>Scotland experiences a mild, wet, and temperate maritime climate due to the strong influence of the North Atlantic Ocean and persistent south-westerly winds (Pozdnoukhov et al., 2008; Scottish Government, 2011). These conditions result in rapid temperature changes, frequent heavy precipitation (falling as either snow or rain in the winter), and strong winds. With the highest peak, Ben Nevis in Lochaber (1345 m), mountains are low compared to alpine ranges (~ 4000 m), resulting in a snowpack that is typically shallower, wetter, and more variable in comparison (Britannica, 2025; Pozdnoukhov et al., 2008; WSL Institute for Snow and Avalanche Research SLF, 2016). Aspects such as rapid freeze-thaw cycles, rain-on-snow, and wind redistribution further destabilise snow structure and stability, creating avalanche risks that can arise and disappear within a short time (Diggins, 2009; Pozdnoukhov et al., 2008; Purves et al., 2003; Scottish Government, 2011). Snowpack conditions also differ regionally; while the West is characterised as strongly maritime, with mild and wet winters, the North and East experience colder and drier conditions (MetOffice, 2010). As such, Scotland’s climate is highly variable both spatially and temporally, adding to the complexity of predicting avalanche risk.</p>
+<p>This paper uses a 15-year archive of avalanche forecasts from Scotland across the six areas of Creah Meagaidh, Glencoe, Lochaber, Northern Cairngorms, Southern Cairngorms, and Torridon, produced by the Scottish Avalanche Information Service (2025). Figure ? illustrates the spatial distribution of avalanche observations over this time frame, with points marking individual events and labels indicating the locations of these six areas. The overall total observations by area and hazard category (Table ?) reflects the difference in observation frequency rather than absolute avalanche activity: Cairngorms (Northern and Southern) and Lochaber, located in the colder and drier North and East, have the most recorded observations, whereas Torridon in the maritime West has substantially fewer. Across all areas, Low and Moderate hazard levels are the most frequently recorded, while High hazard events are comparatively rare and concentrated primarily in Northern Cairngorms and Lochaber.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="DS4i_writeup_files/figure-html/map-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption></caption>
+<colgroup>
+<col style="width: 27%">
+<col style="width: 5%">
+<col style="width: 12%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 6%">
+<col style="width: 8%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Area</th>
+<th style="text-align: right;">Low</th>
+<th style="text-align: right;">Moderate</th>
+<th style="text-align: right;">Considerable -</th>
+<th style="text-align: right;">Considerable +</th>
+<th style="text-align: right;">High</th>
+<th style="text-align: right;">Total</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Creag Meagaidh</td>
+<td style="text-align: right;">636</td>
+<td style="text-align: right;">545</td>
+<td style="text-align: right;">413</td>
+<td style="text-align: right;">155</td>
+<td style="text-align: right;">63</td>
+<td style="text-align: right;">1812</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Glencoe</td>
+<td style="text-align: right;">716</td>
+<td style="text-align: right;">524</td>
+<td style="text-align: right;">405</td>
+<td style="text-align: right;">109</td>
+<td style="text-align: right;">58</td>
+<td style="text-align: right;">1812</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Lochaber</td>
+<td style="text-align: right;">597</td>
+<td style="text-align: right;">498</td>
+<td style="text-align: right;">506</td>
+<td style="text-align: right;">116</td>
+<td style="text-align: right;">56</td>
+<td style="text-align: right;">1773</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Northern Cairngorms</td>
+<td style="text-align: right;">655</td>
+<td style="text-align: right;">567</td>
+<td style="text-align: right;">501</td>
+<td style="text-align: right;">122</td>
+<td style="text-align: right;">46</td>
+<td style="text-align: right;">1891</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Southern Cairngorms</td>
+<td style="text-align: right;">751</td>
+<td style="text-align: right;">546</td>
+<td style="text-align: right;">383</td>
+<td style="text-align: right;">72</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">1787</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Torridon</td>
+<td style="text-align: right;">678</td>
+<td style="text-align: right;">373</td>
+<td style="text-align: right;">85</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1143</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Data cover the Scottish winters (November to April) from the December 2009 to March 2025. Predictor variables are categorised into three main groups, including (1) position and topography, (2) weather, and (3) snowpack test, all collected at the forecast location. Each observation also includes the date and the forecast area (metadata). For an overview of the predictors available, see Table ? below.</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table caption-top table-sm table-striped small" data-quarto-postprocess="true">
+<caption>\emph{Overview of predictor variables available in the avalanche forecast dataset.}</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Predictor_Group</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Variables</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; width: 8em;">Metadata</td>
+<td style="text-align: left; width: 30em;">date, area</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; width: 8em;">Position and Topography</td>
+<td style="text-align: left; width: 30em;">longitude, latitude, altitude, aspect of slope, incline of slope</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; width: 8em;">Weather</td>
+<td style="text-align: left; width: 30em;">air temperature, wind direction, wind speed, cloud cover, precipitation code, snowdrift, total snow depth, foot penetration, ski penetration, rain observed at 900m elevation, summit air temperature, summit wind direction, summit wind speed</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; width: 8em;">Snowpack Test</td>
+<td style="text-align: left; width: 30em;">max. temperature gradient, max. hardness gradient, no.settle, snow.index, insolation, crystals, wetness, AV.Cat, and snow temperature</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="exploratory-data-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="exploratory-data-analysis">Exploratory Data Analysis</h2>
+<section id="a.-feature-map-correlations" class="level3">
+<h3 class="anchored" data-anchor-id="a.-feature-map-correlations">a. Feature Map Correlations</h3>
+<p>The Scottish avalanche dataset contains several features that are moderately to strongly correlated, while others appear largely independent (Figure ?). This pattern suggests a potential redundancy. From a modelling perspective, highly correlated features can increase complexity and obscure unique contributors, however, can also capture the multifactorial nature of avalanche risk. In the context of neural networks, the presence of correlated variables is not inherently problematic, since the model can learn non-linear interactions. However, strong correlations can increase the risk of overfitting if the network memorises patterns rather than generalising to new data.</p>
+<p>The highest correlation found was between summit air temperature and air temperature (r = 0.8463287), indicating strong redundancy. Nevertheless, both variables were retained as each likely capture a different aspect relevant to forecasting (i.e., summit conditions versus broader conditions). Air temperature is an identified key driver of avalanche conditions and is expected to be an important predictor in the final neural network (Fromm &amp; Schonberger, 2022; Gauthier et al., 2025; Pozdnoukhouv et al., 2018; Souckova et al., 2022; Ward,1980). Exploration of air temperature across observed avalanche hazard (OAH) levels further supports its importance in forecasting (Figure ?). Higher hazard categories are generally associated with lower air temperatures, with “Considerable -”, “Considerable +”, and “High” hazards centred below 0 °C. “Low” hazard days show medians above freezing and wider variability. The transition at “Moderate” hazard, where temperatures cluster around 0 °C, reflects conditions that can either stabilise or destabilise the snowpack through freeze-thaw cycles. These patterns highlight Scotland’s sensitivity to rapid temperature shifts and their impact on avalanche activity (Diggins, 2009; Pozdnoukhov et al., 2008).</p>
+<p>Other correlations with 0.5&lt;|r|&lt; 0.80 are moderately strong but remain informative and manageable, as neural networks can accommodate interdependent inputs.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="DS4i_writeup_files/figure-html/correlation-plot-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="DS4i_writeup_files/figure-html/temperature-plot-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="b.-precipitation-type" class="level3">
+<h3 class="anchored" data-anchor-id="b.-precipitation-type">b. Precipitation Type</h3>
+<p>The distribution of OAH levels varies clearly across different precipitation types (Figure ?). Low hazard predominates under conditions of none (0) or trace (2) precipitation, whereas higher hazard categories become increasingly prevalent as snowfall intensity increases. Heavy snow (level 10) is associated with a substantially larger share of “Considerable” and “High” hazard ratings (81.8965517 %). This aligns with existing knowledge of the Scottish climate, where rapid weather shifts and frequent rain or snow-on-snow events contribute to unstable snowpack conditions (Pozdnoukhov et al., 2008; Purves et al., 2003).</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="DS4i_writeup_files/figure-html/precip-plot-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="c.-seasonality" class="level3">
+<h3 class="anchored" data-anchor-id="c.-seasonality">c.&nbsp;Seasonality</h3>
+<p>Monthly patterns of OAH across the extended avalanche season (November to May) reveal clear seasonal trends (Figure ?). Early (November-December) and late (April-May) months are dominated by low and moderate hazards, while mid-season months (Jan-Mar) contain a higher proportion of considerable and high hazards. Most forecasts occur between December and March, highlighting the period of greatest avalanche risk (SAIS, 2024). These patterns reflect the cyclical nature of snowpack development, with mid-winter weather instability driving higher-risk avalanches (Diggins, 2009; Podzdnoukhov et al., 2008; Purves et al., 2003). For modelling, this seasonality indicates that hazard levels are unevenly distributed, however, neural networks can accommodate complex, changing relationships between weather conditions and other important variables.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="DS4i_writeup_files/figure-html/season-plots-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="d.-fah-vs-oah" class="level3">
+<h3 class="anchored" data-anchor-id="d.-fah-vs-oah">d.&nbsp;FAH vs OAH</h3>
+<p>Lastly, Figure 6 shows the relationship between forecast avalanche hazard (FAH) on day <em>t</em> and observed avalanche hazard (OAH) on day <em>t+1</em>. Each column sums to 100%, showing how outcomes were distributed given a specific forecast level. Forecasts of “Low” hazard were highly accurate, with 86.5089121 % of cases confirmed the following day. This indicates that forecasters were most successful in predicting stable snowpack conditions and low hazard scenarios.</p>
+<p>For intermediate levels such as “Moderate” and “Considerable –” the agreement weakens. Only about half of “Moderate” forecasts matched the following day’s observations, with a substantial spillover into “Low” and “Considerable –”. “Considerable –” forecasts split almost evenly between being observed as “Moderate,” “Considerable –,” and “Considerable +.” This pattern shows that there is a challenge in differentiating between neighbouring hazard categories, which may highlight the subjectivity and sensitivity of these intermediate hazard thresholds.</p>
+<p>Forecasts of “High” hazard showed weaker reliability. Fewer than one-quarter of these forecasts corresponded to an observed “High” hazard the next day. Most “High” forecasts aligned with “Considerable –” or “Considerable +” outcomes. This shows that there is a tendency towards over-prediction of extreme conditions, or difficulty in anticipating when weather and snowpack instabilities will escalate into truly high-risk scenarios.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="DS4i_writeup_files/figure-html/OAH-FAH-plot-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The plot shows that the forecast (FAH) is highest in stable, low-risk conditions and lowest at the extremes, with the middle categories marked by uncertainty. This implies that avalanche hazard ratings are best treated as ordinal outcomes for modelling purposes, where the cost of misclassification is not uniform and depends on how far apart the categories are. Neural networks can capture these patterns well when framed as ordinal classfiers. They can learn that misclassifications most often occur between neighbouring hazard levels, instead of treating all errors equally. Class imbalances will also need to be addressed during model training to ensure the network does not simply default to predicting the most common outcomes.</p>
+</section>
+<section id="e.-missing-values" class="level3">
+<h3 class="anchored" data-anchor-id="e.-missing-values">e. Missing Values</h3>
+</section>
+</section>
+<section id="feature-engineering" class="level2">
+<h2 class="anchored" data-anchor-id="feature-engineering">Feature Engineering</h2>
+<section id="modeling-methodology" class="level3">
+<h3 class="anchored" data-anchor-id="modeling-methodology">Modeling Methodology</h3>
+<p>There are three main models used in this project. Firstly, a feed forward neural network (FFN), a convolutional neural network (CNN) and a recurrent neural network (RNN). The idea behind the feed forward neural network is that it would likely leverage the categorical variables, like forecasted avalanche risk, well in predicting the target. However, CNN and RNN were more likely to leverage any time series trends present in the data.</p>
+<p>A feed forward neural network makes use of a series of nodes. The basic structure of neural networks is first input nodes, variable layers of perceptron nodes and output nodes. The perceptron nodes (or hidden layers) contain activation functions and weights. The first hidden layer nodes take the weighted sum of the input layer, apply the activation function to this input and multiply that by the weight. Subsequent layers take the previous layers calculations as input. The weights determine the amount of influence that part of the system has on the algorithm, while the activation functions introduce non-linearity. To determine the weights, they are first randomly assigned, and then back propagation is completed during training with an optimizer like gradient descent to assign appropriate values.</p>
+<p>Convolutional neural networks work differently, by sliding filters across the data which allow the algorithm to consider broader trends. The filter is essentially a matrix of weights, and the dot product between these weights and the data is calculated. These individual values are taken across the feature space, in turn highlighting any local patterns. Using multiple filters at once during training allows for the algorithm to learn various patterns simultaneously. After completing the above convolution, activation functions are applied to the resultant feature map to introduce non-linearity. Typically, a process called pooling is also applied, which reduces the dimensionality of the feature space, while preserving the most informative trends. One can stack numerous layers of convolutions to learn deeper trends in the data, although we found that 2 layers were a good balance between the model’s complexity and ability to generalize.</p>
+<div class="cell">
+<div class="cell-output-display">
+<!-- VALID-padding convolution demo with filter display -->
+<style>
+  :root{ --cell:40px; --gap:6px; }
+  .wrap{font-family:system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color:#111}
+  .row{display:flex; gap:18px; align-items:flex-start}
+  .col{flex:1}
+  .label{font-size:13px; color:#444; margin: 4px 0 8px; font-weight:600}
+  .board, .out{display:grid; gap:var(--gap); position:relative; padding:6px; border:1px solid #ddd; border-radius:12px; background:#fff}
+  .board{grid-template-columns:repeat(5, var(--cell)); grid-auto-rows:var(--cell)}
+  .out{grid-template-columns:repeat(3, var(--cell)); grid-auto-rows:var(--cell)}
+  .cell, .ocell{display:flex; align-items:center; justify-content:center; font-weight:600; border:1px solid #ccc; border-radius:8px}
+  .cell{background:#fff}
+  .ocell{background:#f8fbff; border-color:#bcd7ff}
+  .ocell.active{background:#e9f3ff}
+  .hl{position:absolute; border:2px solid #0a84ff; border-radius:12px; box-shadow:0 0 0 3px rgba(10,132,255,.15) inset; pointer-events:none; transition:left .22s, top .22s}
+  .controls{display:flex; gap:10px; align-items:center; padding:8px; border:1px solid #eee; border-radius:10px; background:#fafafa; margin:10px 0}
+  .btn{padding:6px 10px; border:1px solid #bbb; border-radius:10px; background:#fff; cursor:pointer}
+  .mini{font-size:12px; color:#555}
+  .kernel{display:grid; grid-template-columns:repeat(3, var(--cell)); grid-auto-rows:var(--cell); gap:var(--gap); padding:6px; border:1px dashed #bbb; border-radius:10px; background:#fff; margin-top:10px}
+  .kcell{display:flex; align-items:center; justify-content:center; font-weight:600; border:1px solid #ccc; border-radius:6px; background:#fdfdfd}
+</style>
+
+<div class="wrap">
+  <div class="controls">
+    <button class="btn" id="play">▶︎ Play</button>
+    <button class="btn" id="pause" disabled="">⏸ Pause</button>
+    <button class="btn" id="step">↦ Step</button>
+    <label class="mini">Speed <input id="speed" type="range" min="200" max="1500" step="50" value="700"></label>
+    <button class="btn" id="reset">↺ Reset</button>
+  </div>
+
+  <div class="row">
+    <div class="col">
+      <div class="label">Input feature map (5×5)</div>
+      <div class="board" id="board"></div>
+    </div>
+    <div class="col">
+      <div class="label">Dot‑product output (VALID, 3×3)</div>
+      <div class="out" id="out"></div>
+      <div class="mini">Position <span id="pos">(1,1)</span> • Value <span id="sum">—</span></div>
+      <div class="label" style="margin-top:10px">Filter weights (3×3)</div>
+      <div class="kernel" id="kernel"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const N = 5;      // input size
+  const K = 3;      // kernel size
+  const O = N - K + 1; // VALID output size = 3
+
+  // Fixed simple edge-like kernel
+  const KERNEL = [
+    [-1, -1, -1],
+    [-1,  8, -1],
+    [-1, -1, -1]
+  ];
+
+  const boardEl = document.getElementById('board');
+  const outEl   = document.getElementById('out');
+  const posEl   = document.getElementById('pos');
+  const sumEl   = document.getElementById('sum');
+  const playBtn = document.getElementById('play');
+  const pauseBtn= document.getElementById('pause');
+  const stepBtn = document.getElementById('step');
+  const speedEl = document.getElementById('speed');
+  const resetBtn= document.getElementById('reset');
+  const kernelEl= document.getElementById('kernel');
+
+  function renderKernel(){
+    kernelEl.innerHTML = '';
+    for(let r=0;r<K;r++){
+      for(let c=0;c<K;c++){
+        const d = document.createElement('div');
+        d.className = 'kcell';
+        d.textContent = KERNEL[r][c];
+        kernelEl.appendChild(d);
+      }
+    }
+  }
+
+  // Structured input
+  function makeInput(){
+    const a = [];
+    for(let r=0;r<N;r++){
+      const row = [];
+      for(let c=0;c<N;c++){
+        let v = Math.round(10 + 4*r + 2*c);
+        if(r===2 && c===2) v += 25;
+        row.push(v);
+      }
+      a.push(row);
+    }
+    return a;
+  }
+
+  let input = makeInput();
+  let output = Array.from({length:O}, ()=> Array(O).fill(null));
+
+  // Render input grid
+  function renderInput(){
+    boardEl.innerHTML = '';
+    for(let r=0;r<N;r++){
+      for(let c=0;c<N;c++){
+        const d = document.createElement('div');
+        d.className = 'cell';
+        d.textContent = input[r][c];
+        boardEl.appendChild(d);
+      }
+    }
+    const hl = document.createElement('div');
+    hl.className = 'hl';
+    hl.id = 'hl';
+    boardEl.appendChild(hl);
+  }
+
+  function renderOutput(active){
+    outEl.innerHTML = '';
+    for(let r=0;r<O;r++){
+      for(let c=0;c<O;c++){
+        const d = document.createElement('div');
+        const isActive = active && active[0]===r && active[1]===c;
+        d.className = 'ocell' + (isActive ? ' active' : '');
+        const val = output[r][c];
+        d.textContent = (val==null ? '' : val);
+        outEl.appendChild(d);
+      }
+    }
+  }
+
+  function moveHL(r, c){
+    const cs = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cell'));
+    const gp = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap'));
+    const left = c*(cs+gp);
+    const top  = r*(cs+gp);
+    const hl = document.getElementById('hl');
+    hl.style.width  = `calc(var(--cell) * ${K} + var(--gap) * ${K-1})`;
+    hl.style.height = `calc(var(--cell) * ${K} + var(--gap) * ${K-1})`;
+    hl.style.left = left + 'px';
+    hl.style.top  = top  + 'px';
+  }
+
+  function convAt(r,c){
+    let s = 0;
+    for(let kr=0; kr<K; kr++){
+      for(let kc=0; kc<K; kc++){
+        s += input[r+kr][c+kc] * KERNEL[kr][kc];
+      }
+    }
+    return Math.round(s);
+  }
+
+  const path = [];
+  for(let r=0;r<=N-K;r++){
+    for(let c=0;c<=N-K;c++) path.push([r,c]);
+  }
+  let idx = 0;
+  let playing = false; let timer=null;
+
+  function step(){
+    if(idx>=path.length){ stop(); return; }
+    const [r,c] = path[idx];
+    moveHL(r,c);
+    const val = convAt(r,c);
+    output[r][c] = val;
+    renderOutput([r,c]);
+    posEl.textContent = `(${r+1},${c+1})`;
+    sumEl.textContent = String(val);
+    idx++;
+  }
+  function play(){
+    if(playing) return; playing=true; playBtn.disabled=true; pauseBtn.disabled=false;
+    const go=()=>{ step(); if(playing && idx<path.length){ timer=setTimeout(go, parseInt(speedEl.value,10)); } else { stop(); } };
+    go();
+  }
+  function stop(){ playing=false; playBtn.disabled=false; pauseBtn.disabled=true; clearTimeout(timer); timer=null; }
+  function reset(){ stop(); idx=0; output = Array.from({length:O}, ()=> Array(O).fill(null)); renderOutput(); moveHL(0,0); posEl.textContent='(1,1)'; sumEl.textContent='—'; }
+
+  playBtn.addEventListener('click', play);
+  pauseBtn.addEventListener('click', stop);
+  stepBtn.addEventListener('click', step);
+  resetBtn.addEventListener('click', reset);
+
+  renderInput();
+  renderOutput();
+  renderKernel();
+  moveHL(0,0);
+})();
+</script>
+</div>
+</div>
+<p>[add section on RNN]</p>
+</section>
+<section id="data-preprocessing-of-neural-networks-models" class="level3">
+<h3 class="anchored" data-anchor-id="data-preprocessing-of-neural-networks-models">Data Preprocessing of Neural Networks models</h3>
+<p>To prepare the data for CNN and RNN, we constructed an array with 3 dimensions which include the number of samples, the time window length and the number features. Each training sample is created by sliding a fixed window across the data. Within the array, the columns represent individual time steps, and the depth represent the features of the data. Since our prediction is one day, each training example represents the observations within the window, for the next day prediction. Furthermore, the data was standardized to ensure the algorithms were not distorted by the different scales of the features. Lastly, the data was also one hot encoded, such that each categorical variable is split into multiple binary variable demarcating each category.</p>
+<p>To preserve the temporal trends of the data, for the CNN and RNN the train and test split was not randomly shuffled. Instead, the first 80% of avalanche records were used as training examples, and the remaining became the test set.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="DS4i_writeup_files/figure-html/cnn_window_vis-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>          used  (Mb) gc trigger  (Mb) max used  (Mb)
+Ncells 3203926 171.2    4758732 254.2  4758732 254.2
+Vcells 6844683  52.3   18099878 138.1 16611405 126.8</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="DS4i_writeup_files/figure-html/RNN_window_search-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.6890166</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="modelling" class="level2">
+<h2 class="anchored" data-anchor-id="modelling">Modelling</h2>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>   [1] 5 5 5 4 4 4 4 4 4 4 4 4 4 4 4 5 5 4 5 5 4 5 5 5 4 4 4 4 4 4 4 4 4 4 4 4 4
+  [38] 4 4 4 4 4 1 4 4 4 4 4 4 4 4 4 5 4 4 4 4 4 4 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5
+  [75] 5 5 3 3 3 3 3 3 3 3 3 1 1 3 3 3 3 3 4 3 3 4 3 3 4 4 4 4 4 3 3 3 3 3 3 3 3
+ [112] 3 4 3 3 3 3 3 3 3 1 1 1 1 1 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3
+ [149] 3 3 3 3 1 3 3 3 1 1 1 1 1 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 5 5 5 5 5
+ [186] 3 3 3 3 3 4 4 3 3 3 3 3 3 3 4 4 4 4 4 4 4 3 3 3 3 3 3 1 1 1 1 1 1 4 4 1 4
+ [223] 1 1 1 4 4 4 4 4 4 4 4 4 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3
+ [260] 4 4 4 4 1 1 1 4 4 4 4 4 4 4 4 4 4 4 4 4 4 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 1
+ [297] 1 1 1 1 1 1 1 1 4 4 4 4 4 4 4 4 4 4 4 1 1 1 1 1 1 1 3 1 1 3 1 1 1 1 1 1 1
+ [334] 1 1 4 4 4 4 4 4 4 4 4 4 3 3 3 4 4 3 3 3 3 3 3 3 3 1 1 1 1 1 1 1 1 1 4 4 4
+ [371] 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 5 4 4 1 1 1 1 1 1
+ [408] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 3 3
+ [445] 3 3 3 3 1 1 1 3 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+ [482] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 3 3 3 3 3 3 1 1 1
+ [519] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 4 4 4 4 4 4 4 4 1 1 1 1 1 1 1
+ [556] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 4 4 1 1 1 1 1 1 1 1 1 1 1 1 1
+ [593] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 5 5 5 5 5 5 5 5 5 5 5 5 5 5 4 4 4 4
+ [630] 4 4 4 4 4 4 4 4 4 4 4 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5
+ [667] 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 4 4
+ [704] 4 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 4 4 4 4 4
+ [741] 3 3 3 3 1 1 1 1 1 1 1 1 3 3 3 3 3 1 1 3 3 1 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3
+ [778] 3 3 3 3 3 3 3 3 3 4 4 4 4 4 3 3 3 4 4 4 4 4 4 4 4 4 3 3 3 3 1 1 4 4 4 4 4
+ [815] 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4
+ [852] 1 1 1 1 1 1 1 1 1 1 1 1 1 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4
+ [889] 4 3 3 3 3 3 3 3 3 3 3 1 1 1 1 1 1 1 1 1 1 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4
+ [926] 4 4 4 4 4 4 4 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 4 4 4 4 4 1 1 1 1 1 1 4 1
+ [963] 1 1 1 1 3 4 3 3 3 3 3 3 3 3 3 3 1 1 1 4 4 4 4 4 4 4 4 1 1 4 4 4 4 4 4 4 4
+[1000] 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4
+[1037] 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4
+[1074] 4 4 4 4 4 4 4 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 3 1 1 1 1 1 1 1 1 1 1
+[1111] 1 1 1 1 1 1 1 1 1 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 5 5 5 5 5 5 5 5 4 4 4 4 4
+[1148] 4 4 4 4 4 5 5 5 5 5 5 5 5 5 5 5 5 5 5 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 1 1
+[1185] 1 1 1 1 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 5 4 5 5 5 5 5 4 4 4 4 4 4 4
+[1222] 4 4 4 5 5 5 5 5 4 4 4 4 4 4 4 5 5 5 5 5 5 5 5 5 5 5 5 4 5 5 5 5 5 5 5 5 4
+[1259] 4 4 4 5 5 5 5 5 5 5 5 3 3 3 3 3 3 3 3 3 3 3 3 5 5 5 5 5 5 5 5 5 5 3 3 3 3
+[1296] 3 3 3 3 3 3 3 3 3 3 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5
+[1333] 5 5 5 5 5 3 3 3 3 3 3 3 3 3 3 3 3 3 5 5 5 5 5 5 5 5 5 3 3 3 3 4 4 4 4 4 4
+[1370] 4 4 3 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 3 3 3 3 3 3 3 4 5 5 5
+[1407] 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 4 5
+[1444] 5 5 5 5 5 5 5 5 5 5 5 5 5 5 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4
+[1481] 4 4 4 4 3 3 3 3 3 3 3 3 3 3 3 3 3 3 1 1 5 5 5 5 4 5 4 4 4 4 4 4 4 4 4 4 4
+[1518] 5 5 5 5 5 5 5 4 4 4 4 4 4 4 4 4 4 4 4 4 5 5 5 5 5 5 5 5 5 4 4 4 4 5 1 1 1
+[1555] 1 1 5 5 5 5 5 5 5</code></pre>
+</div>
+</div>
+</section>
+<section id="modelling-1" class="level2">
+<h2 class="anchored" data-anchor-id="modelling-1">Modelling</h2>
+<p>FFN</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code> Connection successful!
+
+R is connected to the H2O cluster: 
+    H2O cluster uptime:         43 minutes 39 seconds 
+    H2O cluster timezone:       Africa/Johannesburg 
+    H2O data parsing timezone:  UTC 
+    H2O cluster version:        3.44.0.3 
+    H2O cluster version age:    1 year, 9 months and 4 days 
+    H2O cluster name:           H2O_started_from_R_USER_osn291 
+    H2O cluster total nodes:    1 
+    H2O cluster total memory:   3.90 GB 
+    H2O cluster total cores:    12 
+    H2O cluster allowed cores:  12 
+    H2O cluster healthy:        TRUE 
+    H2O Connection ip:          localhost 
+    H2O Connection port:        54321 
+    H2O Connection proxy:       NA 
+    H2O Internal Security:      FALSE 
+    R Version:                  R version 4.4.1 (2024-06-14 ucrt) </code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>
+  |                                                                            
+  |                                                                      |   0%
+  |                                                                            
+  |======================================================================| 100%</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+  |                                                                            
+  |                                                                      |   0%
+  |                                                                            
+  |======================================================================| 100%</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="DS4i_writeup_files/figure-html/get-best-model-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>
+  |                                                                            
+  |                                                                      |   0%
+  |                                                                            
+  |======================================================================| 100%</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Variable Importances: 
+            variable relative_importance scaled_importance percentage
+1       FAH.Moderate            1.000000          1.000000   0.041100
+2            FAH.Low            0.967902          0.967902   0.039780
+3 FAH.Considerable -            0.872198          0.872198   0.035847
+4 FAH.Considerable +            0.860799          0.860799   0.035379
+5           FAH.High            0.857075          0.857075   0.035226
+
+---
+                  variable relative_importance scaled_importance percentage
+64                latitude            0.229823          0.229823   0.009446
+65                  Aspect            0.221589          0.221589   0.009107
+66      season.missing(NA)            0.000000          0.000000   0.000000
+67 Precip.Code.missing(NA)            0.000000          0.000000   0.000000
+68        Area.missing(NA)            0.000000          0.000000   0.000000
+69         FAH.missing(NA)            0.000000          0.000000   0.000000</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="DS4i_writeup_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="results" class="level2">
+<h2 class="anchored" data-anchor-id="results">Results</h2>
+</section>
+<section id="discussion" class="level2">
+<h2 class="anchored" data-anchor-id="discussion">Discussion</h2>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
