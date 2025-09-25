@@ -1435,7 +1435,7 @@ ggplot(res %>% slice(1:top_n),
 
 ```
 
-The validation accuracy of the top 30 models is presented in Figure ? above. The Best performance overall was a validation accuracy of roughly 69%. We stuck with this model, as validation accuracy had not improved meaningfully over the course of the expanded search. The best performing model during the prediction window search acheived a validation accurayc of `r max(results_cnn_search$val_accuracy)`. 
+The validation accuracy of the top 30 models is presented in Figure ? above. The Best performance overall was a validation accuracy of roughly 69%. We stuck with this model, as validation accuracy had not improved meaningfully over the course of the expanded search. The best performing model during the prediction window search acheived a validation accurayc of `r max(results_cnn_search$val_accuracy)`. The final selected model involved 32 filters in the first layer, followed by a dropout of 70%, then 16 layers in the second layers, followed by dropout of 70% and global average pooling into the the final output layer. 
 
 ```{r fiiting_final_cnn}
 # #best model  had 16 filters with 2 layers,  and kernel size 15,  0.7 dropout between layers
@@ -1494,6 +1494,8 @@ load("pred_cnn")
 ```
 
 ## Reccurrent Neural Network 
+
+The approach for the Reccurent Neural Network was the same as the CNN discussed above. Firstly a search over numerous candidate wndow sizes was completed, and a subsequent expanded search was done as well. In Figure ? below, the validation accuracy of the models test is presented. We used a combination of two Long Short-Term memory layers (LSTM), with dropout and varied the LSTM units and dropout values in the grid search.
 
 ```{r  RNN_search_function}
 
@@ -1651,6 +1653,7 @@ ggplot(data = results_rnn_search, aes( x  = model_no, y  = val_accuracy, colour 
 max(results_rnn_search$test_accuracy)
 
 ```
+The window search for the recurrent neural network involved more competitive performances. In this case, a window of 30 days appears more robust overall, containing fewer worse performing models towards the extreme end. 
 
 ## Modelling
 
