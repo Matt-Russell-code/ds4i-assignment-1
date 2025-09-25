@@ -1132,22 +1132,21 @@ ggplot(data = results_cnn_search, aes( x  = model_no, y  = val_accuracy, colour 
 
 ```
 
-<<<<<<< HEAD
 
 
 ```{r  expanded_search}
 # #we will go with a window of roughly  7  days
 
-rm(res_window_120,  res_window_3, res_window_30)
-
-W_ <- pre_data(w = 7, h = 1)
-
-y.test <- W_[[1]]
-y.train <- W_[[2]]
-X.train <- W_[[3]]
-X.test <- W_[[4]]
-cl_weights <- W_[[5]]
-F_ <- W_[[6]]
+# rm(res_window_120,  res_window_3, res_window_30)
+# 
+# W_ <- pre_data(w = 7, h = 1)
+# 
+# y.test <- W_[[1]]
+# y.train <- W_[[2]]
+# X.train <- W_[[3]]
+# X.test <- W_[[4]]
+# cl_weights <- W_[[5]]
+# F_ <- W_[[6]]
 
 # 
 # # Repro seeds
@@ -1522,14 +1521,14 @@ max(results_rnn_search$test_accuracy)
 
 ```{r}
 
-W_ <- pre_data(w = 30, h = 1) #using 30 days
-
-y.test <- W_[[1]]
-y.train <- W_[[2]]
-X.train <- W_[[3]]
-X.test <- W_[[4]]
-cl_weights <- W_[[5]]
-F_ <- W_[[6]]
+# W_ <- pre_data(w = 30, h = 1) #using 30 days
+# 
+# y.test <- W_[[1]]
+# y.train <- W_[[2]]
+# X.train <- W_[[3]]
+# X.test <- W_[[4]]
+# cl_weights <- W_[[5]]
+# F_ <- W_[[6]]
 
 set.seed(1)
 tf$keras$utils$set_random_seed(123L)
@@ -2155,10 +2154,14 @@ pred_rnn_labels <- factor(levels(true_labels)[pred_rnn],
                    levels = levels(true_labels))
 
 
-temporal_labels <- max.col(y.test)
+# temporal_labels <- max.col(y.test)
+# 
+# temporal_labels <- factor(levels(true_labels)[temporal_labels],
+#                    levels = levels(true_labels))
+# 
+# save(temporal_labels, file = "temporal_labels")
 
-temporal_labels <- factor(levels(true_labels)[temporal_labels],
-                   levels = levels(true_labels))
+load("temporal_labels")
 
 #so the  final prediction objects are
 
