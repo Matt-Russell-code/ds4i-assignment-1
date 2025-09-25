@@ -793,9 +793,9 @@ To preserve the temporal trends of the data, for the CNN and RNN the train and t
 
 ```{r Keras_data_preprocessing_function}
 
-library(keras3)
-library(tensorflow)
-library(reticulate)
+# library(keras3)
+# library(tensorflow)
+# library(reticulate)
 
 # reticulate::install_miniconda()   # sets up a private Python just for R
 # library(keras3)
