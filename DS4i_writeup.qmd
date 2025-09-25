@@ -771,7 +771,7 @@ comp <- sum(!complete.cases(data_edit))/sum(complete.cases(data_edit)) * 100
 
 ```
 
-Having dropped the above variables, we were left with roughly `r comp` % non-complete samples in the data.
+Having dropped the above variables, we were left with roughly `r comp` % non-complete samples in the data. We dropped the remaining samples that contained missing values to maintain complete cases for the models. 
 
 ```{r date_time}
 
@@ -857,6 +857,14 @@ htmltools::includeHTML("cnn_filter_animation_quarto_ready_html.html")
 To prepare the data for CNN and RNN, we constructed an array with 3 dimensions which include the number of samples, the time window length and the number features. Each training sample is created by sliding a fixed window across the data. Within the array, the columns represent individual time steps, and the depth represent the features of the data. Since our prediction is one day, each training example represents the observations within the window, for the next day prediction. Furthermore, the data was standardized to ensure the algorithms were not distorted by the different scales of the features. Lastly, the data was also one hot encoded, such that each categorical variable is split into multiple binary variable demarcating each category.
 
 To preserve the temporal trends of the data, for the CNN and RNN the train and test split was not randomly shuffled. Instead, the first 80% of avalanche records were used as training examples, and the remaining became the test set.
+
+
+## Convolutional Neural Network
+
+The selection of the convolution neural network and recurrent neural netowrk parameters involved two stages. Firstly, several candidate data sets were created with various time windows. In our cases, we tested a window of 3 days, 7 days, 30 days and 120 days. We kept the search parameters more narrow in this stage, and estimated many models in order to assess what prediction window would be most appropriate, according to validation accuracy.
+
+In the second stage, a more broad grid search was conducted on the chosen window, and the best model was chosen according to the highest validation accuracy. In all our tests presented, we assessed architectures with two convolutional layers using the Relu function in those latent layers, and the softmax function in our input layer to create the predictions. More complex architectures did not performly better, or meaningfully better. 
+
 
 ```{r Keras_data_preprocessing_function}
 
@@ -1215,16 +1223,24 @@ res_window_120 <- res_window_120%>%
 
 
 results_cnn_search <- rbind(res_window_3, res_window_30, res_window_7,  res_window_120)
+
+
 ```
+
+
+
 
 ```{r cnn_window_vis}
 #graph of validation accuracy
 ggplot(data = results_cnn_search, aes( x  = model_no, y  = val_accuracy, colour = as.factor(window)))+
   geom_point()+
-  labs(x = "Model Number (arranged by  validation accuracy)")
+  labs(x = "Model Number (arranged by  validation accuracy)") + 
+  labs(title = "Figure ?: CNN Prediction Window Search")
 
 
 ```
+Considering Figure ? above, we decided on a prediction window of 7 days. Overall, out of the models tested, most perform best with a window of roughly 3 to 7 days, while 30 days and 120 days were shown to be meaningfully worse than former two options. Overall, validation accuracy between 3 to 7 days was competitive. However, 7 days appeared to be more robust, as the set of models with a 3 day prediction contained performances that achieved a much lower accuracy at the extreme end. 
+
 
 ```{r  expanded_search}
 # #we will go with a window of roughly  7  days
@@ -1246,14 +1262,14 @@ ggplot(data = results_cnn_search, aes( x  = model_no, y  = val_accuracy, colour 
 # tf$keras$utils$set_random_seed(123L)
 # 
 # # Define the grid (
-# grid <- expand.grid(
-#   filters1   = c( 16, 32, 64),
-#   filters2   = c( 16, 32, 64),
-#   kernel_sz  = c(5,15),
-#   drop1      = c(0.5,0.7),
-#   drop2      = c(0.5, 0.7),
-#   stringsAsFactors = FALSE
-# )
+grid <- expand.grid(
+  filters1   = c( 16, 32, 64),
+  filters2   = c( 16, 32, 64),
+  kernel_sz  = c(5,15),
+  drop1      = c(0.5,0.7),
+  drop2      = c(0.5, 0.7),
+  stringsAsFactors = FALSE
+)
 # 
 # results <- data.frame(
 #   filters1 = integer(), filters2 = integer(),
@@ -1357,6 +1373,38 @@ best <- final_cnn_search[1, ]
 gc()
 ```
 
+
+
+
+
+After completing the above search, an expanded search with the below hyperamaters was completed.
+
+```{r}
+
+grid <- data.frame(
+  hyperparameter = c("filters1", "filters2", "kernel_sz", "drop1", "drop2"),
+  values = I(list(
+    c(16, 32, 64),
+    c(16, 32, 64),
+    c(5, 15),
+    c(0.5, 0.7),
+    c(0.5, 0.7)
+  ))
+)
+
+
+
+kable(grid, format = "html",
+      digits = 4,
+      caption = "Expanded Grid Search") %>%
+  kable_styling(
+    bootstrap_options = c("hover"),
+    full_width = FALSE
+  ) 
+
+
+```
+
 ```{r  final_cnn_search_viz}
 
 
@@ -1372,20 +1420,22 @@ res <- final_cnn_search %>%
 
 library(scales)
 
-# 
-# top_n <- 30 
-# ggplot(res %>% slice(1:top_n),
-#        aes(x = reorder(label, val_accuracy), y = val_accuracy, fill = top5)) +
-#   geom_col() +
-#   coord_flip() +
-#   geom_text(aes(label = percent(val_accuracy, accuracy = 0.1)),
-#             hjust = -0.1, size = 3) +
-#   scale_y_continuous(labels = percent_format(accuracy = 1), expand = expansion(mult = c(0, .1))) +
-#   scale_fill_manual(values = c("grey80", "grey40"), guide = "none") +
-#   labs(title = sprintf("Top %d configs by validation accuracy", top_n),
-#        x = "Config", y = "Val accuracy")
+
+top_n <- 30
+ggplot(res %>% slice(1:top_n),
+       aes(x = reorder(label, val_accuracy), y = val_accuracy, fill = top5)) +
+  geom_col() +
+  coord_flip() +
+  geom_text(aes(label = percent(val_accuracy, accuracy = 0.1)),
+            hjust = -0.1, size = 3) +
+  scale_y_continuous(labels = percent_format(accuracy = 1), expand = expansion(mult = c(0, .1))) +
+  scale_fill_manual(values = c("lightblue", "#1f78b4"), guide = "none") +
+  labs(title = sprintf("Figure ?: Top %d configs by validation accuracy", top_n),
+       x = "Config", y = "Val accuracy")
 
 ```
+
+The validation accuracy of the top 30 models is presented in Figure ? above. The Best performance overall was a validation accuracy of roughly 69%. We stuck with this model, as validation accuracy had not improved meaningfully over the course of the expanded search. The best performing model during the prediction window search acheived a validation accurayc of `r max(results_cnn_search$val_accuracy)`. 
 
 ```{r fiiting_final_cnn}
 # #best model  had 16 filters with 2 layers,  and kernel size 15,  0.7 dropout between layers
@@ -1442,6 +1492,8 @@ library(scales)
 load("pred_cnn")
 
 ```
+
+## Reccurrent Neural Network 
 
 ```{r  RNN_search_function}
 
