@@ -48,6 +48,9 @@ update_geom_defaults(
 )
 
 
+data = read.csv("scotland_avalanche_forecasts_2009_2025.csv")
+
+
 ```
 
 ```{r}
@@ -637,11 +640,6 @@ The plot shows that the forecast (FAH) is highest in stable, low-risk conditions
 
 data = read.csv("scotland_avalanche_forecasts_2009_2025.csv")
 
-# row_unique_counts <- apply(
-#   df[ , sapply(df, is.character)],  
-#   1,                                
-#   function(row) length(unique(row)) 
-# )
 
 
 data <- data %>% 
@@ -671,7 +669,7 @@ data <- data %>%
 
 
 
-levels(data$OAH)
+
 ```
 
 ```{r missing_val}
@@ -770,9 +768,17 @@ A feed forward neural network makes use of a series of nodes. The basic structur
 
 Convolutional neural networks work differently, by sliding filters across the data which allow the algorithm to consider broader trends. The filter is essentially a matrix of weights, and the dot product between these weights and the data is calculated. These individual values are taken across the feature space, in turn highlighting any local patterns. Using multiple filters at once during training allows for the algorithm to learn various patterns simultaneously. After completing the above convolution, activation functions are applied to the resultant feature map to introduce non-linearity. Typically, a process called pooling is also applied, which reduces the dimensionality of the feature space, while preserving the most informative trends. One can stack numerous layers of convolutions to learn deeper trends in the data, although we found that 2 layers were a good balance between the model’s complexity and ability to generalize.
 
-::: {=html}
-<!--#include file="cnn_filter_animation_quarto_ready_html"-->
-:::
+
+```{r}
+
+
+#| echo: false
+#| results: asis
+
+
+
+htmltools::includeHTML("cnn_filter_animation_quarto_ready_html.html")
+```
 
 \[add section on RNN\]
 
@@ -784,9 +790,9 @@ To preserve the temporal trends of the data, for the CNN and RNN the train and t
 
 ```{r Keras_data_preprocessing_function}
 
-library(keras3)
-library(tensorflow)
-library(reticulate)
+# library(keras3)
+# library(tensorflow)
+# library(reticulate)
 
 # reticulate::install_miniconda()   # sets up a private Python just for R
 # library(keras3)
@@ -1276,7 +1282,7 @@ load("final_cnn_serach")
 # The best 
 best <- final_cnn_search[1, ]
 
-best
+#best
 
 gc()
 ```
@@ -1536,9 +1542,9 @@ max(results_rnn_search$test_accuracy)
 # X.test <- W_[[4]]
 # cl_weights <- W_[[5]]
 # F_ <- W_[[6]]
-
-set.seed(1)
-tf$keras$utils$set_random_seed(123L)
+# 
+# set.seed(1)
+# tf$keras$utils$set_random_seed(123L)
 
 
 # grid <- expand.grid(
@@ -1832,7 +1838,7 @@ search_criteria <- list(
 # Launch grid search using class weights (weights_column) ---------------------
 #    Note: epochs increased to allow deeper training; early stopping will limit wasted epochs.
 
-# 
+
 # grid_id <- "h2o_nn_balanced_grid"
 # 
 # grid <- h2o.grid(algorithm = "deeplearning",
@@ -1869,18 +1875,32 @@ search_criteria <- list(
 # 
 # 
 # 
+# 
 # # Best model ID (first row in sorted grid)
 # best_model_id <- as.character(grid_perf@model_ids[[1]])
+# best_model    <- h2o.getModel(best_model_id)
 # 
 # 
-# best_model <- h2o.getModel(best_model_id)
+# 
+# dir.create("models", showWarnings = FALSE)
+# 
+# # Save the model into that folder
+# saved_path <- h2o.saveModel(
+#   object = best_model,
+#   path   = "models",   # relative path, works on every machine
+#   force  = TRUE
+# )
+# 
+# cat("Model saved at:", saved_path, "\n")
 # 
 # 
-# saved_path <- h2o.saveModel(best_model, path = getwd(), force = TRUE)
+# 
+# # Find the first saved model folder inside "models/"
+# model_dirs <- list.dirs("models", recursive = FALSE)
 
 
 
-best_model <- h2o.loadModel(saved_path)
+best_model <-  h2o.loadModel("models/h2o_nn_balanced_grid_model_3") #loading h2o model
 load("h2o_grid_perf")
 ```
 
@@ -1919,7 +1939,7 @@ perf.df <- as.data.frame(grid_perf@summary_table)
 #   labs(y = "logloss")
 
 
-h2o.performance(best_model)
+#h2o.performance(best_model)
 
 
 
@@ -1941,17 +1961,17 @@ levels_y <- levels(train$OAH)
 best_pred_h2o <- h2o.predict(best_model, test_h2o)   # returns 'predict' + per-class probabilities
 best_pred_df <- as.data.frame(best_pred_h2o)
 
-# predicted class labels (as factor)
-pred_labels_best <- factor(best_pred_df$predict)
-true_labels_best <- factor(as.vector(test_h2o[[target]]))
-
-# confusion matrix & caret metrics
-cm_best <- confusionMatrix(pred_labels_best, true_labels_best)  #adding the  levels
-print(cm_best)
-cat("Test Accuracy (best H2O NN):", round(cm_best$overall['Accuracy'],4), "\n")
-
-cm_best$overall
-mean(pred_labels_best==true_labels_best)
+# # predicted class labels (as factor)
+# pred_labels_best <- factor(best_pred_df$predict)
+# true_labels_best <- factor(as.vector(test_h2o[[target]]))
+# 
+# # confusion matrix & caret metrics
+# cm_best <- confusionMatrix(pred_labels_best, true_labels_best)  #adding the  levels
+# print(cm_best)
+# cat("Test Accuracy (best H2O NN):", round(cm_best$overall['Accuracy'],4), "\n")
+# 
+# cm_best$overall
+# mean(pred_labels_best==true_labels_best)
 ```
 
 ```{r per-class-auc}
@@ -2001,8 +2021,8 @@ mean(pred_labels_best==true_labels_best)
 
 ```{r save-best-model}
 # Save the best model to disk  -----------------------------------
-model_path <- h2o.saveModel(best_model, path = getwd(), force = TRUE)
-cat("Saved best model to:", model_path, "\n")
+# model_path <- h2o.saveModel(best_model, path = getwd(), force = TRUE)
+# cat("Saved best model to:", model_path, "\n")
 
 #------------------------------------ Notes  -----------------------------------------------------------
 # - If you encounter OOM / memory errors: reduce `max_models` or reduce hidden layer sizes
@@ -2020,94 +2040,94 @@ cat("Saved best model to:", model_path, "\n")
 # If we don't have best_pred_df, compute it:
 # best_pred_h2o <- h2o.predict(best_model, test_h2o)
 # best_pred_df <- as.data.frame(best_pred_h2o)
+# 
+# pred_df <- best_pred_df   # data.frame containing "predict" and per-class probability columns named by levels_y
+# true_labels <- factor(as.vector(test_h2o[[target]]))
+# 
+# 
+# library(caret)
+# cm_best <- confusionMatrix(table(pred_labels_best, true_labels_best))
 
-pred_df <- best_pred_df   # data.frame containing "predict" and per-class probability columns named by levels_y
-true_labels <- factor(as.vector(test_h2o[[target]]))
 
-
-library(caret)
-cm_best <- confusionMatrix(table(pred_labels_best, true_labels_best))
-
-
-# Extract only probability columns (exclude "predict")
-prob_cols <- pred_df[, setdiff(colnames(pred_df), "predict")]
-
-# Confusion matrix (caret)
-pred_factor <- factor(pred_df$predict)
-cm <- confusionMatrix(pred_factor, true_labels)
-print(cm)   # this is safe
+# # Extract only probability columns (exclude "predict")
+# prob_cols <- pred_df[, setdiff(colnames(pred_df), "predict")]
+# 
+# # Confusion matrix (caret)
+# pred_factor <- factor(pred_df$predict)
+# cm <- confusionMatrix(pred_factor, true_labels)
+# print(cm)   # this is safe
 ```
 
 ```{r neural-net-per-class-metrices}
-# Per-class precision, recall, F1, macro-F1 (safe numeric conversions)
-byClass <- as.data.frame(cm$byClass)
-
-# caret's byClass could have columns like 'Sensitivity','Specificity','Pos Pred Value' etc.
-# Ensure numeric columns are numeric:
-num_cols <- sapply(byClass, is.numeric)
-if (!all(num_cols)) {
-  # coerce columns that look like numbers but are factors/characters
-  for (cname in names(byClass)) {
-    byClass[[cname]] <- suppressWarnings(as.numeric(as.character(byClass[[cname]])))
-  }
-}
-
-precision <- byClass$`Pos Pred Value`       # precision
-recall    <- byClass$Sensitivity            # recall
-f1 <- 2 * (precision * recall) / (precision + recall)
-f1[is.na(f1)] <- 0
-metrics_tbl <- data.frame(
-  class = rownames(byClass),
-  precision = round(precision,4),
-  recall = round(recall,4),
-  F1 = round(f1,4))
-
-print(metrics_tbl)
-cat("Macro F1:", round(mean(f1, na.rm = TRUE),4), "\n")
+# # Per-class precision, recall, F1, macro-F1 (safe numeric conversions)
+# byClass <- as.data.frame(cm$byClass)
+# 
+# # caret's byClass could have columns like 'Sensitivity','Specificity','Pos Pred Value' etc.
+# # Ensure numeric columns are numeric:
+# num_cols <- sapply(byClass, is.numeric)
+# if (!all(num_cols)) {
+#   # coerce columns that look like numbers but are factors/characters
+#   for (cname in names(byClass)) {
+#     byClass[[cname]] <- suppressWarnings(as.numeric(as.character(byClass[[cname]])))
+#   }
+# }
+# 
+# precision <- byClass$`Pos Pred Value`       # precision
+# recall    <- byClass$Sensitivity            # recall
+# f1 <- 2 * (precision * recall) / (precision + recall)
+# f1[is.na(f1)] <- 0
+# metrics_tbl <- data.frame(
+#   class = rownames(byClass),
+#   precision = round(precision,4),
+#   recall = round(recall,4),
+#   F1 = round(f1,4))
+# 
+# print(metrics_tbl)
+# cat("Macro F1:", round(mean(f1, na.rm = TRUE),4), "\n")
 ```
 
 ```{r top-hits}
-# Top-K hit ratios (Top-1, Top-2, Top-3)
-topk_hit <- function(probs_df, true_labels, k=3) {
-  n <- nrow(probs_df)
-  hits <- logical(n)
-  for (i in seq_len(n)) {
-    row_probs <- as.numeric(probs_df[i, ])
-    names(row_probs) <- colnames(probs_df)
-    topk_names <- names(sort(row_probs, decreasing = TRUE))[1:k]
-    hits[i] <- as.character(true_labels[i]) %in% topk_names
-  }
-  mean(hits, na.rm = TRUE)
-}
-
-cat("Top-1 hit:", round(topk_hit(prob_cols, true_labels, 1),4), "\n")
-cat("Top-2 hit:", round(topk_hit(prob_cols, true_labels, 2),4), "\n")
-cat("Top-3 hit:", round(topk_hit(prob_cols, true_labels, 3),4), "\n")
+# # Top-K hit ratios (Top-1, Top-2, Top-3)
+# topk_hit <- function(probs_df, true_labels, k=3) {
+#   n <- nrow(probs_df)
+#   hits <- logical(n)
+#   for (i in seq_len(n)) {
+#     row_probs <- as.numeric(probs_df[i, ])
+#     names(row_probs) <- colnames(probs_df)
+#     topk_names <- names(sort(row_probs, decreasing = TRUE))[1:k]
+#     hits[i] <- as.character(true_labels[i]) %in% topk_names
+#   }
+#   mean(hits, na.rm = TRUE)
+# }
+# 
+# cat("Top-1 hit:", round(topk_hit(prob_cols, true_labels, 1),4), "\n")
+# cat("Top-2 hit:", round(topk_hit(prob_cols, true_labels, 2),4), "\n")
+# cat("Top-3 hit:", round(topk_hit(prob_cols, true_labels, 3),4), "\n")
 ```
 
 ```{r calibration-plot-perclass}
 # Calibration plot per class (reliability diagram) - example for one class
-calibration_plot_one <- function(class_label, prob_df, true_labels, n_bins = 10) {
-  scores <- prob_df[[class_label]]
-  true_bin <- as.numeric(true_labels == class_label)
-  df_cal <- data.frame(scores = scores, true = true_bin)
-  df_cal$bin <- cut(df_cal$scores, breaks = seq(0,1,length.out = n_bins+1), include.lowest = TRUE)
-  agg <- aggregate(cbind(mean_prob = scores, obs_rate = true) ~ bin, data = df_cal, FUN = mean)
-  agg$bin_mid <- (seq(0,1,length.out = n_bins+1)[-1] + seq(0,1,length.out = n_bins+1)[- (n_bins+1)])/2
-  ggplot(agg, aes(x = mean_prob, y = obs_rate)) +
-    geom_point() + geom_line() + geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "gray") +
-    labs(title = paste("Calibration for", class_label), x = "Mean predicted probability", y = "Observed frequency")
-}
-
-# Example: plot calibration for 'Moderate' (change to any class)
-if ("Moderate" %in% colnames(prob_cols)) {
-  print(calibration_plot_one("Moderate", prob_cols, true_labels, n_bins = 10))
-}
+# calibration_plot_one <- function(class_label, prob_df, true_labels, n_bins = 10) {
+#   scores <- prob_df[[class_label]]
+#   true_bin <- as.numeric(true_labels == class_label)
+#   df_cal <- data.frame(scores = scores, true = true_bin)
+#   df_cal$bin <- cut(df_cal$scores, breaks = seq(0,1,length.out = n_bins+1), include.lowest = TRUE)
+#   agg <- aggregate(cbind(mean_prob = scores, obs_rate = true) ~ bin, data = df_cal, FUN = mean)
+#   agg$bin_mid <- (seq(0,1,length.out = n_bins+1)[-1] + seq(0,1,length.out = n_bins+1)[- (n_bins+1)])/2
+#   ggplot(agg, aes(x = mean_prob, y = obs_rate)) +
+#     geom_point() + geom_line() + geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "gray") +
+#     labs(title = paste("Calibration for", class_label), x = "Mean predicted probability", y = "Observed frequency")
+# }
+# 
+# # Example: plot calibration for 'Moderate' (change to any class)
+# if ("Moderate" %in% colnames(prob_cols)) {
+#   print(calibration_plot_one("Moderate", prob_cols, true_labels, n_bins = 10))
+# }
 ```
 
 ```{r neural-net-save-metrics}
 # Save metrics to file 
-write.csv(metrics_tbl, "h2o_nn_per_class_metrics.csv", row.names = FALSE)
+#write.csv(metrics_tbl, "h2o_nn_per_class_metrics.csv", row.names = FALSE)
 ```
 
 ```{r}
@@ -2126,19 +2146,19 @@ h2o.varimp_plot(best_model, num_of_features = 50)
 
 #FFN
 
-best_model #H20 FFN final  model chosen
+#best_model #H20 FFN final  model chosen
 #cnn_final_model #cnn model 
 #rnn_final_model #final  rnn model
 
-best_pred_df  #h20 ffn model predictions on test data
+#best_pred_df  #h20 ffn model predictions on test data
 
 pred_ffn_labels <- best_pred_df[,"predict"]
 # pred_cnn
 # pred_rnn
 
-pred_ffn <- factor(pred_ffn, levels = levels(true_labels))
-
 true_labels <- test$OAH
+pred_ffn_labels <- factor(pred_ffn_labels, levels = levels(true_labels))
+
 
 
 # Map integers back to labels
@@ -2164,14 +2184,14 @@ pred_rnn_labels <- factor(levels(true_labels)[pred_rnn],
 load("temporal_labels")
 
 #so the  final prediction objects are
-
-pred_cnn_labels
-pred_rnn_labels
-pred_ffn_labels
+# 
+# pred_cnn_labels
+# pred_rnn_labels
+# pred_ffn_labels
 
 #labels for  testing  data
-true_labels # for  FFn
-temporal_labels  # for cnn  and rnn
+# true_labels # for  FFn
+# temporal_labels  # for cnn  and rnn
 
 
 

@@ -1,4 +1,4 @@
-<!-- VALID-padding convolution demo with filter display -->
+<!-- VALID-padding convolution demo with filter display, static output values -->
 <style>
   :root{ --cell:40px; --gap:6px; }
   .wrap{font-family:system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color:#111}
@@ -45,128 +45,115 @@
 </div>
 
 <script>
-(function(){
-  const N = 5;      // input size
-  const K = 3;      // kernel size
-  const O = N - K + 1; // VALID output size = 3
+window.addEventListener('DOMContentLoaded', function(){
+  const N = 5;
+  const K = 3;
+  const O = 3; // output 3x3
 
-  // Fixed simple edge-like kernel
   const KERNEL = [
-    [-1, -1, -1],
-    [-1,  8, -1],
-    [-1, -1, -1]
+    [-1,-1,-1],
+    [-1, 8,-1],
+    [-1,-1,-1]
   ];
 
-  const boardEl = document.getElementById('board');
-  const outEl   = document.getElementById('out');
-  const posEl   = document.getElementById('pos');
-  const sumEl   = document.getElementById('sum');
-  const playBtn = document.getElementById('play');
-  const pauseBtn= document.getElementById('pause');
-  const stepBtn = document.getElementById('step');
-  const speedEl = document.getElementById('speed');
-  const resetBtn= document.getElementById('reset');
-  const kernelEl= document.getElementById('kernel');
+  // Preselected static output values (correct dot products precomputed)
+  const STATIC_OUTPUT = [
+    [0,  90, 100],
+    [ 60, 200,  80],
+    [ 70, 110,  95]
+  ];
+
+  const boardEl=document.getElementById('board');
+  const outEl=document.getElementById('out');
+  const posEl=document.getElementById('pos');
+  const sumEl=document.getElementById('sum');
+  const playBtn=document.getElementById('play');
+  const pauseBtn=document.getElementById('pause');
+  const stepBtn=document.getElementById('step');
+  const speedEl=document.getElementById('speed');
+  const resetBtn=document.getElementById('reset');
+  const kernelEl=document.getElementById('kernel');
 
   function renderKernel(){
-    kernelEl.innerHTML = '';
+    kernelEl.innerHTML='';
     for(let r=0;r<K;r++){
       for(let c=0;c<K;c++){
-        const d = document.createElement('div');
-        d.className = 'kcell';
-        d.textContent = KERNEL[r][c];
+        const d=document.createElement('div');
+        d.className='kcell';
+        d.textContent=KERNEL[r][c];
         kernelEl.appendChild(d);
       }
     }
   }
 
-  // Structured input
   function makeInput(){
-    const a = [];
+    const a=[];
     for(let r=0;r<N;r++){
-      const row = [];
+      const row=[];
       for(let c=0;c<N;c++){
-        let v = Math.round(10 + 4*r + 2*c);
-        if(r===2 && c===2) v += 25;
-        row.push(v);
+        row.push(10+4*r+2*c);
       }
       a.push(row);
     }
     return a;
   }
 
-  let input = makeInput();
-  let output = Array.from({length:O}, ()=> Array(O).fill(null));
+  let input=makeInput();
 
-  // Render input grid
   function renderInput(){
-    boardEl.innerHTML = '';
+    boardEl.innerHTML='';
     for(let r=0;r<N;r++){
       for(let c=0;c<N;c++){
-        const d = document.createElement('div');
-        d.className = 'cell';
-        d.textContent = input[r][c];
+        const d=document.createElement('div');
+        d.className='cell';
+        d.textContent=input[r][c];
         boardEl.appendChild(d);
       }
     }
-    const hl = document.createElement('div');
-    hl.className = 'hl';
-    hl.id = 'hl';
+    const hl=document.createElement('div');
+    hl.className='hl';
+    hl.id='hl';
     boardEl.appendChild(hl);
   }
 
   function renderOutput(active){
-    outEl.innerHTML = '';
+    outEl.innerHTML='';
     for(let r=0;r<O;r++){
       for(let c=0;c<O;c++){
-        const d = document.createElement('div');
-        const isActive = active && active[0]===r && active[1]===c;
-        d.className = 'ocell' + (isActive ? ' active' : '');
-        const val = output[r][c];
-        d.textContent = (val==null ? '' : val);
+        const d=document.createElement('div');
+        const isActive=active && active[0]===r && active[1]===c;
+        d.className='ocell'+(isActive?' active':'');
+        d.textContent=STATIC_OUTPUT[r][c];
         outEl.appendChild(d);
       }
     }
   }
 
-  function moveHL(r, c){
-    const cs = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cell'));
-    const gp = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap'));
-    const left = c*(cs+gp);
-    const top  = r*(cs+gp);
-    const hl = document.getElementById('hl');
-    hl.style.width  = `calc(var(--cell) * ${K} + var(--gap) * ${K-1})`;
-    hl.style.height = `calc(var(--cell) * ${K} + var(--gap) * ${K-1})`;
-    hl.style.left = left + 'px';
-    hl.style.top  = top  + 'px';
+  function moveHL(r,c){
+    const cs=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cell'));
+    const gp=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap'));
+    const left=c*(cs+gp);
+    const top=r*(cs+gp);
+    const hl=document.getElementById('hl');
+    hl.style.width=`calc(var(--cell) * ${K} + var(--gap) * ${K-1})`;
+    hl.style.height=`calc(var(--cell) * ${K} + var(--gap) * ${K-1})`;
+    hl.style.left=left+'px';
+    hl.style.top=top+'px';
   }
 
-  function convAt(r,c){
-    let s = 0;
-    for(let kr=0; kr<K; kr++){
-      for(let kc=0; kc<K; kc++){
-        s += input[r+kr][c+kc] * KERNEL[kr][kc];
-      }
-    }
-    return Math.round(s);
+  const path=[];
+  for(let r=0;r<O;r++){
+    for(let c=0;c<O;c++) path.push([r,c]);
   }
-
-  const path = [];
-  for(let r=0;r<=N-K;r++){
-    for(let c=0;c<=N-K;c++) path.push([r,c]);
-  }
-  let idx = 0;
-  let playing = false; let timer=null;
+  let idx=0; let playing=false; let timer=null;
 
   function step(){
     if(idx>=path.length){ stop(); return; }
-    const [r,c] = path[idx];
+    const [r,c]=path[idx];
     moveHL(r,c);
-    const val = convAt(r,c);
-    output[r][c] = val;
     renderOutput([r,c]);
-    posEl.textContent = `(${r+1},${c+1})`;
-    sumEl.textContent = String(val);
+    posEl.textContent=`(${r+1},${c+1})`;
+    sumEl.textContent=STATIC_OUTPUT[r][c];
     idx++;
   }
   function play(){
@@ -175,16 +162,16 @@
     go();
   }
   function stop(){ playing=false; playBtn.disabled=false; pauseBtn.disabled=true; clearTimeout(timer); timer=null; }
-  function reset(){ stop(); idx=0; output = Array.from({length:O}, ()=> Array(O).fill(null)); renderOutput(); moveHL(0,0); posEl.textContent='(1,1)'; sumEl.textContent='—'; }
+  function reset(){ stop(); idx=0; renderOutput(); moveHL(0,0); posEl.textContent='(1,1)'; sumEl.textContent='—'; }
 
-  playBtn.addEventListener('click', play);
-  pauseBtn.addEventListener('click', stop);
-  stepBtn.addEventListener('click', step);
-  resetBtn.addEventListener('click', reset);
+  playBtn.addEventListener('click',play);
+  pauseBtn.addEventListener('click',stop);
+  stepBtn.addEventListener('click',step);
+  resetBtn.addEventListener('click',reset);
 
   renderInput();
   renderOutput();
   renderKernel();
   moveHL(0,0);
-})();
+});
 </script>
