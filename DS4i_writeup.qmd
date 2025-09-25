@@ -633,7 +633,15 @@ The plot shows that the forecast (FAH) is highest in stable, low-risk conditions
 
 ```
 
-## Feature Engineering
+## Data Cleaning and Feature Engineering
+
+Feature engineering mainly consisted of constructing temporal variables for the models. In particular, a feed forward neural network does not natively capture any time series trends. Given that the above exploratory analysis highlights that observed avalanche risk varies according to the season, and time of year, several variable were constructed to take this into account.
+
+<br>
+
+<br>
+
+Firstly, before removing any observations that contained large amount of missing values, we constructed constructed several variable marking the samples time of day, day of the week, month and year from the date. Next, we created a variable to represent the subsequent seasons in the data, as we observed a trend that avalanche risk appeared to be increasing year on year. The first season of avalanche recordings begins in December in 2009 and ends in April. We constructed a categorical variable to represent each season from 2009 to 2025 beginning from December into the following year.
 
 ```{r read_data}
 
@@ -663,9 +671,6 @@ for (i in c){
   
 }
 
-data <- data %>%
-  mutate(OAH = ifelse(OAH == "", NA, as.character(OAH)),
-         OAH = factor(OAH))   # rebuild factor from scratch, no "" level
 
 
 
@@ -704,10 +709,73 @@ missing_df <- missing_df %>%
   filter(`Missing (%)` > 0) %>% 
   arrange(desc(`Missing (%)`),)
 
+sum(!complete.cases(data))
+
 
 ```
 
+```{r}
+
+
+
+kable(missing_df, format = "html",
+      digits = 4,
+      caption = "Missing Value Exploration") %>%
+  kable_styling(
+    bootstrap_options = c("hover"),
+    full_width = FALSE
+  ) %>%
+  footnote(general = "All values rounded to 4 decimal places.")
+
+
+
+```
+
+Missing values were also a challenge. Table ? presents the percentage of missing values for each feature in the data. *Av.Cat* was the first variable we felt should be eliminated. We could not find what this variable represented, and it had implausible values eg (`r data$AV.Cat` ). Shown in Figure ? below, we observed not discernible trend in the relationship between Ski penetration and OAH, save for High risk avalanches. Overall, we removed this feature, as the contribution of snow precipitation to the risk would likely be well represented by other variables in the data. Lastly, we removed Summit wind direction as well, (roughly 12% missing). Similarly, to *Ski.pen*, we notice not discernible trend, and decided to dropped this feature as well.
+
+```{r}
+
+
+# 2) Plot (note the exact column name)
+px <- ggplot(data, aes(x = OAH, y = Ski.Pen)) +
+  geom_boxplot(na.rm = TRUE)+
+  labs(title = "Figure ?")+
+  ylim(0, 20)
+
+px1 <- ggplot(data, aes(x = OAH, y = Summit.Wind.Dir) )+
+  geom_boxplot(na.rm = TRUE)+
+  labs(title = "Figure ?")+
+  ylim(0,500)
+
+p_all <- ggarrange(px, px1,
+                   ncol = 2,
+                   nrow = 1,
+                   labels = c("A", "B"))
+
+annotate_figure(p_all,
+                bottom = text_grob("Note: Outliers have been excluded. Y-axis scale from 0 to 20 on the left, and 0 to 500 on the right.",
+                                   hjust = 0, x = 0,       # left
+                                   size = 7, color = "black"))
+
+
+
+```
+
+```{r}
+
+data_edit <- data %>% 
+  select(-c(AV.Cat, Summit.Wind.Dir, Ski.Pen))
+
+
+comp <- sum(!complete.cases(data_edit))/sum(complete.cases(data_edit)) * 100
+
+```
+
+Having dropped the above variables, we were left with roughly `r comp` % non-complete samples in the data.
+
 ```{r date_time}
+
+
 
 #adding date variable
 data$Date <- as.POSIXct(data$Date, format="%Y-%m-%d %H:%M:%S", tz="UTC")
@@ -731,6 +799,9 @@ data <- data %>%
   group_by(season, Area) %>% 
   mutate(dayofseason = row_number()) %>% 
   arrange(Date, Area)
+
+
+
 
 
 ```
@@ -767,7 +838,6 @@ There are three main models used in this project. Firstly, a feed forward neural
 A feed forward neural network makes use of a series of nodes. The basic structure of neural networks is first input nodes, variable layers of perceptron nodes and output nodes. The perceptron nodes (or hidden layers) contain activation functions and weights. The first hidden layer nodes take the weighted sum of the input layer, apply the activation function to this input and multiply that by the weight. Subsequent layers take the previous layers calculations as input. The weights determine the amount of influence that part of the system has on the algorithm, while the activation functions introduce non-linearity. To determine the weights, they are first randomly assigned, and then back propagation is completed during training with an optimizer like gradient descent to assign appropriate values.
 
 Convolutional neural networks work differently, by sliding filters across the data which allow the algorithm to consider broader trends. The filter is essentially a matrix of weights, and the dot product between these weights and the data is calculated. These individual values are taken across the feature space, in turn highlighting any local patterns. Using multiple filters at once during training allows for the algorithm to learn various patterns simultaneously. After completing the above convolution, activation functions are applied to the resultant feature map to introduce non-linearity. Typically, a process called pooling is also applied, which reduces the dimensionality of the feature space, while preserving the most informative trends. One can stack numerous layers of convolutions to learn deeper trends in the data, although we found that 2 layers were a good balance between the model’s complexity and ability to generalize.
-
 
 ```{r}
 
