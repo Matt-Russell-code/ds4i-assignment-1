@@ -665,10 +665,13 @@ for (i in c){
   
 }
 
+data <- data %>%
+  mutate(OAH = ifelse(OAH == "", NA, as.character(OAH)),
+         OAH = factor(OAH))   # rebuild factor from scratch, no "" level
 
 
 
-
+levels(data$OAH)
 ```
 
 ```{r missing_val}
@@ -706,77 +709,7 @@ missing_df <- missing_df %>%
 
 ```
 
-```{r tablex}
 
-
-
-kable(missing_df, 
-      format = "html",
-      digits = 2,
-      caption = "Missing Values") %>%
-  kable_styling(
-    bootstrap_options = c("hover"),
-    full_width = FALSE
-  ) %>%
-  footnote(general = "")
-
-
-```
-
-```{r check_missing_fnx}
-
-# a few functions to help me evaluate the extent of missing values
-
-#Find percentage of missing values per Column
-find_missing <- function(a){
-  
-  
-col.n <- colnames(a)
-n <- nrow(a)
-missing_df <- data.frame(Variable = character(),
-                         "Missing (%)" = numeric(),
-                         check.names = F)
-
-
-for (i in col.n){
-  
-  x <- sum(is.na(a[,i]))
-  
-  perc <- (x/n) * 100
-  
-  missing_df <- rbind(missing_df,
-                      data.frame(
-                        Variable = i,
-                        `Missing (%)` = perc
-                      , check.names = F)
-                      )
-  
-}
- 
-missing_df <- missing_df %>% 
-  filter(`Missing (%)` > 0) %>% 
-  arrange(desc(`Missing (%)`),)
-
-return(missing_df)
-
-}
-
-#Find total % missing values
-find_total_missing <- function(b){
-  
-  
-  count_na <- 0
-for (i in 1:nrow(b)){
-  if (any(is.na(data[i, ]))){count_na <- count_na +1}
-}
-
-
-count_na/nrow(b)
-  
-  return(count_na*100/nrow(b) )
-}
-
-```
 
 ```{r date_time}
 
@@ -803,9 +736,6 @@ data <- data %>%
   mutate(dayofseason = row_number()) %>% 
   arrange(Date, Area)
 
-  
-
-36 - 4 + 26
 
 ```
 
@@ -816,8 +746,6 @@ data <- data %>%
   select(- c(AV.Cat, Ski.Pen, Summit.Wind.Dir, Obs, Location, OSgrid))
 
 data <- na.omit(data) #remove remaining missing
-
-#any(is.na(data))
 
 
 
@@ -832,8 +760,8 @@ train.idx <- sample(1:nrow(data),
 train <- data[train.idx,] #Training data
 test <- data[-train.idx,] #Testing Data
 
-
-
+#levels(train$OAH)
+#levels(test$OAH)
 ```
 
 ```{r Keras_data_preprocessing_function}
@@ -1004,10 +932,10 @@ round(apply(X.train[ , , numeric.indexes, drop = FALSE], 3, sd),   3)
 #Since we are doing a multiclass prediction we need to use softmax
 #This means using the tocategorical() function on y
 
-y.test <- to_categorical(y.test, num_classes = 6)
+y.test <- to_categorical(y.test, num_classes = 5)
 
 
-y.train <- to_categorical(y.train, num_classes = 6)
+y.train <- to_categorical(y.train, num_classes = 5)
 
 list(y.test, y.train, X.train, X.test, class_weights, F_)
 
@@ -1085,7 +1013,7 @@ for (i in seq_len(nrow(grid))) {
                   padding = "same", activation = "relu") %>%
     layer_global_average_pooling_1d() %>%
     layer_dropout(rate = grid$drop2[i]) %>%
-    layer_dense(units = 6, activation = "softmax")
+    layer_dense(units = 5, activation = "softmax")
 
   model <- keras_model(inputs = input, outputs = output)
 
@@ -1154,28 +1082,26 @@ return(results)
 
 ```{r keras_search}
 #Window = 3 
-
-#res_window_3 <- keras_search(window = 3)
-
-#save(res_window_3, file =  "res_window_3")
-
-#Window  = 7
-#res_window_7 <- keras_search(window = 7)
-#save(res_window_7, file =  "res_window_7")
-
-#Window = 30
-#res_window_30 <- keras_search(window = 30)
-#save(res_window_30, file =  "res_window_30")
-#window = 
-
-#Window = 120
-#res_window_120 <- keras_search(window = 120)
-#save(res_window_120, file =  "res_window_120")
+# 
+# res_window_3 <- keras_search(window = 3)
+# save(res_window_3, file =  "res_window_3")
+# 
+# # #Window  = 7
+# res_window_7 <- keras_search(window = 7)
+# save(res_window_7, file =  "res_window_7")
+# 
+# #Window = 30
+# res_window_30 <- keras_search(window = 30)
+# 
+# #Window = 120
+# res_window_120 <- keras_search(window = 120)
+# save(res_window_120, file =  "res_window_120")
 
 load("res_window_3")
 load("res_window_7")
 load("res_window_30")
 load("res_window_120")
+
 
 res_window_3 <- res_window_3 %>% 
   mutate(model_no = row_number(),
@@ -1204,33 +1130,27 @@ ggplot(data = results_cnn_search, aes( x  = model_no, y  = val_accuracy, colour 
   labs(x = "Model Number (arranged by  validation accuracy)")
 
 
-
 ```
 
-```{r}
-#we will go with a window of roughly  7  days
+<<<<<<< HEAD
+
+
+```{r  expanded_search}
+# #we will go with a window of roughly  7  days
+
 rm(res_window_120,  res_window_3, res_window_30)
 
+W_ <- pre_data(w = 7, h = 1)
 
-#I  am going to do one more expanded search, just with a window  of 7 days
+y.test <- W_[[1]]
+y.train <- W_[[2]]
+X.train <- W_[[3]]
+X.test <- W_[[4]]
+cl_weights <- W_[[5]]
+F_ <- W_[[6]]
 
-# res_window_7[which.max(res_window_7$val_accuracy),]
 # 
-# #serach
-# 
-# 
-# 
-# W_ <- pre_data(w = 3, h = 1)
-# 
-# y.test <- W_[[1]]
-# y.train <- W_[[2]]
-# X.train <- W_[[3]]
-# X.test <- W_[[4]]
-# cl_weights <- W_[[5]]
-# F_ <- W_[[6]]
-# 
-# 
-# # Repro seeds 
+# # Repro seeds
 # set.seed(1)
 # tf$keras$utils$set_random_seed(123L)
 # 
@@ -1262,11 +1182,11 @@ rm(res_window_120,  res_window_3, res_window_30)
 #   # Clear TF/Keras state between runs to avoid graph/memory accumulation
 #   tensorflow::tf$keras$backend$clear_session()
 # 
-#  
+# 
 #   set.seed(1)
 #   tf$keras$utils$set_random_seed(123L)
 # 
-#  
+# 
 #   input <- layer_input(shape = c(dim(X.train)[2], F_)) # (L, F)
 # 
 #   output <- input %>%
@@ -1279,7 +1199,7 @@ rm(res_window_120,  res_window_3, res_window_30)
 #                   padding = "same", activation = "relu") %>%
 #     layer_global_average_pooling_1d() %>%
 #     layer_dropout(rate = grid$drop2[i]) %>%
-#     layer_dense(units = 6, activation = "softmax")
+#     layer_dense(units = 5, activation = "softmax")
 # 
 #   model <- keras_model(inputs = input, outputs = output)
 # 
@@ -1307,10 +1227,10 @@ rm(res_window_120,  res_window_3, res_window_30)
 #     val_acc <- tail(history$metrics$val_acc, 1)
 #   }
 # 
-#   # Evaluate on test set 
+#   # Evaluate on test set
 #   test_metrics <- model %>% evaluate(X.test, y.test, verbose = 0)
 # 
-#   # test_metrics is usually a named numeric vector: 
+#   # test_metrics is usually a named numeric vector:
 #   test_loss <- as.numeric(test_metrics[[1]])
 #   test_acc  <- if (!is.null(names(test_metrics)) && "accuracy" %in% names(test_metrics)) {
 #     as.numeric(test_metrics[["accuracy"]])
@@ -1327,13 +1247,13 @@ rm(res_window_120,  res_window_3, res_window_30)
 #   histories[[i]] <- history
 # }
 # 
-# # Sort by best validation accuracy 
+# # Sort by best validation accuracy
 # results <- results[order(-results$val_accuracy), ]
 # 
 # print(results)
 # 
 # final_cnn_search  <-  results
-#save(final_cnn_search, file =  "final_cnn_serach")
+# save(final_cnn_search, file =  "final_cnn_serach")
 
 
 load("final_cnn_serach")
@@ -1346,7 +1266,9 @@ best
 gc()
 ```
 
-```{r}
+
+
+```{r  final_cnn_search_viz}
 
 
 res <- final_cnn_search %>%
@@ -1361,212 +1283,208 @@ res <- final_cnn_search %>%
 
 library(scales)
 
-
-top_n <- 30 
-ggplot(res %>% slice(1:top_n),
-       aes(x = reorder(label, val_accuracy), y = val_accuracy, fill = top5)) +
-  geom_col() +
-  coord_flip() +
-  geom_text(aes(label = percent(val_accuracy, accuracy = 0.1)),
-            hjust = -0.1, size = 3) +
-  scale_y_continuous(labels = percent_format(accuracy = 1), expand = expansion(mult = c(0, .1))) +
-  scale_fill_manual(values = c("grey80", "grey40"), guide = "none") +
-  labs(title = sprintf("Top %d configs by validation accuracy", top_n),
-       x = "Config", y = "Val accuracy")
-
-```
-
-```{r}
-#best model  had 16 filters with 2 layers,  and kernel size 15,  0.7 dropout between layers
-
-#Fit  final model on full  training data
-
-  input <- layer_input(shape = c(dim(X.train)[2], F_)) # (L, F)
-
-  output <- input %>%
-    layer_conv_1d(filters = 16, kernel_size = 15, padding = "same", activation = "relu") %>%
-    layer_dropout(rate = 0.7) %>%
-    layer_conv_1d(filters = 16, kernel_size = 15, padding = "same", activation = "relu") %>%
-    layer_global_average_pooling_1d() %>%
-    layer_dropout(rate = 0.7) %>%
-    layer_dense(units = 6, activation = "softmax")
-
-  model <- keras_model(inputs = input, outputs = output)
-
-  model %>% compile(
-    optimizer = "adam",
-    loss = "categorical_crossentropy",
-    metrics = "accuracy"
-  )
-
-    history <- model %>% fit(
-    X.train, y.train,
-    epochs = 60,
-    batch_size = 64,
-    verbose = 0,
-    validation_split = 0,
-    shuffle = FALSE
-    # = cl_weights
-  )
-
-final_cnn_model  <- model    
-save(final_cnn_model,  file = "final_cnn_model")
-load("final_cnn_model")
-
-test_metrics <- model %>% evaluate(X.test, y.test, verbose = 0)
-
-test_metrics$accuracy
-
-
-
-```
-
-```{r  RNN}
-#sam as above but for RNN model
-keras_search_rnn <- function(window){
-
-W_ <- pre_data(w = window, h = 1)
-
-y.test <- W_[[1]]
-y.train <- W_[[2]]
-X.train <- W_[[3]]
-X.test <- W_[[4]]
-cl_weights <- W_[[5]]
-F_ <- W_[[6]]
-# ---------------- Grid search architecture ----------------
-
 # 
-set.seed(1)
-tf$keras$utils$set_random_seed(123L)
+# top_n <- 30 
+# ggplot(res %>% slice(1:top_n),
+#        aes(x = reorder(label, val_accuracy), y = val_accuracy, fill = top5)) +
+#   geom_col() +
+#   coord_flip() +
+#   geom_text(aes(label = percent(val_accuracy, accuracy = 0.1)),
+#             hjust = -0.1, size = 3) +
+#   scale_y_continuous(labels = percent_format(accuracy = 1), expand = expansion(mult = c(0, .1))) +
+#   scale_fill_manual(values = c("grey80", "grey40"), guide = "none") +
+#   labs(title = sprintf("Top %d configs by validation accuracy", top_n),
+#        x = "Config", y = "Val accuracy")
 
-# grid
-grid <- expand.grid(
-  filters1   = c( 32, 64),
-  filters2   = c( 32, 64),
-  kernel_sz  = c(5, 15),
-  drop1      = c(0.3, 0.5),
-  drop2      = c(0.3, 0.5),
-  stringsAsFactors = FALSE
-)
+```
 
-results <- data.frame(
-  filters1 = integer(), filters2 = integer(),
-  kernel_sz = integer(), drop1 = double(), drop2 = double(),
-  val_accuracy = double(), test_loss = double(), test_accuracy = double(),
-  stringsAsFactors = FALSE
-)
 
-histories <- vector("list", nrow(grid))  #  keep training histories
 
-for (i in seq_len(nrow(grid))) {
-  cat(sprintf("\n[%d/%d] f1=%d, f2=%d, k=%d, d1=%.2f, d2=%.2f\n",
-              i, nrow(grid),
-              grid$filters1[i], grid$filters2[i],
-              grid$kernel_sz[i], grid$drop1[i], grid$drop2[i]))
+```{r fiiting_final_cnn}
+# #best model  had 16 filters with 2 layers,  and kernel size 15,  0.7 dropout between layers
 
-  # Clear TF/Keras state between runs to avoid graph/memory accumulation
-  tensorflow::tf$keras$backend$clear_session()
 
-  # r-seed before each run to keep trials comparable
+
+
+#   input <- layer_input(shape = c(dim(X.train)[2], F_)) # (L, F)
+# 
+#   output <- input %>%
+#     layer_conv_1d(filters = 32, kernel_size = 15, padding = "same", activation = "relu") %>%
+#     layer_dropout(rate = 0.7) %>%
+#     layer_conv_1d(filters = 16, kernel_size = 15, padding = "same", activation = "relu") %>%
+#     layer_global_average_pooling_1d() %>%
+#     layer_dropout(rate = 0.5) %>%
+#     layer_dense(units = 5, activation = "softmax")
+# 
+#   model <- keras_model(inputs = input, outputs = output)
+# 
+#   model %>% compile(
+#     optimizer = "adam",
+#     loss = "categorical_crossentropy",
+#     metrics = "accuracy"
+#   )
+# 
+#     history <- model %>% fit(
+#     X.train, y.train,
+#     epochs = 60,
+#     batch_size = 64,
+#     verbose = 0,
+#     validation_split = 0,
+#     shuffle = FALSE
+#     # = cl_weights
+#   )
+# 
+# final_cnn_model  <- model
+# 
+# 
+# 
+# 
+# 
+# test_metrics <- model %>% evaluate(X.test, y.test, verbose = 0)
+# 
+# test_metrics$accuracy
+# 
+# 
+# 
+# pred_cnn  <- predict(final_cnn_model, X.test)
+# 
+# pred_cnn <- max.col(pred_cnn)
+# 
+# save(pred_cnn, file   = "pred_cnn")
+
+load("pred_cnn")
+
+```
+
+
+
+```{r  RNN_search_function}
+
+#sam as above but for RNN model
+
+
+
+ keras_search_rnn <- function(window){
+
+  W_ <- pre_data(w = window, h = 1)
+
+  y.test <- W_[[1]]
+  y.train <- W_[[2]]
+  X.train <- W_[[3]]
+  X.test <- W_[[4]]
+  cl_weights <- W_[[5]]
+  F_ <- W_[[6]]
+
   set.seed(1)
   tf$keras$utils$set_random_seed(123L)
 
-  # ----- Build model as an RNN (LSTM) using the same grid fields -----
-  input <- layer_input(shape = c(dim(X.train)[2], F_)) # (L, F)
 
-  output <- input %>%
-    layer_lstm(units = grid$filters1[i], return_sequences = TRUE) %>%
-    layer_dropout(rate = grid$drop1[i]) %>%
-    layer_lstm(units = grid$filters2[i], return_sequences = FALSE) %>%
-    layer_dropout(rate = grid$drop2[i]) %>%
-    layer_dense(units = 6, activation = "softmax")
-
-  model <- keras_model(inputs = input, outputs = output)
-
-  model %>% compile(
-    optimizer = "adam",
-    loss = "categorical_crossentropy",
-    metrics = "accuracy"
+  grid <- expand.grid(
+    units1 = c(32, 64),   # LSTM units in layer 1
+    units2 = c(32, 64),   # LSTM units in layer 2
+    drop1  = c(0.3, 0.5),
+    drop2  = c(0.3, 0.5),
+    stringsAsFactors = FALSE
   )
 
-  # ----- Train -----
-  history <- model %>% fit(
-    X.train, y.train,
-    epochs = 60,
-    batch_size = 64,
-    verbose = 0,
-    validation_split = 0.2,
-    shuffle = FALSE
-    # = cl_weights
+  results <- data.frame(
+    units1 = integer(), units2 = integer(),
+    drop1 = double(), drop2 = double(),
+    val_accuracy = double(),
+    test_loss = double(), test_accuracy = double(),
+    stringsAsFactors = FALSE
   )
 
-  # Collect validation accuracy from the last epoch
-  val_acc <- tail(history$metrics$val_accuracy, 1)
-  if (length(val_acc) == 0) {
-    # Fallback name 
-    val_acc <- tail(history$metrics$val_acc, 1)
+  histories <- vector("list", nrow(grid))
+
+  for (i in seq_len(nrow(grid))) {
+    cat(sprintf("\n[%d/%d] u1=%d, u2=%d, d1=%.2f, d2=%.2f\n",
+                i, nrow(grid),
+                grid$units1[i], grid$units2[i],
+                grid$drop1[i], grid$drop2[i]))
+
+    tensorflow::tf$keras$backend$clear_session()
+    set.seed(1)
+    tf$keras$utils$set_random_seed(123L)
+
+    input <- layer_input(shape = c(dim(X.train)[2], F_)) # (timesteps, features)
+
+    output <- input %>%
+      layer_lstm(units = grid$units1[i], return_sequences = TRUE) %>%
+      layer_dropout(rate = grid$drop1[i]) %>%
+      layer_lstm(units = grid$units2[i], return_sequences = FALSE) %>%
+      layer_dropout(rate = grid$drop2[i]) %>%
+      layer_dense(units = 6, activation = "softmax")
+
+    model <- keras_model(inputs = input, outputs = output)
+
+    model %>% compile(
+      optimizer = "adam",
+      loss = "categorical_crossentropy",
+      metrics = "accuracy"
+    )
+
+    history <- model %>% fit(
+      X.train, y.train,
+      epochs = 60,
+      batch_size = 64,
+      verbose = 0,
+      validation_split = 0.2,
+      shuffle = FALSE
+    )
+
+    # val acc from last epoch
+    val_acc <- tail(history$metrics$val_accuracy, 1)
+    if (length(val_acc) == 0) val_acc <- tail(history$metrics$val_acc, 1)
+
+    test_metrics <- model %>% evaluate(X.test, y.test, verbose = 0)
+    test_loss <- as.numeric(test_metrics[[1]])
+    test_acc  <- if (!is.null(names(test_metrics)) && "accuracy" %in% names(test_metrics)) {
+      as.numeric(test_metrics[["accuracy"]])
+    } else {
+      as.numeric(test_metrics[[2]])
+    }
+
+    results[i, ] <- list(
+      grid$units1[i], grid$units2[i],
+      grid$drop1[i], grid$drop2[i],
+      as.numeric(val_acc), test_loss, test_acc
+    )
+    histories[[i]] <- history
   }
 
-  # Evaluate on test set 
-  test_metrics <- model %>% evaluate(X.test, y.test, verbose = 0)
+  results <- results[order(-results$val_accuracy), ]
+  print(results)
 
-  # test_metrics is usually a named numeric 
-  test_loss <- as.numeric(test_metrics[[1]])
-  test_acc  <- if (!is.null(names(test_metrics)) && "accuracy" %in% names(test_metrics)) {
-    as.numeric(test_metrics[["accuracy"]])
-  } else {
-    as.numeric(test_metrics[[2]])
-  }
-
-  # Store results
-  results[i, ] <- list(
-    grid$filters1[i], grid$filters2[i],
-    grid$kernel_sz[i], grid$drop1[i], grid$drop2[i],
-    as.numeric(val_acc), test_loss, test_acc
-  )
-  histories[[i]] <- history
-}
-
-
-results <- results[order(-results$val_accuracy), ]
-
-print(results)
-
-# The best 
-best <- results[1, ]
-
-rm(W_) #For saving memory
-gc()
-
-return(results)
-
+  rm(W_)
+  gc()
+  return(results)
 }
 
 
 
 ```
 
-```{r}
+```{r RNN_window_search}
 
 
 
-#Window = 3 
 
-rnn_window_3 <- keras_search(window = 3)
-save(rnn_window_3, file =  "res_window_3")
+#
+# #Window = 3 
+# 
+# rnn_window_3 <- keras_search_rnn(window = 3)
+# save(rnn_window_3, file =  "rnn_window_3")
+# #Window  = 7
+# rnn_window_7 <- keras_search_rnn(window = 7)
+# save(rnn_window_7, file =  "rnn_window_7")
+# #Window = 30
+# rnn_window_30 <- keras_search_rnn(window = 30)
+# save(rnn_window_30, file =  "rnn_window_30")
+# #Window = 120
+# rnn_window_120 <- keras_search_rnn(window = 120)
+# save(rnn_window_120, file =  "rnn_window_120")
 
-#Window  = 7
-rnn_window_7 <- keras_search(window = 7)
-save(rnn_window_7, file =  "res_window_7")
-
-#Window = 30
-rnn_window_30 <- keras_search(window = 30)
-save(rnn_window_30, file =  "res_window_30")
- 
-
-#Window = 120
-rnn_window_120 <- keras_search(window = 120)
-save(rnn_window_120, file =  "res_window_120")
 
 load("rnn_window_3")
 load( "rnn_window_7")
@@ -1589,10 +1507,164 @@ rnn_window_120 <- res_window_120%>%
   mutate(model_no = row_number(),
          window  = 120)
 
+results_rnn_search <- rbind(rnn_window_3, rnn_window_30, rnn_window_7,  rnn_window_120)
+ggplot(data = results_rnn_search, aes( x  = model_no, y  = val_accuracy, colour = as.factor(window)))+
+  geom_point()+
+  labs(x = "Model Number (arranged by  validation accuracy)")
+max(results_rnn_search$test_accuracy)
 
 ```
 
 ## Modelling
+
+
+
+
+```{r}
+
+W_ <- pre_data(w = 30, h = 1) #using 30 days
+
+y.test <- W_[[1]]
+y.train <- W_[[2]]
+X.train <- W_[[3]]
+X.test <- W_[[4]]
+cl_weights <- W_[[5]]
+F_ <- W_[[6]]
+
+set.seed(1)
+tf$keras$utils$set_random_seed(123L)
+
+
+# grid <- expand.grid(
+#   units1 = c(16,32, 64),   # LSTM units in layer 1
+#   units2 = c(16, 32, 64),   # LSTM units in layer 2
+#   drop1  = c(0.3, 0.5, 0.7),
+#   drop2  = c(0.3, 0.5, 0.7),
+#   stringsAsFactors = FALSE
+# )
+# 
+# results <- data.frame(
+#   units1 = integer(), units2 = integer(),
+#   drop1 = double(), drop2 = double(),
+#   val_accuracy = double(),
+#   test_loss = double(), test_accuracy = double(),
+#   stringsAsFactors = FALSE
+# )
+# 
+# histories <- vector("list", nrow(grid))
+# 
+# for (i in seq_len(nrow(grid))) {
+#   cat(sprintf("\n[%d/%d] u1=%d, u2=%d, d1=%.2f, d2=%.2f\n",
+#               i, nrow(grid),
+#               grid$units1[i], grid$units2[i],
+#               grid$drop1[i], grid$drop2[i]))
+# 
+#   tensorflow::tf$keras$backend$clear_session()
+#   set.seed(1)
+#   tf$keras$utils$set_random_seed(123L)
+# 
+#   input <- layer_input(shape = c(dim(X.train)[2], F_)) # (timesteps, features)
+# 
+#   output <- input %>%
+#     layer_lstm(units = grid$units1[i], return_sequences = TRUE) %>%
+#     layer_dropout(rate = grid$drop1[i]) %>%
+#     layer_lstm(units = grid$units2[i], return_sequences = FALSE) %>%
+#     layer_dropout(rate = grid$drop2[i]) %>%
+#     layer_dense(units = 6, activation = "softmax")
+# 
+#   model <- keras_model(inputs = input, outputs = output)
+# 
+#   model %>% compile(
+#     optimizer = "adam",
+#     loss = "categorical_crossentropy",
+#     metrics = "accuracy"
+#   )
+# 
+#   history <- model %>% fit(
+#     X.train, y.train,
+#     epochs = 60,
+#     batch_size = 64,
+#     verbose = 0,
+#     validation_split = 0.2,
+#     shuffle = FALSE
+#   )
+# 
+#   # val acc from last epoch
+#   val_acc <- tail(history$metrics$val_accuracy, 1)
+#   if (length(val_acc) == 0) val_acc <- tail(history$metrics$val_acc, 1)
+# 
+#   test_metrics <- model %>% evaluate(X.test, y.test, verbose = 0)
+#   test_loss <- as.numeric(test_metrics[[1]])
+#   test_acc  <- if (!is.null(names(test_metrics)) && "accuracy" %in% names(test_metrics)) {
+#     as.numeric(test_metrics[["accuracy"]])
+#   } else {
+#     as.numeric(test_metrics[[2]])
+#   }
+# 
+#   results[i, ] <- list(
+#     grid$units1[i], grid$units2[i],
+#     grid$drop1[i], grid$drop2[i],
+#     as.numeric(val_acc), test_loss, test_acc
+#   )
+#   histories[[i]] <- history
+# }
+# 
+# results <- results[order(-results$val_accuracy), ]
+# 
+# rnn_final_search <- results
+# 
+# save(rnn_final_search, file = "rnn_final_search")
+  
+load("rnn_final_search")
+
+```
+
+
+```{r final_rnn_search}
+
+
+#rnn_final_search[1,]
+#fitting final rnn mdoel = 64, 16 0.7.  0.5
+
+
+
+#     input <- layer_input(shape = c(dim(X.train)[2], F_)) # (timesteps, features)
+# 
+#     output <- input %>%
+#       layer_lstm(units = 64, return_sequences = TRUE) %>%
+#       layer_dropout(rate = 0.7) %>%
+#       layer_lstm(units = 16, return_sequences = FALSE) %>%
+#       layer_dropout(rate = 0.5) %>%
+#       layer_dense(units = 5, activation = "softmax")
+# 
+#     final_rnn_model <- keras_model(inputs = input, outputs = output)
+# 
+#     final_rnn_model %>% compile(
+#       optimizer = "adam",
+#       loss = "categorical_crossentropy",
+#       metrics = "accuracy"
+#     )
+# 
+# 
+# 
+# 
+# 
+# 
+# # true_labels <- apply(y.test, 1, max)
+# pred_rnn  <- predict(final_rnn_model, X.test)
+# 
+# 
+# 
+# pred_rnn <- max.col(pred_rnn)
+# 
+# save(pred_rnn,  file = "pred_rnn")
+
+load("pred_rnn")
+
+pred_rnn
+```
+
+
 
 ## Modelling
 
@@ -1633,342 +1705,12 @@ library(pdp)       # Used to generate Partial Dependence Plots for model interpr
 set.seed(123)
 ```
 
-```{r data-loading}
-# # Load raw data from CSV
-# df_raw <- read_csv("scotland_avalanche_forecasts_2009_2025.csv")
-# 
-# # Clean column names -> snake_case
-# df <- df_raw %>% clean_names()
-# 
-# # Fix Cols
-# df <- df %>% mutate(date = parse_date_time(date, orders = c("ymd HMS", "ymd HM", "ymd"), tz = "Europe/London"),
-#                     fah = as.factor(fah),
-#                     oah = as.factor(oah),
-#                     area = as.factor(area),
-#                     obs = as.factor(obs))
-# 
-# 
-# # Inspect structure of cleaned dataset
-# head(df)
-```
-
-```{r target-var-distr}
-# ggplot(df, aes(x = oah)) + geom_bar() + labs(title = "Observed Avalanche Hazard (OAH)") + theme_minimal()
-# 
-# library(ggplot2)
-# library(dplyr)
-# 
-# # First, prepare the data with counts and percentages
-# df_counts <- df %>%
-#   count(oah) %>%
-#   mutate(percent = n / sum(n) * 100)
-# 
-# # Plot
-# ggplot(df_counts, aes(x = reorder(oah, -n), y = n, fill = oah)) +
-#   geom_bar(stat = "identity", show.legend = FALSE) +
-#   geom_text(aes(label = paste0(n, " (", round(percent, 1), "%)")), 
-#             vjust = -0.5, size = 4) +
-#   labs(
-#     title = "Observed Avalanche Hazard (OAH)",
-#     x = "Hazard Level",
-#     y = "Count"
-#   ) +
-#   theme_minimal(base_size = 14) +
-#   theme(
-#     plot.title = element_text(face = "bold", hjust = 0.5),
-#     axis.title.y = element_text(margin = margin(r = 10))
-#   ) +
-#   scale_y_continuous(expand = expansion(mult = c(0, 0.1)))
 
 
-# ggplot(train, aes(x = oah)) + geom_bar() + labs(title = "Observed Avalanche Hazard (OAH)") + theme_minimal()
 
-# ggplot(test, aes(x = oah)) + geom_bar() + labs(title = "Observed Avalanche Hazard (OAH)") + theme_minimal()
-```
 
-```{r data-preparation}
-## ---------------------------
-# Data preparation 
-## ---------------------------
-# Define target column
-#target <- "OAH" #changed from oah to OAH
 
-# ---------------------------
-# Train-test split
-# ---------------------------
-#set.seed(123)
-#MATT EDIT: commenting this out because we are going to use my data above made before modeling going forward
-# split <- sample.split(df[[target]], SplitRatio = 0.7)
-# train <- subset(df, split == TRUE)
-# test  <- subset(df, split == FALSE)
-```
-
-```{r drop-missing}
-# ---------------------------
-# Drop rows with missing values in both target and predictors
-# ---------------------------
-# Our predictors, col names
-# setdiff(a, b): Returns elements in a that are not in b.
-
-#predictor_cols <- setdiff(names(data), target) #Matt edit, replaced df with data, to be consistent as above
-
-#Explanation:
-# train[, c(target, predictor_cols)]: Selects columns from train that are either the target or one of the predictors.
-# complete.cases(...): Returns a logical vector indicating which rows have no missing values (NA) across the selected columns.
-# train[ ..., ]: Subsets the train data to only those rows that have complete data in both the target and predictors.
-# Result:
-#   Removes rows with missing values in any of the important columns (target or predictors) from the training set.
-# train <- train[complete.cases(train[, c(target, predictor_cols)]), ]
-# test  <- test[complete.cases(test[, c(target, predictor_cols)]), ]
-```
-
-```{r target-var-factor-encoding}
-# ---------------------------
-# Target variable conversion
-#   Change the Target Variable (y) in our data into factor with all levels,
-#   making sure all data has levels from whole data even if it doesn't show in train or test
-#   because of the split.
-# ---------------------------
-
-#Matt comment: The data was converted to factors right at the begining of the data set so I dont think this is a necessary step. The test and training have the same factors levels.
-
-# # Extract all possible levels (classes) of the target variable from the full dataset
-# # This ensures consistency in factor levels across training and test sets, even if some classes are missing in one set.
-# target_levels <- levels(factor(data[[target]])) #matt edit changed to "OAH" to make this more clear
-# 
-# # Convert the target variable in the training set to a factor with levels set to target_levels
-# # This makes sure the factor levels are in the same order as in the full dataset (important for classification labels).
-# train[[target]] <- factor(train[[target]], levels = target_levels)
-# 
-# # Do the same for the test set
-# test[[target]]  <- factor(test[[target]],  levels = target_levels)
-```
-
-```{r target-var-encoding}
-# # ------------------------------------------------------
-# # Numeric encoding for XGBoost (0-based indexing)
-# # XGB Model needs all our factor variables encoded into numerical values,
-# # so we change all y levels into numbers, STARTING FROM 0 ...so -1L
-# # ------------------------------------------------------
-# 
-# # Convert the factor target in training set to integer values, then subtract 1
-# # XGBoost expects class labels as integers starting from 0, so this makes sure labels are 0-based.
-# y_train <- as.integer(train[[target]]) - 1L
-# 
-# # Same conversion for test set
-# y_test  <- as.integer(test[[target]]) - 1L
-# 
-# # Store the original class labels (factor levels)
-# # Useful later to map predictions back to human-readable class names (e.g., for confusion matrix or reporting).
-# levels_y <- target_levels
-# 
-# # Count the number of unique classes
-# # This is needed when setting the "num_class" parameter in the XGBoost model (for multi-class classification).
-# num_class <- length(levels_y)
-
-```
-
-```{r model-feature-matrix}
-# # ---------------------------
-# # Feature matrix creation
-# # ---------------------------
-# # Select only predictor columns from the training set
-# # 'predictor_cols' contains the names of all input features (excluding the target)
-# x_train <- train %>% 
-#   select(all_of(predictor_cols))
-# 
-# # Do the same for the test set
-# x_test  <- test %>% 
-#   select(all_of(predictor_cols))
-# 
-# 
-# # ------------------------------------------------------------
-# # Convert to design matrices (dummy encoding for categorical variables)
-# # ------------------------------------------------------------
-# 
-# # Convert the training data frame to a design matrix using model.matrix
-# # '~ . -1' creates a formula that includes all variables (.) but removes the intercept (-1)
-# # This will automatically dummy-encode categorical variables into binary columns (one-hot encoding)
-# 
-# # Combine train and test predictors before encoding
-# x_all <- rbind(x_train, x_test)
-# 
-# # Create design matrix once (ensures consistent dummy columns)
-# dm_all <- model.matrix(~ . -1, data = x_all)
-# 
-# 
-# 
-# # Split back into train and test matrices
-# dm_train <- dm_all[1:nrow(x_train), ]
-# 
-# dm_test  <- dm_all[(nrow(x_train)+1):nrow(x_all), ]
-# # ------------------------------------------------------------
-# # Debugging check to confirm alignment
-# # ------------------------------------------------------------
-# # Output number of rows in design matrix vs. number of labels
-# # This is a sanity check to ensure that the feature matrix (dm_train) has the same number of rows
-# #   as the target label vector (y_train), which is essential for training
-# cat("Rows in dm_train:", nrow(dm_train), "Length of y_train:", length(y_train), "\n")
-# 
-# # Same check for the test set
-# cat("Rows in dm_test:", nrow(dm_test), "Length of y_test:", length(y_test), "\n")
-
-```
-
-```{r dmatrix}
-# ---------------------------
-# DMatrix creation
-#   :( REQUIRED
-# ---------------------------
-# 
-# dtrain <- xgb.DMatrix(data = dm_train, 
-#                       label = y_train)
-# 
-# 
-# dtest  <- xgb.DMatrix(data = dm_test,
-#                       label = y_test)
-```
-
-```{r crossval-earlystop}
-# ---------------------------
-# Cross-validated early stopping for multi-class XGBoost
-# ---------------------------
-
-# # Define the set of hyperparameters for XGBoost cross-validation
-# cv_params <- list(
-# objective = "multi:softprob", # Predict probabilities for each class (required for multi-class)
-# eval_metric = "mlogloss", # Use multi-class logarithmic loss as evaluation metric
-# eta = 0.1, # Learning rate: smaller values improve generalization
-# max_depth = 6, # Maximum depth of each tree (controls model complexity)
-# min_child_weight = 1, # Minimum sum of instance weights needed in a child node
-# subsample = 0.8, # Fraction of training data used for each tree (prevents overfitting)
-# colsample_bytree = 0.8, # Fraction of features used for each tree (prevents overfitting)
-# gamma = 0, # Minimum loss reduction to make a split
-# num_class = num_class # Number of classes in the target variable
-# )
-# 
-# # Perform k-fold cross-validation with early stopping
-# cv <- xgb.cv(
-# params = cv_params, # Hyperparameters defined above
-# data = dtrain, # Training data in DMatrix format
-# nrounds = 2000, # Maximum number of boosting iterations
-# nfold = 5, # Number of folds for cross-validation
-# stratified = TRUE, # Ensure class proportions are preserved in folds
-# early_stopping_rounds = 25, # Stop if no improvement after 25 rounds
-# verbose = 1, # Print progress during training
-# maximize = FALSE # Minimize the logloss metric
-# )
-# 
-# # Extract the optimal number of boosting rounds
-# best_nrounds <- cv$best_iteration
-# cat('Best nrounds from xgb.cv:', best_nrounds, "\n")
-```
-
-```{r xgbmodel}
-
-#Matt edit, commented out for now
-# ---------------------------
-# Final Multi-Class XGBoost Model
-# ---------------------------
-
-# # Set hyperparameters (based on CV up there)
-# final_params <- list(
-#   objective = "multi:softprob",   # Multiclass classification: predict probability for each class
-#   eval_metric = "mlogloss",       # Use multiclass log-loss as evaluation metric
-#   eta = 0.1,                      # Learning rate: step size shrinkage to prevent overfitting
-#   max_depth = 6,                  # Maximum depth of trees (controls model complexity)
-#   min_child_weight = 1,           # Minimum sum of instance weights (hessian) needed in a child (controls overfitting)
-#   subsample = 0.8,                # Subsample ratio of training instances (row sampling, adds randomness)
-#   colsample_bytree = 0.8,         # Fraction of features sampled per tree (adds randomness)
-#   gamma = 0,                      # Minimum loss reduction required for a split (regularization parameter)
-#   num_class = num_class)           # Total number of target classes (required for multi-class setup)
-# 
-# 
-# # Use optimal nrounds from CV
-# final_nrounds <- 68  # Best number of boosting rounds determined by earlier cross-validation
-# 
-# # Train final model with early stopping on evaluation set
-# final_model <- xgb.train(
-#   params = final_params,          # Pass hyperparameters
-#   data = dtrain,                  # Training data (DMatrix)
-#   nrounds = final_nrounds,        # Number of boosting rounds (iterations)
-#   watchlist = list(train = dtrain, eval = dtest),  # Monitor train and test sets during training
-#   early_stopping_rounds = 25,     # Stop training if no improvement for 25 consecutive rounds
-#   verbose = 1,                    # Print training log (progress per round)
-#   maximize = FALSE)               # We are minimizing logloss (not maximizing accuracy)
-```
-
-```{r model-test-set-eval}
-
-#MATT EDIT: COmmented out for now
-# # ---------------------------
-# # Test set evaluation
-# # ---------------------------
-# 
-# # Predict probabilities on test set
-# pred_test_prob <- predict(final_model, dtest)  
-# # -> Returns a flat vector of probabilities for all classes stacked row-wise
-# 
-# # Convert probability vector into a matrix (rows = observations, cols = classes)
-# pred_test_matrix <- matrix(pred_test_prob, 
-#                            nrow = nrow(dm_test),   # Number of test samples
-#                            ncol = num_class,       # Number of classes
-#                            byrow = TRUE)           # Fill by rows (each row = one observation)
-# 
-# # Convert probabilities to predicted classes
-# pred_test_class <- max.col(pred_test_matrix) - 1L  
-# # -> max.col finds index of highest probability (predicted class)
-# # -> Subtract 1 since XGBoost class indices start at 0
-# 
-# # Convert numeric labels back to factors for confusion matrix
-# y_test_factor <- factor(y_test, levels = 0:(num_class-1), labels = levels_y)  
-# pred_test_factor <- factor(pred_test_class, levels = 0:(num_class-1), labels = levels_y)  
-# # -> Factors needed for caret's confusionMatrix
-```
-
-```{r eval-results}
-
-#MATT EDIT: Commented out for now
-# # Compute confusion matrix and overall accuracy
-# cm_test <- confusionMatrix(pred_test_factor, y_test_factor)  
-# 
-# # Prints
-# cat("\nFinal Model Test Accuracy:", round(cm_test$overall['Accuracy'], 4), "\n")  
-# cat("\nConfusion Matrix (Test Set):\n")  
-# print(cm_test$table)  
-# # -> Shows prediction performance per class (actual vs predicted counts)
-# 
-# # Compute multi-class AUC per class (one-vs-all)
-# test_auc_list <- list()
-# for (i in 1:num_class) {
-#   binary_labels <- as.numeric(y_test == (i - 1))          
-#   # -> Convert labels into binary (one-vs-rest for class i)
-#   test_auc_list[[levels_y[i]]] <- roc(binary_labels, pred_test_matrix[, i])$auc  
-#   # -> Compute ROC-AUC for that class
-# }
-# 
-# 
-# cat("\nFinal Model Test AUC per class:\n")
-# print(round(unlist(test_auc_list), 4))  
-# # -> Print AUC values for each class
-```
-
-```{r model-feature-importance}
-
-#MATT EDIT: COmmented out for now
-# # ---------------------------
-# # Feature importance and interpretation
-# # ---------------------------
-# # Get feature importance
-# importance_matrix <- xgb.importance(model = final_model)  
-# print(head(importance_matrix, 20))  # Print top 20 most important features ranked by gain
-# 
-# # Plot feature importance
-# xgb.plot.importance(importance_matrix, top_n = 20)  
-# # -> Visualize top 20 important features
-```
-
-===================================================== Neural Net ====================================================
+FFN
 
 ```{r h2o-initialise}
 ## ---------------------------
@@ -1978,7 +1720,6 @@ set.seed(123)
 ## evaluates on the test set and shows how to tune hyperparameters with H2O Grid Search.
 ## ---------------------------
 
-#Comment from Matt: I think we need to change this approach so that the NN code can run without the above, because I am not certain that we are keeping much from the XGboost work?
 
 target <- "OAH"
 predictor_cols <- setdiff(names(data), target) #Matt edit, replaced df with data, to be consistent as above
@@ -2071,7 +1812,8 @@ hyper_params <- list(
     c(64,32,16),
     c(64,32)),
   activation =  c("RectifierWithDropout"),
-  l2 = c(0, 1e-4),
+  l1 = c(0, 1e-4, 1e-5),
+  l2 = c(0, 1e-4,1e-5),
   rate = c(0.01, 0.001),                # learning rates (smaller = slower but better generalization)
   input_dropout_ratio = c(0.1, 0.3, 0.5))     # apply some input dropout regularization
 ```
@@ -2091,81 +1833,97 @@ search_criteria <- list(
 ```{r h2o-grid-search}
 # Launch grid search using class weights (weights_column) ---------------------
 #    Note: epochs increased to allow deeper training; early stopping will limit wasted epochs.
-grid_id <- "h2o_nn_balanced_grid"
 
-grid <- h2o.grid(algorithm = "deeplearning",
-                 grid_id = grid_id,
-                 x = predictor_cols,
-                 y = target,
-                 training_frame = train_h2o_split,
-                 validation_frame = valid_h2o_split,
-                 # Use the weights column computed earlier:
-                 # weights_column = "class_weights",
-                 # # Make H2O use classes weighting; setting balance_classes=FALSE because we supply weights explicitly
-                 balance_classes = T,
-                 # Training control
-                 epochs = 200,                       # allow many epochs (early stopping will truncate)
-                 stopping_metric = "logloss",
-                 stopping_tolerance = 1e-4,
-                 stopping_rounds = 10,
-                 # optimization / regularization defaults; some are overridden by hyperparams
-                 distribution = "multinomial",
-                 #activation = "RectifierWithDropout",
-                 adaptive_rate = TRUE,
-                 # small-ish default l1/l2 (grid will explore others)
-                 l1 = 0, l2 = 0,
-                 # Use relatively small mini-batch default (H2O autodetects)
-                 reproducible = T,   # reproducible=TRUE may slow things on multi-core machines
-                 seed = 123,
-                 # hyperparameter space and search criteria:
-                 hyper_params = hyper_params,
-                 search_criteria = search_criteria)
+# 
+# grid_id <- "h2o_nn_balanced_grid"
+# 
+# grid <- h2o.grid(algorithm = "deeplearning",
+#                  grid_id = grid_id,
+#                  x = predictor_cols,
+#                  y = target,
+#                  training_frame = train_h2o_split,
+#                  validation_frame = valid_h2o_split,
+#                  # Use the weights column computed earlier:
+#                  # weights_column = "class_weights",
+#                  # # Make H2O use classes weighting; setting balance_classes=FALSE because we supply weights explicitly
+#                  balance_classes = T,
+#                  # Training control
+#                  epochs = 200,                       # allow many epochs (early stopping will truncate)
+#                  stopping_metric = "logloss",
+#                  stopping_tolerance = 1e-4,
+#                  stopping_rounds = 10,
+#                  # optimization / regularization defaults; some are overridden by hyperparams
+#                  distribution = "multinomial",
+#                  #activation = "RectifierWithDropout",
+#                  adaptive_rate = TRUE,
+#                  # small-ish default l1/l2 (grid will explore others)
+#                  l1 = 0, l2 = 0,
+#                  # Use relatively small mini-batch default (H2O autodetects)
+#                  reproducible = T,   # reproducible=TRUE may slow things on multi-core machines
+#                  seed = 123,
+#                  # hyperparameter space and search criteria:
+#                  hyper_params = hyper_params,
+#                  search_criteria = search_criteria)
+# 
+# # Review the grid search summary (sorted by validation logloss) ---------------
+# grid_perf <- h2o.getGrid(grid_id = grid_id, sort_by = "logloss", decreasing = FALSE)
+# save(grid_perf, file = "h2o_grid_perf")
+# 
+# 
+# 
+# # Best model ID (first row in sorted grid)
+# best_model_id <- as.character(grid_perf@model_ids[[1]])
+# 
+# 
+# best_model <- h2o.getModel(best_model_id)
+# 
+# 
+# saved_path <- h2o.saveModel(best_model, path = getwd(), force = TRUE)
 
-# Review the grid search summary (sorted by validation logloss) ---------------
-grid_perf <- h2o.getGrid(grid_id = grid_id, sort_by = "logloss", decreasing = FALSE)
-print(grid_perf)
 
 
+best_model <- h2o.loadModel(saved_path)
+load("h2o_grid_perf")
 ```
 
 ```{r get-best-model}
-# Pull the best model (lowest validation logloss) ----------------------------
-best_model_id <- grid_perf@model_ids[[1]]
-best_model <- h2o.getModel(best_model_id)
+# # Pull the best model (lowest validation logloss) ----------------------------
+# best_model_id <- grid_perf@model_ids[[1]]
+# best_model <- h2o.getModel(best_model_id)
+# 
+# cat("Best model id:", best_model_id, "\n")
+# print(best_model)
+# 
+# h2o.performance(best_model)
+# 
+# save(best_model, file = "FFN_final_model")
 
-cat("Best model id:", best_model_id, "\n")
-print(best_model)
+#load("FFN_final_model")
 
-h2o.performance(best_model)
-#save(grid_perf,  file = "grid1")   first   round
+
 
 #plot of performance
 
 perf.df <- as.data.frame(grid_perf@summary_table) 
 
 
-ggplot(data = perf.df, aes(x = hidden, y = logloss, colour = as.factor(input_dropout_ratio))) + 
-  geom_point(size = 2)+
-  labs(y = "logloss")
 
-ggplot(data = perf.df, aes(x = hidden, y = logloss, colour = as.factor(l1))) + 
-  geom_point(size = 2)+
-  labs(y = "logloss")
-
-ggplot(data = perf.df, aes(x = hidden, y = logloss, colour = as.factor(l2))) + 
-  geom_point(size = 2)+
-  labs(y = "logloss")
+# ggplot(data = perf.df, aes(x = hidden, y = logloss, colour = as.factor(input_dropout_ratio))) + 
+#   geom_point(size = 2)+
+#   labs(y = "logloss")
+# 
+# ggplot(data = perf.df, aes(x = hidden, y = logloss, colour = as.factor(l1))) + 
+#   geom_point(size = 2)+
+#   labs(y = "logloss")
+# 
+# ggplot(data = perf.df, aes(x = hidden, y = logloss, colour = as.factor(l2))) + 
+#   geom_point(size = 2)+
+#   labs(y = "logloss")
 
 
 h2o.performance(best_model)
 
 
-ggplot(perf.df, aes(x = factor(l1), y = factor(l2), fill = logloss)) +
-  geom_tile() +
-  facet_wrap(~ hidden) +
-  scale_fill_viridis_c() +
-  theme_minimal() +
-  labs(title = "Effect of L1/L2 by Architecture")
 
 
 ggplot(perf.df, aes(x = rate, y = logloss, color = factor(input_dropout_ratio))) +
@@ -2181,6 +1939,7 @@ ggplot(perf.df, aes(x = rate, y = logloss, color = factor(input_dropout_ratio)))
 
 levels_y <- levels(train$OAH)
 # Evaluate the best model on the held-out test set ---------------------------
+
 best_pred_h2o <- h2o.predict(best_model, test_h2o)   # returns 'predict' + per-class probabilities
 best_pred_df <- as.data.frame(best_pred_h2o)
 
@@ -2265,7 +2024,7 @@ cat("Saved best model to:", model_path, "\n")
 # best_pred_df <- as.data.frame(best_pred_h2o)
 
 pred_df <- best_pred_df   # data.frame containing "predict" and per-class probability columns named by levels_y
-true_labels <- factor(as.vector(test_h2o[[target]]), levels = levels_y)
+true_labels <- factor(as.vector(test_h2o[[target]]))
 
 
 library(caret)
@@ -2276,7 +2035,7 @@ cm_best <- confusionMatrix(table(pred_labels_best, true_labels_best))
 prob_cols <- pred_df[, setdiff(colnames(pred_df), "predict")]
 
 # Confusion matrix (caret)
-pred_factor <- factor(pred_df$predict, levels = levels_y)
+pred_factor <- factor(pred_df$predict)
 cm <- confusionMatrix(pred_factor, true_labels)
 print(cm)   # this is safe
 ```
@@ -2356,7 +2115,63 @@ write.csv(metrics_tbl, "h2o_nn_per_class_metrics.csv", row.names = FALSE)
 ```{r}
 h2o.varimp(best_model)
 
-h2o.varimp_plot(best_model)
+h2o.varimp_plot(best_model, num_of_features = 50)
+```
+## Results
+
+```{r}
+
+#Hi Sanana ! :)
+
+#Here  are all the  model  and prediction objects
+
+#FFN
+
+best_model #H20 FFN final  model chosen
+#cnn_final_model #cnn model 
+#rnn_final_model #final  rnn model
+
+best_pred_df  #h20 ffn model predictions on test data
+
+pred_ffn_labels <- best_pred_df[,"predict"]
+# pred_cnn
+# pred_rnn
+
+pred_ffn <- factor(pred_ffn, levels = levels(true_labels))
+
+true_labels <- test$OAH
+
+
+# Map integers back to labels
+
+load("pred_cnn")
+load("pred_rnn")
+pred_cnn_labels <- factor(levels(true_labels)[pred_cnn],
+                   levels = levels(true_labels))
+
+
+
+pred_rnn_labels <- factor(levels(true_labels)[pred_rnn],
+                   levels = levels(true_labels))
+
+
+temporal_labels <- max.col(y.test)
+
+temporal_labels <- factor(levels(true_labels)[temporal_labels],
+                   levels = levels(true_labels))
+
+#so the  final prediction objects are
+
+pred_cnn_labels
+pred_rnn_labels
+pred_ffn_labels
+
+#labels for  testing  data
+true_labels # for  FFn
+temporal_labels  # for cnn  and rnn
+
+
+
 ```
 
 ## Discussion
