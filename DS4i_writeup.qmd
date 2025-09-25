@@ -2149,7 +2149,7 @@ h2o.varimp_plot(best_model, num_of_features = 50)
 
 
 
-pred_ffn_labels <- best_pred_df[,"predict"]
+#pred_ffn_labels <- best_pred_df[,"predict"]
 # pred_cnn
 # pred_rnn
 
