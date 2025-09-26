@@ -648,8 +648,12 @@ data = read.csv("scotland_avalanche_forecasts_2009_2025.csv")
 
 
 
-data <- data %>% 
+remove <- which(data$OAH == "")
+
+data <- data[-remove,] %>% 
   mutate(across(where(is.character), as.factor))
+
+
 
 c <- colnames(data)
 r <- data.frame(var = character(),
@@ -890,8 +894,8 @@ In the second stage, a more broad grid search was conducted on the chosen window
 
 #Function to let me test for numerous window sizes
 
-
-pre_data <- function(w = 3, h = 1){
+#length(unique(data$OAH))
+ pre_data <- function(w = 3, h = 1){
 
 #--------Data Preparation-------------------------------------
 
@@ -958,8 +962,10 @@ for (i in 1:N_samp){ #here we are filling in the array with our data
 
 }
 
+y <- y - 1
 
-
+length(unique(y))
+unique(y)
 #------------Training and testing split-----------------------------
 
 #We want to preserve time series patterns, so no shuffling
@@ -973,7 +979,7 @@ te <- idx[(number.training + 1):N_samp] #Testing indices
 
 #making 1 = 0 to see if that helps
 
-y <- y - 1 # Now categories are {0,1,2,3,4,5,}
+
 
 n.classes <- length(unique(y))
 
@@ -1053,6 +1059,9 @@ list(y.test, y.train, X.train, X.test, class_weights, F_)
 
 
 }
+
+
+
 ```
 
 ```{r keras_grid_search}
@@ -1712,7 +1721,7 @@ kable(grid_summary, format = "html",
 
 
 
-```{r}
+```{r rnn_fitting}
 
 library(keras3)
 
@@ -2493,6 +2502,7 @@ pred_rnn_labels <- factor(levels(true_labels)[pred_rnn + 1],
 
 
 # temporal_labels <- max.col(y.test)
+# 
 # 
 # temporal_labels <- factor(levels(true_labels)[temporal_labels],
 #                    levels = levels(true_labels))
