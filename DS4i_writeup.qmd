@@ -2518,3 +2518,80 @@ mean(pred_rnn_labels == temporal_labels)
 ```
 
 ## Discussion
+
+```{r, echo = FALSE}
+# Getting FFN in order
+pred_ffn_labels <- best_pred_df[,"predict"]
+
+true_labels <- test$OAH
+pred_ffn_labels <- factor(pred_ffn_labels, levels = levels(true_labels))
+ffn_cm <- confusionMatrix(pred_ffn_labels, true_labels)
+
+# ----------------------------------------------------------
+# Getting CNN and RNN in order
+pred_cnn_labels
+pred_rnn_labels
+
+# Test set labels for cnn and rnn
+temporal_labels
+
+# Checking
+class(pred_cnn_labels)
+class(pred_rnn_labels)
+class(temporal_labels)
+
+length(pred_cnn_labels) # Why are you longer :/
+length(pred_rnn_labels)
+length(temporal_labels)
+
+# "Fixing" CNN preds
+pred_cnn_labels <- pred_cnn_labels[1:length(temporal_labels)]
+
+# Create the confusion matrices
+cnn_cm <- confusionMatrix(pred_cnn_labels, temporal_labels)
+rnn_cm <- confusionMatrix(pred_rnn_labels, temporal_labels)
+
+```
+
+```{r}
+library(gridExtra)
+
+plot_cm <- function(cm, title) {
+  cm_table <- as.data.frame(cm$table)
+  ggplot(cm_table, aes(x = Reference, y = Prediction, fill = Freq)) +
+    geom_tile() +
+    geom_text(aes(label = Freq), color = "coral") +
+    scale_fill_gradient(low = "white", high = "steelblue") +
+    labs(title = title, x = "Actual", y = "Predicted") +
+    theme_minimal()
+}
+
+p1 <- plot_cm(ffn_cm, "Feed-Forward NN Confusion Matrix")
+p2 <- plot_cm(cnn_cm, "CNN Confusion Matrix")
+p3 <- plot_cm(rnn_cm, "RNN Confusion Matrix")
+
+grid.arrange(p1, p2, p3, nrow = 3)
+```
+
+```{r}
+# Statistics by class
+kable(as.data.frame(ffn_cm$byClass), caption = "FFNN Statistics by Class") %>% kable_styling()
+kable(as.data.frame(cnn_cm$byClass), caption = "CNN Statistics by Class") %>% kable_styling()
+kable(as.data.frame(rnn_cm$byClass), caption = "RNN Statistics by Class") %>% kable_styling()
+```
+
+```{r}
+# Accuracy table summary
+accuracy_tbl <- data.frame(
+  Model = c("FFNN", "CNN", "RNN"),
+  Accuracy = paste0(
+    round(c(
+      ffn_cm$overall["Accuracy"],
+      cnn_cm$overall["Accuracy"],
+      rnn_cm$overall["Accuracy"]
+    ) * 100, 1), "%")
+)
+
+kable(accuracy_tbl, caption = "Overall Accuracy by Model") %>%
+  kable_styling(full_width = FALSE)
+```
