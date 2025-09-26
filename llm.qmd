@@ -2,5 +2,15 @@
 title: "llm"
 format: html
 ---
+1. Domain Knowledge Gap
+One of the first things used was giving context to the situation- none of us have even been to Scotland, much less have any expert knowledge about the climate. Avalanches are also a very distant thought as we dont experience this in South Africa
 
-How we used LLMs
+Coming into this, we only have some experience as data scientists. Dont know anything about what predictors are best. That is why we decided on a data-driven approach, which was also recommended by a number of literature. 
+
+But even for some statistical modelling, using chatgpt was helpful to bridge gaps in problems we havent encountered before such as modelling time series (Matthew)
+
+Chatgpt was also very helpful in summarising literature. During the process of writing the literature review, it was helpful to read the whole thing and then write your own notes, but then feed the literature into chatgpt to make sure you hadnt left anything out or overlooked anything.
+
+chatgpt for debugging?
+
+Chatgpt was approached with suspicion - always checked. For example, when asking it about the predictor variables, i always googled it or shifted through literature to make sure it was correct
