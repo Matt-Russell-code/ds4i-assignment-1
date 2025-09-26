@@ -2268,11 +2268,12 @@ kable(as.data.frame(rnn_cm$byClass), caption = "RNN Statistics by Class") %>% ka
 # Accuracy table summary
 accuracy_tbl <- data.frame(
   Model = c("FFNN", "CNN", "RNN"),
-  Accuracy = c(
-    ffn_cm$overall["Accuracy"],
-    cnn_cm$overall["Accuracy"],
-    rnn_cm$overall["Accuracy"]
-  )
+  Accuracy = paste0(
+    round(c(
+      ffn_cm$overall["Accuracy"],
+      cnn_cm$overall["Accuracy"],
+      rnn_cm$overall["Accuracy"]
+    ) * 100, 1), "%")
 )
 
 kable(accuracy_tbl, caption = "Overall Accuracy by Model") %>%
