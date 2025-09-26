@@ -6,3 +6,4 @@
 *.html
 *.docx
 *.csv
+/.quarto/
