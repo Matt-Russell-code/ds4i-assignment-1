@@ -319,13 +319,7 @@ ul.task-list li input[type="checkbox"] {
 <h2 class="anchored" data-anchor-id="data-cleaning-and-feature-engineering">Data Cleaning and Feature Engineering</h2>
 <p>Feature engineering mainly consisted of constructing temporal variables for the models. In particular, a feed forward neural network does not natively capture any time series trends. Given that the above exploratory analysis highlights that observed avalanche risk varies according to the season, and time of year, several variable were constructed to take this into account.</p>
 <p><br></p>
-<p><br></p>
 <p>Firstly, before removing any observations that contained large amount of missing values, we constructed constructed several variable marking the samples time of day, day of the week, month and year from the date. Next, we created a variable to represent the subsequent seasons in the data, as we observed a trend that avalanche risk appeared to be increasing year on year. The first season of avalanche recordings begins in December in 2009 and ends in April. We constructed a categorical variable to represent each season from 2009 to 2025 beginning from December into the following year.</p>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 4376</code></pre>
-</div>
-</div>
 <div class="cell">
 <div class="cell-output-display">
 <table class="table table-hover caption-top table-sm table-striped small" data-quarto-postprocess="true">
@@ -443,7 +437,7 @@ ul.task-list li input[type="checkbox"] {
 </table>
 </div>
 </div>
-<p>Missing values were also a challenge. Table ? presents the percentage of missing values for each feature in the data. <em>Av.Cat</em> was the first variable we felt should be eliminated. We could not find what this variable represented, and it had implausible values eg (NA, 3, -2, 2, 1, 4, 8800, -1, 0, 1021, 4400, -9999, 99, 88, 44, 5031, 121 ). Shown in Figure ? below, we observed not discernible trend in the relationship between Ski penetration and OAH, save for High risk avalanches. Overall, we removed this feature, as the contribution of snow precipitation to the risk would likely be well represented by other variables in the data. Lastly, we removed Summit wind direction as well, (roughly 12% missing). Similarly, to <em>Ski.pen</em>, we notice not discernible trend, and decided to dropped this feature as well.</p>
+<p>Missing values were also a challenge. Table ? presents the percentage of missing values for each feature in the data that had misisng values. <em>Av.Cat</em> was the first variable we felt should be eliminated. We could not find what this variable represented, and it had implausible values ( For example : NA, 3, -2, 2, 1, 4, 8800, -1, 0, 1021, 4400, -9999, 99, 88, 44, 5031, 121 ). Shown in Figure ? below, we observed no discernible trend in the relationship between Ski penetration and OAH, save for High risk avalanches. Overall, we removed this feature, as the contribution of snow precipitation to the risk would likely be well represented by other variables in the data. Lastly, we removed Summit wind direction as well, (roughly 12% missing). Similarly, to <em>Ski.pen</em>, we notice no discernible trend, and decided to drop this feature as well.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div>
@@ -453,7 +447,8 @@ ul.task-list li input[type="checkbox"] {
 </div>
 </div>
 </div>
-<p>Having dropped the above variables, we were left with roughly 35.7633588 % non-complete samples in the data. We dropped the remaining samples that contained missing values to maintain complete cases for the models.</p>
+<p>Lastly, we also dropped categorical variables that had very high cardinality, which included <em>OsGrid</em> and <em>Location</em>. <em>Osgrid</em> appeared to be some kind of ID variable with over 3000 unique values. When one hot encoding this would make our data set unnecessarily complex, and we surmised that this variable likely would not be indicative of risk. Likewise, we also dropped Location for similar reasoning. We had the latitiude and longitude of included in the data as well as the <em>Area</em> indicative which we expected to be more indicative of avalanche risk, so we dropped this feature as well to reduce unneccessary complexity.</p>
+<p>Having dropped the above variables, we were left with roughly 36 % non-complete samples in the data. We dropped the remaining samples that contained missing values to maintain complete cases for the models. Ideally, it would be better to maintain more observations. However, we felt we still had a large enough sample to maintain representative results (around 7000 observations). At a later stage, we fit our best performing model to a simply imputed data set and achieve an accuracy roughly equivalent to the complete cases data set.</p>
 <section id="modeling-methodology" class="level3">
 <h3 class="anchored" data-anchor-id="modeling-methodology">Modeling Methodology</h3>
 <p>There are three main models used in this project. Firstly, a feed forward neural network (FFN), a convolutional neural network (CNN) and a recurrent neural network (RNN). The idea behind the feed forward neural network is that it would likely leverage the categorical variables, like forecasted avalanche risk, well in predicting the target. However, CNN and RNN were more likely to leverage any time series trends present in the data.</p>
@@ -644,14 +639,14 @@ window.addEventListener('DOMContentLoaded', function(){
 </section>
 <section id="data-preprocessing-of-neural-networks-models" class="level3">
 <h3 class="anchored" data-anchor-id="data-preprocessing-of-neural-networks-models">Data Preprocessing of Neural Networks models</h3>
-<p>To prepare the data for CNN and RNN, we constructed an array with 3 dimensions which include the number of samples, the time window length and the number features. Each training sample is created by sliding a fixed window across the data. Within the array, the columns represent individual time steps, and the depth represent the features of the data. Since our prediction is one day, each training example represents the observations within the window, for the next day prediction. Furthermore, the data was standardized to ensure the algorithms were not distorted by the different scales of the features. Lastly, the data was also one hot encoded, such that each categorical variable is split into multiple binary variable demarcating each category.</p>
+<p>To prepare the data for CNN and RNN, we constructed an array with 3 dimensions which include the number of samples, the time window length and the number features. Each training sample is created by sliding a fixed window across the data. Within the array, the columns represent individual time steps, and the depth represent the features of the data. Since our prediction is one day ahead, each training example represents the observations within the window, for the next day prediction. Furthermore, the data was standardized to ensure the algorithms were not distorted by the different scales of the features. Lastly, the data was also one hot encoded, such that each categorical variable is split into multiple binary variable demarcating each category.</p>
 <p>To preserve the temporal trends of the data, for the CNN and RNN the train and test split was not randomly shuffled. Instead, the first 80% of avalanche records were used as training examples, and the remaining became the test set.</p>
 </section>
 </section>
 <section id="convolutional-neural-network" class="level2">
 <h2 class="anchored" data-anchor-id="convolutional-neural-network">Convolutional Neural Network</h2>
-<p>The selection of the convolution neural network and recurrent neural netowrk parameters involved two stages. Firstly, several candidate data sets were created with various time windows. In our cases, we tested a window of 3 days, 7 days, 30 days and 120 days. We kept the search parameters more narrow in this stage, and estimated many models in order to assess what prediction window would be most appropriate, according to validation accuracy.</p>
-<p>In the second stage, a more broad grid search was conducted on the chosen window, and the best model was chosen according to the highest validation accuracy. In all our tests presented, we assessed architectures with two convolutional layers using the Relu function in those latent layers, and the softmax function in our input layer to create the predictions. More complex architectures did not performly better, or meaningfully better.</p>
+<p>The selection of the convolution neural network and recurrent neural netowrk parameters involved two stages. Firstly, several candidate data sets were created with various time windows. In our cases, we tested a window of 3 days, 7 days, 30 days and 120 days. We kept the search parameters more narrow in this stage, and estimated many models in order to assess what prediction window would be most appropriate, according to validation accuracy. To estimate validation accuracy we used cross validation with 20% holdout set. All models were trained for 60 epochs save for the Feed forward Neural Network.</p>
+<p>In the second stage, a more broad grid search was conducted on the chosen window, and the best model was chosen according to the highest validation accuracy. In all our tests presented for the CNN, we assessed architectures with two convolutional layers using the Relu function in those latent layers, and the softmax function in our input layer to create the class predictions. More complex architectures did not perform better, or meaningfully better.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div>
@@ -661,15 +656,7 @@ window.addEventListener('DOMContentLoaded', function(){
 </div>
 </div>
 </div>
-<p>Considering Figure ? above, we decided on a prediction window of 7 days. Overall, out of the models tested, most perform best with a window of roughly 3 to 7 days, while 30 days and 120 days were shown to be meaningfully worse than former two options. Overall, validation accuracy between 3 to 7 days was competitive. However, 7 days appeared to be more robust, as the set of models with a 3 day prediction contained performances that achieved a much lower accuracy at the extreme end.</p>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>          used  (Mb) gc trigger  (Mb) max used  (Mb)
-Ncells 2859220 152.7    5303820 283.3  4143828 221.4
-Vcells 6531092  49.9   12255594  93.6  9562672  73.0</code></pre>
-</div>
-</div>
-<p>After completing the above search, an expanded search with the below hyperamaters was completed.</p>
+<p>Considering Figure ? above, we decided on a prediction window of 7 days. Overall, out of the models tested, most perform best with a window of roughly 3 to 7 days, while 30 days and 120 days were shown to be meaningfully worse than former two options. Overall, validation accuracy between 3 to 7 days was competitive. However, 7 days appeared to be more robust, as the set of models with a 3 day prediction contained performances that achieved a much lower accuracy at the extreme end. <br> <br></p>
 <div class="cell">
 <div class="cell-output-display">
 <table class="table table-hover caption-top table-sm table-striped small" data-quarto-postprocess="true">
@@ -714,11 +701,12 @@ Vcells 6531092  49.9   12255594  93.6  9562672  73.0</code></pre>
 </div>
 </div>
 </div>
-<p>The validation accuracy of the top 30 models is presented in Figure ? above. The Best performance overall was a validation accuracy of roughly 69%. We stuck with this model, as validation accuracy had not improved meaningfully over the course of the expanded search. The best performing model during the prediction window search acheived a validation accurayc of 0.6722355. The final selected model involved 32 filters in the first layer, followed by a dropout of 70%, then 16 layers in the second layers, followed by dropout of 70% and global average pooling into the the final output layer.</p>
+<p>After completing the above search, an expanded search with the hyperamaters presented in table ? was completed.The validation accuracy of the top 30 models is presented in Figure ? above. The Best performance overall was a validation accuracy of roughly 69%. We stuck with this model, as validation accuracy had not improved meaningfully over the course of the expanded search. The best performing model during the prediction window search acheived a validation accuracy of 67. The final selected model involved 32 filters in the first layer, followed by a dropout of 70%, then 16 layers in the second layers, followed by dropout of 70% and global average pooling into the the final output layer. <br> <br></p>
 </section>
 <section id="reccurrent-neural-network" class="level2">
 <h2 class="anchored" data-anchor-id="reccurrent-neural-network">Reccurrent Neural Network</h2>
 <p>The approach for the Reccurent Neural Network was the same as the CNN discussed above. Firstly a search over numerous candidate wndow sizes was completed, and a subsequent expanded search was done as well. In Figure ? below, the validation accuracy of the models test is presented. We used a combination of two Long Short-Term memory layers (LSTM), with dropout and varied the LSTM units and dropout values in the grid search.</p>
+<p><br> <br></p>
 <div class="cell">
 <div class="cell-output-display">
 <div>
@@ -728,7 +716,7 @@ Vcells 6531092  49.9   12255594  93.6  9562672  73.0</code></pre>
 </div>
 </div>
 </div>
-<p>The window search for the recurrent neural network involved more competitive performances. In this case, a window of 30 days appears more robust overall, containing fewer worse performing models towards the extreme end. We therefore, conducted an exapnded grid search using that window, the results of which are presented in Figure ? below. The hypermarameters of for grid search is presented in the below table.</p>
+<p>The window search for the recurrent neural network involved more competitive performances. In this case, a window of 30 days appears more robust overall, containing fewer worse performing models towards the extreme end. We therefore, conducted an exapnded grid search using that window, the results of which are presented in Figure ? below. The hypermarameters of for grid search is presented in the below table. <br> <br></p>
 <div class="cell">
 <div class="cell-output-display">
 <table class="table table-hover caption-top table-sm table-striped small" data-quarto-postprocess="true">
@@ -760,158 +748,125 @@ Vcells 6531092  49.9   12255594  93.6  9562672  73.0</code></pre>
 </table>
 </div>
 </div>
-</section>
-<section id="modelling" class="level2">
-<h2 class="anchored" data-anchor-id="modelling">Modelling</h2>
 <div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="DS4i_writeup_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Out of the more expanded grid search, the best performing model achieved a validation accuracy of roughly 64%. We fitted this model to the full training data and used that to predict onto the test set. Overall, we were satisfied with this search as the validation accuracy had not improved drastically compared to the search across various windows done above. For example, the best performing model in the first stage of search achieved an accuracy of roughly 0.5950676%.</p>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>   [1] 5 5 5 4 4 4 4 4 4 4 4 4 4 4 4 5 5 4 5 5 4 5 5 5 4 4 4 4 4 4 4 4 4 4 4 4 4
-  [38] 4 4 4 4 4 1 4 4 4 4 4 4 4 4 4 5 4 4 4 4 4 4 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5
-  [75] 5 5 3 3 3 3 3 3 3 3 3 1 1 3 3 3 3 3 4 3 3 4 3 3 4 4 4 4 4 3 3 3 3 3 3 3 3
- [112] 3 4 3 3 3 3 3 3 3 1 1 1 1 1 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3
- [149] 3 3 3 3 1 3 3 3 1 1 1 1 1 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 5 5 5 5 5
- [186] 3 3 3 3 3 4 4 3 3 3 3 3 3 3 4 4 4 4 4 4 4 3 3 3 3 3 3 1 1 1 1 1 1 4 4 1 4
- [223] 1 1 1 4 4 4 4 4 4 4 4 4 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3
- [260] 4 4 4 4 1 1 1 4 4 4 4 4 4 4 4 4 4 4 4 4 4 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 1
- [297] 1 1 1 1 1 1 1 1 4 4 4 4 4 4 4 4 4 4 4 1 1 1 1 1 1 1 3 1 1 3 1 1 1 1 1 1 1
- [334] 1 1 4 4 4 4 4 4 4 4 4 4 3 3 3 4 4 3 3 3 3 3 3 3 3 1 1 1 1 1 1 1 1 1 4 4 4
- [371] 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 5 4 4 1 1 1 1 1 1
- [408] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 3 3
- [445] 3 3 3 3 1 1 1 3 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
- [482] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 3 3 3 3 3 3 1 1 1
- [519] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 4 4 4 4 4 4 4 4 1 1 1 1 1 1 1
- [556] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 4 4 1 1 1 1 1 1 1 1 1 1 1 1 1
- [593] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 5 5 5 5 5 5 5 5 5 5 5 5 5 5 4 4 4 4
- [630] 4 4 4 4 4 4 4 4 4 4 4 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5
- [667] 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 4 4
- [704] 4 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 4 4 4 4 4
- [741] 3 3 3 3 1 1 1 1 1 1 1 1 3 3 3 3 3 1 1 3 3 1 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3
- [778] 3 3 3 3 3 3 3 3 3 4 4 4 4 4 3 3 3 4 4 4 4 4 4 4 4 4 3 3 3 3 1 1 4 4 4 4 4
- [815] 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4
- [852] 1 1 1 1 1 1 1 1 1 1 1 1 1 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4
- [889] 4 3 3 3 3 3 3 3 3 3 3 1 1 1 1 1 1 1 1 1 1 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4
- [926] 4 4 4 4 4 4 4 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 4 4 4 4 4 1 1 1 1 1 1 4 1
- [963] 1 1 1 1 3 4 3 3 3 3 3 3 3 3 3 3 1 1 1 4 4 4 4 4 4 4 4 1 1 4 4 4 4 4 4 4 4
-[1000] 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4
-[1037] 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4
-[1074] 4 4 4 4 4 4 4 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 3 1 1 1 1 1 1 1 1 1 1
-[1111] 1 1 1 1 1 1 1 1 1 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 5 5 5 5 5 5 5 5 4 4 4 4 4
-[1148] 4 4 4 4 4 5 5 5 5 5 5 5 5 5 5 5 5 5 5 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 1 1
-[1185] 1 1 1 1 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 5 4 5 5 5 5 5 4 4 4 4 4 4 4
-[1222] 4 4 4 5 5 5 5 5 4 4 4 4 4 4 4 5 5 5 5 5 5 5 5 5 5 5 5 4 5 5 5 5 5 5 5 5 4
-[1259] 4 4 4 5 5 5 5 5 5 5 5 3 3 3 3 3 3 3 3 3 3 3 3 5 5 5 5 5 5 5 5 5 5 3 3 3 3
-[1296] 3 3 3 3 3 3 3 3 3 3 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5
-[1333] 5 5 5 5 5 3 3 3 3 3 3 3 3 3 3 3 3 3 5 5 5 5 5 5 5 5 5 3 3 3 3 4 4 4 4 4 4
-[1370] 4 4 3 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 3 3 3 3 3 3 3 4 5 5 5
-[1407] 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 4 5
-[1444] 5 5 5 5 5 5 5 5 5 5 5 5 5 5 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4
-[1481] 4 4 4 4 3 3 3 3 3 3 3 3 3 3 3 3 3 3 1 1 5 5 5 5 4 5 4 4 4 4 4 4 4 4 4 4 4
-[1518] 5 5 5 5 5 5 5 4 4 4 4 4 4 4 4 4 4 4 4 4 5 5 5 5 5 5 5 5 5 4 4 4 4 5 1 1 1
-[1555] 1 1 5 5 5 5 5 5 5</code></pre>
-</div>
-</div>
-</section>
-<section id="modelling-1" class="level2">
-<h2 class="anchored" data-anchor-id="modelling-1">Modelling</h2>
-<p>FFN</p>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>
-H2O is not running yet, starting it now...
-
-Note:  In case of errors look at the following log files:
-    C:\Users\Matthew\AppData\Local\Temp\RtmpiSaors\file795045872836/h2o_Matthew_started_from_r.out
-    C:\Users\Matthew\AppData\Local\Temp\RtmpiSaors\file79506b84bb2/h2o_Matthew_started_from_r.err
-
-
-Starting H2O JVM and connecting:  Connection successful!
-
-R is connected to the H2O cluster: 
-    H2O cluster uptime:         4 seconds 294 milliseconds 
-    H2O cluster timezone:       Africa/Harare 
-    H2O data parsing timezone:  UTC 
-    H2O cluster version:        3.44.0.3 
-    H2O cluster version age:    1 year, 9 months and 5 days 
-    H2O cluster name:           H2O_started_from_R_Matthew_osn291 
-    H2O cluster total nodes:    1 
-    H2O cluster total memory:   3.42 GB 
-    H2O cluster total cores:    14 
-    H2O cluster allowed cores:  14 
-    H2O cluster healthy:        TRUE 
-    H2O Connection ip:          localhost 
-    H2O Connection port:        54321 
-    H2O Connection proxy:       NA 
-    H2O Internal Security:      FALSE 
-    R Version:                  R version 4.5.0 (2025-04-11 ucrt) </code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>
-  |                                                                            
-  |                                                                      |   0%
-  |                                                                            
-  |======================================================================| 100%</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>
-  |                                                                            
-  |                                                                      |   0%
-  |                                                                            
-  |======================================================================| 100%</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="DS4i_writeup_files/figure-html/get-best-model-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>
-  |                                                                            
-  |                                                                      |   0%
-  |                                                                            
-  |======================================================================| 100%</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>Variable Importances: 
-            variable relative_importance scaled_importance percentage
-1       FAH.Moderate            1.000000          1.000000   0.041100
-2            FAH.Low            0.967902          0.967902   0.039780
-3 FAH.Considerable -            0.872198          0.872198   0.035847
-4 FAH.Considerable +            0.860799          0.860799   0.035379
-5           FAH.High            0.857075          0.857075   0.035226
-
----
-                  variable relative_importance scaled_importance percentage
-64                latitude            0.229823          0.229823   0.009446
-65                  Aspect            0.221589          0.221589   0.009107
-66      season.missing(NA)            0.000000          0.000000   0.000000
-67 Precip.Code.missing(NA)            0.000000          0.000000   0.000000
-68        Area.missing(NA)            0.000000          0.000000   0.000000
-69         FAH.missing(NA)            0.000000          0.000000   0.000000</code></pre>
-</div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
 <p><img src="DS4i_writeup_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Out of the more expanded grid search, the best performing model achieved a validation accuracy of roughly 64%. We fitted this model to the full training data and used that to predict onto the test set. Overall, we were satisfied with this search as the validation accuracy had not improved drastically compared to the search across various windows done above. For example, the best performing model in the first stage of search achieved an accuracy of roughly 60%.</p>
+</section>
+<section id="modelling" class="level2">
+<h2 class="anchored" data-anchor-id="modelling">Modelling</h2>
+<p>Feed Forward Neural network</p>
+<p>A feed-forward multilayer perceptron (MLP) neural network was developed for multi-class classification using the H2O deep learning framework. The objective was to predict a five level categorical outcome based on a high-dimensional feature set.</p>
+<p>The MLP architecture was systematically optimized through a randomized discrete grid search to identify the most effective combination of hyperparameters. All candidate models were structured with a consistent input and output layer, while the hidden layer configuration was varied. The Input Layer Comprised 61 nodes, corresponding to the full set of hot one encoded engineered predictor variables, plus the bias. <br> <br></p>
+<p>The grid search explored architectures containing between two and four hidden layers. Neuron configurations tested included dense layers such as [256, 128, 64], [512, 256, 128], and [128, 64]. The RectifierWithDropout activation function was initially considered to promote non-linearity and mitigate overfitting. The output layerContained five neurons, and employed a softmax activation function to generate a probability distribution over the classes.</p>
+<p><br> <br></p>
+<p>To counteract the effects of an imbalanced class distribution in the training data, a class-balancing strategy was implemented. Each training observation was assigned a weight inversely proportional to its class frequency, thereby increasing the influence of minority classes during the optimization of the loss function.</p>
+<p><br> <br></p>
+<p>The randomized grid search evaluated a maximum of 216 candidate models, exploring a predefined hyperparameter space. Key hyperparameters and their search ranges are detailed in Table ? below.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>       Hyperparameter                                   Values
+1              hidden (128,128); (128,64); (64,32,16); (64,32)
+2          activation                     RectifierWithDropout
+3                  l1                            0, 1e-4, 1e-5
+4                  l2                            0, 1e-4, 1e-5
+5                rate                              0.01, 0.001
+6 input_dropout_ratio                            0.1, 0.3, 0.5</code></pre>
+</div>
+<div class="cell-output-display">
+<table class="table table-hover caption-top table-sm table-striped small" data-quarto-postprocess="true">
+<caption>Feed Forward Neural Network Grid Search Hyperparameters</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Hyperparameter</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Values</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">hidden</td>
+<td style="text-align: left;">(128,128); (128,64); (64,32,16); (64,32)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">activation</td>
+<td style="text-align: left;">RectifierWithDropout</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">l1</td>
+<td style="text-align: left;">0, 1e-4, 1e-5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">l2</td>
+<td style="text-align: left;">0, 1e-4, 1e-5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">rate</td>
+<td style="text-align: left;">0.01, 0.001</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">input_dropout_ratio</td>
+<td style="text-align: left;">0.1, 0.3, 0.5</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell-output-display">
+<table class="table table-hover table-condensed caption-top table-sm table-striped small" data-quarto-postprocess="true">
+<caption>Hyperparameter Grid</caption>
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th" style="text-align: left; color: white !important;">Hyperparameter</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; color: white !important;">Values</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left; width: 22%; font-weight: bold;">hidden</td>
+<td style="text-align: left; width: 60%; font-family: monospace;">(128,128)<br>
+(128,64)<br>
+(64,32,16)<br>
+(64,32)</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; width: 22%; font-weight: bold;">activation</td>
+<td style="text-align: left; width: 60%; font-family: monospace;">RectifierWithDropout</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; width: 22%; font-weight: bold;">l1</td>
+<td style="text-align: left; width: 60%; font-family: monospace;">0, 1e-4, 1e-5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; width: 22%; font-weight: bold;">l2</td>
+<td style="text-align: left; width: 60%; font-family: monospace;">0, 1e-4, 1e-5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; width: 22%; font-weight: bold;">rate</td>
+<td style="text-align: left; width: 60%; font-family: monospace;">0.01, 0.001</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; width: 22%; font-weight: bold;">input_dropout_ratio</td>
+<td style="text-align: left; width: 60%; font-family: monospace;">0.1, 0.3, 0.5</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Each model was trained for a maximum of 200 epochs. An early stopping mechanism was employed to prevent overfitting, which terminated training if the validation set logloss did not improve by a tolerance of at least 1e-4 over 10 consecutive scoring intervals.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="DS4i_writeup_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
