@@ -1514,7 +1514,7 @@ After completing the above search, an expanded search with the hyperamaters pres
 
 
 load("temporal_labels_rnn")
-save(pred_cnn, file   = "pred_cnn")
+#save(pred_cnn, file   = "pred_cnn")
 
 load("pred_cnn")
 
@@ -1713,7 +1713,7 @@ kable(grid_summary, format = "html",
 
 ```
 
-<<<<<<< HEAD
+
 
 
 
@@ -1731,20 +1731,7 @@ kable(grid_summary, format = "html",
 # X.test <- W_[[4]]
 # cl_weights <- W_[[5]]
 # F_ <- W_[[6]]
-=======
-```{r}
 
-library(keras3)
-
-W_ <- pre_data(w = 30, h = 1) #using 30 days
-
-y.test <- W_[[1]]
-y.train <- W_[[2]]
-X.train <- W_[[3]]
-X.test <- W_[[4]]
-cl_weights <- W_[[5]]
-F_ <- W_[[6]]
->>>>>>> 06a2b09edf5d50038c61a38671f4373c130c1601
 # 
 # set.seed(1)
 # tf$keras$utils$set_random_seed(123L)
@@ -2016,16 +2003,7 @@ summary_df <- data.frame(
   stringsAsFactors = FALSE
 )
 
-summary_df
 
-
-kable(summary_df, format = "html",
-      digits = 4,
-      caption = "Feed Forward Neural Network Grid Search Hyperparameters") %>%
-  kable_styling(
-    bootstrap_options = c("hover"),
-    full_width = FALSE
-  )
 
 
 
@@ -2573,27 +2551,27 @@ ffn_cm <- confusionMatrix(pred_ffn_labels, true_labels)
 
 # ----------------------------------------------------------
 # Getting CNN and RNN in order
-pred_cnn_labels
-pred_rnn_labels
+# pred_cnn_labels
+# pred_rnn_labels
 
 # Test set labels for cnn and rnn
-temporal_labels
+
 
 # Checking
 class(pred_cnn_labels)
 class(pred_rnn_labels)
-class(temporal_labels)
+#class(temporal_labels)
 
 length(pred_cnn_labels) # Why are you longer :/
 length(pred_rnn_labels)
-length(temporal_labels)
+#length(temporal_labels)
 
 # "Fixing" CNN preds
-pred_cnn_labels <- pred_cnn_labels[1:length(temporal_labels)]
+#pred_cnn_labels <- pred_cnn_labels[1:length(temporal_labels)]
 
 # Create the confusion matrices
-cnn_cm <- confusionMatrix(pred_cnn_labels, temporal_labels)
-rnn_cm <- confusionMatrix(pred_rnn_labels, temporal_labels)
+cnn_cm <- confusionMatrix(pred_cnn_labels, temporal_labels_cnn)
+rnn_cm <- confusionMatrix(pred_rnn_labels, temporal_labels_rnn)
 
 ```
 

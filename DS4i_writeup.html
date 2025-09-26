@@ -91,7 +91,7 @@ ul.task-list li input[type="checkbox"] {
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="av.jpg" class="img-fluid figure-img"></p>
+<p><img src="av.jpg" class="img-fluid figure-img" width="2000"></p>
 </figure>
 </div>
 </div>
@@ -333,95 +333,95 @@ ul.task-list li input[type="checkbox"] {
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">AV.Cat</td>
-<td style="text-align: right;">23.3718</td>
+<td style="text-align: right;">23.3494</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Ski.Pen</td>
-<td style="text-align: right;">22.5283</td>
+<td style="text-align: right;">22.4898</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Summit.Wind.Dir</td>
-<td style="text-align: right;">12.3512</td>
+<td style="text-align: right;">12.3548</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Crystals</td>
-<td style="text-align: right;">9.2587</td>
+<td style="text-align: right;">9.2566</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Summit.Wind.Speed</td>
-<td style="text-align: right;">8.5184</td>
+<td style="text-align: right;">8.5293</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Summit.Air.Temp</td>
-<td style="text-align: right;">7.0659</td>
+<td style="text-align: right;">7.0653</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Snow.Index</td>
-<td style="text-align: right;">6.9815</td>
+<td style="text-align: right;">6.9991</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Max.Temp.Grad</td>
-<td style="text-align: right;">6.6535</td>
+<td style="text-align: right;">6.1679</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Max.Hardness.Grad</td>
-<td style="text-align: right;">5.8945</td>
+<td style="text-align: right;">5.4029</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Wetness</td>
-<td style="text-align: right;">5.3978</td>
+<td style="text-align: right;">5.3273</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Insolation</td>
-<td style="text-align: right;">4.7512</td>
+<td style="text-align: right;">4.7606</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Snow.Temp</td>
-<td style="text-align: right;">3.8422</td>
+<td style="text-align: right;">3.7404</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">OAH</td>
-<td style="text-align: right;">3.4580</td>
+<td style="text-align: right;">3.4854</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Aspect</td>
-<td style="text-align: right;">3.3268</td>
+<td style="text-align: right;">3.0320</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">No.Settle</td>
-<td style="text-align: right;">2.7083</td>
+<td style="text-align: right;">2.7298</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Total.Snow.Depth</td>
-<td style="text-align: right;">1.5275</td>
+<td style="text-align: right;">1.4168</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Wind.Dir</td>
-<td style="text-align: right;">1.4806</td>
+<td style="text-align: right;">1.3696</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Wind.Speed</td>
-<td style="text-align: right;">0.4967</td>
+<td style="text-align: right;">0.3967</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Foot.Pen</td>
-<td style="text-align: right;">0.3936</td>
+<td style="text-align: right;">0.2739</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Incline</td>
-<td style="text-align: right;">0.3374</td>
+<td style="text-align: right;">0.2172</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Air.Temp</td>
-<td style="text-align: right;">0.3186</td>
+<td style="text-align: right;">0.2172</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Cloud</td>
-<td style="text-align: right;">0.2718</td>
+<td style="text-align: right;">0.1700</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Alt</td>
-<td style="text-align: right;">0.0562</td>
+<td style="text-align: right;">0.0472</td>
 </tr>
 </tbody><tfoot>
 <tr class="odd">
@@ -447,8 +447,8 @@ ul.task-list li input[type="checkbox"] {
 </div>
 </div>
 </div>
-<p>Lastly, we also dropped categorical variables that had very high cardinality, which included <em>OsGrid</em> and <em>Location</em>. <em>Osgrid</em> appeared to be some kind of ID variable with over 3000 unique values. When one hot encoding this would make our data set unnecessarily complex, and we surmised that this variable likely would not be indicative of risk. Likewise, we also dropped Location for similar reasoning. We had the latitiude and longitude of included in the data as well as the <em>Area</em> indicative which we expected to be more indicative of avalanche risk, so we dropped this feature as well to reduce unneccessary complexity.</p>
-<p>Having dropped the above variables, we were left with roughly 36 % non-complete samples in the data. We dropped the remaining samples that contained missing values to maintain complete cases for the models. Ideally, it would be better to maintain more observations. However, we felt we still had a large enough sample to maintain representative results (around 7000 observations). At a later stage, we fit our best performing model to a simply imputed data set and achieve an accuracy roughly equivalent to the complete cases data set.</p>
+<p>Lastly, we also dropped categorical variables that had very high cardinality, which included <em>OsGrid</em> and <em>Location</em>. <em>Osgrid</em> appeared to be some kind of ID variable with over 3000 unique values. When one hot encoding this would make our data set unnecessarily complex, and we surmised that this variable likely would not be indicative of risk. Likewise, we also dropped Location for similar reasoning. We had the latitiude and longitude of included in the data as well as the <em>Area</em> indicative which we expected to be more indicative of avalanche risk, so we dropped this feature as well to reduce unnecessary complexity.</p>
+<p>Having dropped the above variables, we were left with roughly 35 % non-complete samples in the data. We dropped the remaining samples that contained missing values to maintain complete cases for the models. Ideally, it would be better to maintain more observations. However, we felt we still had a large enough sample to maintain representative results (around 7000 observations). At a later stage, we fit our best performing model to a simply imputed data set and achieve an accuracy roughly equivalent to the complete cases data set.</p>
 <section id="modeling-methodology" class="level3">
 <h3 class="anchored" data-anchor-id="modeling-methodology">Modeling Methodology</h3>
 <p>There are three main models used in this project. Firstly, a feed forward neural network (FFN), a convolutional neural network (CNN) and a recurrent neural network (RNN). The idea behind the feed forward neural network is that it would likely leverage the categorical variables, like forecasted avalanche risk, well in predicting the target. However, CNN and RNN were more likely to leverage any time series trends present in the data.</p>
@@ -752,7 +752,7 @@ window.addEventListener('DOMContentLoaded', function(){
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="DS4i_writeup_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="DS4i_writeup_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -866,7 +866,7 @@ window.addEventListener('DOMContentLoaded', function(){
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="DS4i_writeup_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="DS4i_writeup_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -874,9 +874,1197 @@ window.addEventListener('DOMContentLoaded', function(){
 </section>
 <section id="results" class="level2">
 <h2 class="anchored" data-anchor-id="results">Results</h2>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.5463852</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.680919</code></pre>
+</div>
+</div>
 </section>
 <section id="discussion" class="level2">
 <h2 class="anchored" data-anchor-id="discussion">Discussion</h2>
+<section id="confusion-matrices" class="level3">
+<h3 class="anchored" data-anchor-id="confusion-matrices">Confusion Matrices</h3>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>   [1] Moderate       Moderate       Considerable - Moderate      
+   [5] Moderate       Moderate       Moderate       Low           
+   [9] Low            Low            Low            Low           
+  [13] Low            Low            Low            Low           
+  [17] Low            Low            Low            Low           
+  [21] Low            Low            Low            Considerable -
+  [25] Moderate       Moderate       Considerable - Moderate      
+  [29] Moderate       Moderate       Low            Low           
+  [33] Low            Low            Moderate       Moderate      
+  [37] Low            Low            Low            Moderate      
+  [41] Moderate       Moderate       Moderate       Moderate      
+  [45] Moderate       Moderate       Moderate       Considerable -
+  [49] Considerable - Moderate       Moderate       Moderate      
+  [53] Moderate       Moderate       Moderate       Low           
+  [57] Moderate       Considerable - Moderate       Moderate      
+  [61] Moderate       Moderate       Moderate       Moderate      
+  [65] Moderate       Considerable - Moderate       Moderate      
+  [69] Moderate       Moderate       Moderate       Moderate      
+  [73] Low            Low            Low            Moderate      
+  [77] Moderate       Moderate       Considerable - Moderate      
+  [81] Moderate       Moderate       Moderate       Moderate      
+  [85] Moderate       Moderate       Moderate       Moderate      
+  [89] Moderate       Moderate       Moderate       Low           
+  [93] Low            Low            Low            Low           
+  [97] Low            Low            Moderate       Low           
+ [101] Low            Low            Low            Low           
+ [105] Low            Low            Low            Low           
+ [109] Low            Moderate       Moderate       Moderate      
+ [113] Moderate       Considerable - Low            Moderate      
+ [117] Moderate       Moderate       Moderate       Moderate      
+ [121] Moderate       Moderate       Moderate       Moderate      
+ [125] Considerable - Considerable - Moderate       Moderate      
+ [129] Moderate       Considerable - Moderate       Moderate      
+ [133] Considerable - Considerable - Moderate       Moderate      
+ [137] Moderate       Moderate       Moderate       Moderate      
+ [141] Moderate       Moderate       Moderate       Moderate      
+ [145] Moderate       Moderate       Moderate       Moderate      
+ [149] Considerable - Moderate       Considerable - Considerable -
+ [153] Moderate       Moderate       Considerable - Considerable -
+ [157] Moderate       Considerable - Considerable - Considerable -
+ [161] Considerable - Considerable - Considerable - Considerable -
+ [165] Considerable - Considerable - Moderate       Considerable -
+ [169] Considerable - Moderate       Considerable - Considerable -
+ [173] Considerable - Considerable - Considerable - Considerable -
+ [177] Considerable - Considerable - Considerable - Considerable -
+ [181] Moderate       Moderate       Moderate       Considerable -
+ [185] Moderate       Moderate       Moderate       Moderate      
+ [189] Moderate       Moderate       Moderate       Moderate      
+ [193] Low            Moderate       Low            Low           
+ [197] Low            Low            Low            Low           
+ [201] Low            Low            Low            Low           
+ [205] Low            Low            Low            Low           
+ [209] Low            Low            Low            Low           
+ [213] Low            Low            Low            Low           
+ [217] Low            Low            Low            Low           
+ [221] Low            Low            Low            Low           
+ [225] Low            Low            Low            Low           
+ [229] Low            Low            Low            Low           
+ [233] Low            Low            Low            Low           
+ [237] Low            Low            Low            Low           
+ [241] Low            Moderate       Considerable - Considerable -
+ [245] Moderate       Moderate       Low            Moderate      
+ [249] Low            Low            Low            Low           
+ [253] Low            Low            Low            Low           
+ [257] Low            Low            Low            Low           
+ [261] Low            Low            Low            Low           
+ [265] Low            Low            Low            Low           
+ [269] Low            Low            Low            Low           
+ [273] Low            Low            Low            Low           
+ [277] Low            Low            Low            Low           
+ [281] Low            Low            Low            Low           
+ [285] Considerable - Moderate       Moderate       Moderate      
+ [289] Low            Moderate       Low            Low           
+ [293] Low            Low            Low            Low           
+ [297] Low            Low            Low            Low           
+ [301] Low            Low            Low            Low           
+ [305] Low            Low            Low            Low           
+ [309] Low            Low            Low            Low           
+ [313] Low            Low            Low            Low           
+ [317] Low            Low            Low            Low           
+ [321] Low            Low            Low            Low           
+ [325] Low            Low            Low            Low           
+ [329] Moderate       Moderate       Moderate       Moderate      
+ [333] Moderate       Moderate       Low            Moderate      
+ [337] Low            Low            Low            Low           
+ [341] Low            Low            Low            Low           
+ [345] Low            Low            Low            Low           
+ [349] Low            Low            Low            Low           
+ [353] Low            Moderate       Moderate       Moderate      
+ [357] Low            Moderate       Moderate       Moderate      
+ [361] Low            Low            Low            Low           
+ [365] Low            Low            Low            Low           
+ [369] Low            Low            Low            Low           
+ [373] Low            Low            Low            Low           
+ [377] Low            Low            Low            Low           
+ [381] Low            Low            Low            Low           
+ [385] Low            Low            Low            Low           
+ [389] Low            Low            Low            Low           
+ [393] Low            Low            Low            Low           
+ [397] Low            Low            Low            Low           
+ [401] Low            Low            Low            Low           
+ [405] Low            Moderate       Moderate       Low           
+ [409] Low            Moderate       Moderate       Moderate      
+ [413] Considerable - Considerable - Low            Moderate      
+ [417] Considerable - Moderate       Moderate       Moderate      
+ [421] Moderate       Moderate       Moderate       Moderate      
+ [425] Moderate       Moderate       Moderate       Moderate      
+ [429] Moderate       Moderate       Moderate       Moderate      
+ [433] Moderate       Moderate       Moderate       Moderate      
+ [437] Moderate       Moderate       Moderate       Moderate      
+ [441] Moderate       Moderate       Moderate       Moderate      
+ [445] Moderate       Moderate       Moderate       Moderate      
+ [449] Moderate       Moderate       Moderate       Considerable -
+ [453] Considerable - Moderate       Moderate       Moderate      
+ [457] Moderate       Moderate       Moderate       Moderate      
+ [461] Moderate       Moderate       Moderate       Moderate      
+ [465] Considerable - Considerable - Considerable - Moderate      
+ [469] Moderate       Moderate       Low            Low           
+ [473] Low            Low            Low            Low           
+ [477] Low            Low            Low            Low           
+ [481] Low            Low            Low            Low           
+ [485] Low            Low            Low            Low           
+ [489] Low            Low            Low            Low           
+ [493] Low            Low            Low            Low           
+ [497] Low            Low            Low            Low           
+ [501] Low            Low            Moderate       Moderate      
+ [505] Moderate       Moderate       Moderate       Moderate      
+ [509] Moderate       Moderate       Low            Low           
+ [513] Low            Low            Low            Low           
+ [517] Low            Low            Low            Low           
+ [521] Low            Moderate       Moderate       Low           
+ [525] Low            Moderate       Moderate       Moderate      
+ [529] Moderate       Moderate       Moderate       Moderate      
+ [533] Low            Low            Low            Low           
+ [537] Low            Low            Low            Low           
+ [541] Low            Low            Low            Low           
+ [545] Low            Low            Low            Low           
+ [549] Low            Low            Low            Low           
+ [553] Low            Low            Low            Low           
+ [557] Low            Low            Low            Low           
+ [561] Low            Low            Low            Low           
+ [565] Low            Low            Low            Low           
+ [569] Low            Low            Low            Low           
+ [573] Low            Low            Low            Low           
+ [577] Low            Low            Low            Low           
+ [581] Low            Low            Low            Low           
+ [585] Low            Low            Low            Low           
+ [589] Low            Low            Low            Moderate      
+ [593] Moderate       Moderate       Moderate       Moderate      
+ [597] Moderate       Moderate       Considerable - Considerable -
+ [601] Considerable - Moderate       Moderate       Moderate      
+ [605] Moderate       Moderate       Moderate       Moderate      
+ [609] Moderate       Moderate       Moderate       Moderate      
+ [613] Moderate       Moderate       Moderate       Moderate      
+ [617] Low            Low            Low            Low           
+ [621] Low            Low            Low            Low           
+ [625] Low            Low            Low            Low           
+ [629] Low            Low            Low            Low           
+ [633] Low            Low            Low            Low           
+ [637] Low            Low            Low            Low           
+ [641] Low            Low            Low            Low           
+ [645] Low            Low            Low            Moderate      
+ [649] Considerable - Moderate       Considerable - Moderate      
+ [653] Moderate       Moderate       Moderate       Moderate      
+ [657] Moderate       Moderate       Moderate       Moderate      
+ [661] Low            Moderate       Moderate       Moderate      
+ [665] Moderate       Moderate       Moderate       Moderate      
+ [669] Moderate       Moderate       Moderate       Low           
+ [673] Low            Low            Low            Low           
+ [677] Moderate       Moderate       Moderate       Moderate      
+ [681] Moderate       Moderate       Moderate       Moderate      
+ [685] Moderate       Moderate       Moderate       Moderate      
+ [689] Low            Low            Low            Low           
+ [693] Low            Low            Low            Low           
+ [697] Low            Low            Low            Low           
+ [701] Low            Low            Low            Low           
+ [705] Low            Low            Low            Low           
+ [709] Low            Low            Low            Low           
+ [713] Low            Low            Low            Low           
+ [717] Low            Low            Low            Low           
+ [721] Low            Low            Low            Low           
+ [725] Low            Low            Low            Low           
+ [729] Low            Low            Low            Low           
+ [733] Low            Low            Low            Low           
+ [737] Low            Low            Low            Low           
+ [741] Low            Low            Low            Moderate      
+ [745] Moderate       Moderate       Moderate       Moderate      
+ [749] Moderate       Moderate       Moderate       Moderate      
+ [753] Considerable - Considerable - Considerable - Considerable -
+ [757] Considerable - Considerable - Considerable - Considerable -
+ [761] Moderate       Moderate       Considerable - Considerable -
+ [765] Considerable - Moderate       Moderate       Moderate      
+ [769] Considerable - Moderate       Moderate       Moderate      
+ [773] Moderate       Moderate       Moderate       Moderate      
+ [777] Moderate       Moderate       Low            Low           
+ [781] Moderate       Moderate       Moderate       Moderate      
+ [785] Moderate       Moderate       Moderate       Moderate      
+ [789] Moderate       Moderate       Moderate       Moderate      
+ [793] Moderate       Moderate       Moderate       Moderate      
+ [797] Low            Low            Low            Low           
+ [801] Low            Low            Low            Low           
+ [805] Moderate       Moderate       Moderate       Moderate      
+ [809] Moderate       Low            Low            Low           
+ [813] Low            Low            Low            Low           
+ [817] Low            Low            Low            Low           
+ [821] Low            Low            Low            Low           
+ [825] Low            Low            Low            Low           
+ [829] Low            Low            Low            Low           
+ [833] Low            Low            Low            Low           
+ [837] Low            Low            Low            Low           
+ [841] Low            Low            Low            Low           
+ [845] Low            Low            Low            Low           
+ [849] Low            Low            Low            Low           
+ [853] Low            Low            Low            Low           
+ [857] Low            Low            Low            Low           
+ [861] Low            Low            Low            Low           
+ [865] Low            Low            Low            Low           
+ [869] Low            Moderate       Moderate       Moderate      
+ [873] Moderate       Moderate       Moderate       Moderate      
+ [877] Moderate       Moderate       Moderate       Moderate      
+ [881] Moderate       Moderate       Moderate       Moderate      
+ [885] Moderate       Moderate       Moderate       Moderate      
+ [889] Moderate       Moderate       Considerable - Considerable -
+ [893] Moderate       Moderate       Moderate       Moderate      
+ [897] Moderate       Moderate       Moderate       Moderate      
+ [901] Moderate       Moderate       Moderate       Low           
+ [905] Low            Low            Low            Low           
+ [909] Low            Low            Low            Low           
+ [913] Low            Low            Low            Low           
+ [917] Low            Low            Low            Low           
+ [921] Low            Low            Low            Low           
+ [925] Low            Low            Low            Low           
+ [929] Low            Low            Low            Low           
+ [933] Low            Low            Low            Low           
+ [937] Low            Low            Low            Low           
+ [941] Low            Low            Low            Low           
+ [945] Low            Moderate       Moderate       Moderate      
+ [949] Moderate       Low            Moderate       Moderate      
+ [953] Moderate       Low            Moderate       Low           
+ [957] Low            Low            Low            Low           
+ [961] Moderate       Moderate       Low            Moderate      
+ [965] Moderate       Moderate       Moderate       Moderate      
+ [969] Moderate       Moderate       Moderate       Moderate      
+ [973] Moderate       Moderate       Moderate       Low           
+ [977] Low            Low            Moderate       Moderate      
+ [981] Moderate       Low            Low            Moderate      
+ [985] Low            Low            Low            Low           
+ [989] Moderate       Moderate       Moderate       Moderate      
+ [993] Moderate       Moderate       Moderate       Moderate      
+ [997] Moderate       Moderate       Moderate       Moderate      
+[1001] Moderate       Moderate       Moderate       Moderate      
+[1005] Moderate       Moderate       Moderate       Moderate      
+[1009] Moderate       Low            Low            Low           
+[1013] Low            Low            Low            Low           
+[1017] Low            Low            Low            Low           
+[1021] Low            Low            Low            Low           
+[1025] Low            Low            Low            Low           
+[1029] Low            Low            Low            Low           
+[1033] Low            Low            Low            Low           
+[1037] Low            Low            Low            Low           
+[1041] Low            Low            Low            Low           
+[1045] Low            Low            Low            Low           
+[1049] Low            Low            Low            Low           
+[1053] Low            Low            Low            Low           
+[1057] Low            Low            Low            Low           
+[1061] Low            Low            Low            Low           
+[1065] Low            Low            Low            Low           
+[1069] Low            Low            Low            Low           
+[1073] Low            Low            Low            Low           
+[1077] Low            Low            Low            Low           
+[1081] Low            Low            Low            Low           
+[1085] Low            Low            Low            Low           
+[1089] Low            Low            Moderate       Moderate      
+[1093] Considerable - Moderate       Moderate       Moderate      
+[1097] Moderate       Moderate       Moderate       Moderate      
+[1101] Moderate       Moderate       Moderate       Moderate      
+[1105] Moderate       Moderate       Low            Moderate      
+[1109] Moderate       Moderate       Low            Moderate      
+[1113] Moderate       Moderate       Moderate       Moderate      
+[1117] Moderate       Moderate       Low            Moderate      
+[1121] Moderate       Moderate       Moderate       Low           
+[1125] Low            Low            Low            Low           
+[1129] Low            Low            Low            Low           
+[1133] Low            Low            Low            Low           
+[1137] Low            Low            Low            Low           
+[1141] Low            Low            Low            Low           
+[1145] Low            Low            Low            Low           
+[1149] Low            Low            Low            Low           
+[1153] Low            Low            Low            Low           
+[1157] Low            Low            Low            Moderate      
+[1161] Low            Low            Moderate       Moderate      
+[1165] Moderate       Moderate       Moderate       Moderate      
+[1169] Moderate       Low            Low            Low           
+[1173] Low            Low            Low            Low           
+[1177] Low            Low            Low            Low           
+[1181] Moderate       Moderate       Low            Moderate      
+[1185] Low            Low            Low            Low           
+[1189] Low            Low            Low            Low           
+[1193] Low            Low            Low            Low           
+[1197] Low            Low            Low            Low           
+[1201] Low            Low            Low            Low           
+[1205] Low            Low            Low            Low           
+[1209] Low            Low            Low            Low           
+[1213] Low            Low            Low            Low           
+[1217] Low            Low            Low            Low           
+[1221] Low            Low            Low            Low           
+[1225] Low            Low            Low            Low           
+[1229] Low            Low            Low            Low           
+[1233] Low            Low            Moderate       Moderate      
+[1237] Moderate       Moderate       Low            Low           
+[1241] Moderate       Low            Low            Low           
+[1245] Low            Low            Low            Low           
+[1249] Low            Low            Low            Low           
+[1253] Low            Low            Low            Low           
+[1257] Low            Low            Low            Low           
+[1261] Low            Low            Low            Low           
+[1265] Low            Low            Low            Low           
+[1269] Low            Low            Low            Low           
+[1273] Low            Low            Low            Low           
+[1277] Moderate       Moderate       Moderate       Moderate      
+[1281] Moderate       Moderate       Moderate       Low           
+[1285] Low            Low            Low            Low           
+[1289] Low            Low            Low            Low           
+[1293] Moderate       Moderate       Moderate       Moderate      
+[1297] Moderate       Moderate       Low            Moderate      
+[1301] Moderate       Moderate       Moderate       Moderate      
+[1305] Moderate       Moderate       Moderate       Moderate      
+[1309] Moderate       Moderate       Moderate       Low           
+[1313] Low            Low            Moderate       Low           
+[1317] Low            Low            Low            Low           
+[1321] Low            Low            Low            Low           
+[1325] Low            Low            Low            Low           
+[1329] Low            Low            Low            Low           
+[1333] Low            Low            Low            Low           
+[1337] Low            Low            Low            Moderate      
+[1341] Moderate       Moderate       Moderate       Moderate      
+[1345] Moderate       Moderate       Moderate       Moderate      
+[1349] Moderate       Moderate       Moderate       Moderate      
+[1353] Moderate       Moderate       Moderate       Moderate      
+[1357] Moderate       Moderate       Moderate       Moderate      
+[1361] Moderate       Moderate       Moderate       Moderate      
+[1365] Moderate       Moderate       Moderate       Low           
+[1369] Moderate       Moderate       Moderate       Low           
+[1373] Low            Low            Low            Low           
+[1377] Low            Low            Low            Low           
+[1381] Low            Low            Low            Low           
+[1385] Low            Low            Low            Low           
+[1389] Low            Low            Low            Low           
+[1393] Low            Low            Low            Low           
+[1397] Low            Low            Low            Moderate      
+[1401] Moderate       Moderate       Low            Low           
+[1405] Low            Low            Low            Low           
+[1409] Low            Low            Low            Low           
+[1413] Low            Low            Low            Low           
+[1417] Low            Low            Low            Low           
+[1421] Low            Low            Low            Low           
+[1425] Low            Low            Low            Low           
+[1429] Low            Low            Low            Low           
+[1433] Low            Low            Low            Low           
+[1437] Low            Low            Low            Low           
+[1441] Low            Low            Low            Low           
+[1445] Low            Low            Low            Low           
+[1449] Moderate       Low            Low            Low           
+[1453] Low            Low            Low            Low           
+[1457] Low            Low            Low            Low           
+[1461] Low            Low            Moderate       Moderate      
+[1465] Moderate       Moderate       Moderate       Moderate      
+[1469] Moderate       Low            Low            Moderate      
+[1473] Moderate       Moderate       Moderate       Low           
+[1477] Low            Moderate       Low            Low           
+[1481] Low            Low            Low            Low           
+[1485] Low            Low            Low            Low           
+[1489] Low            Low            Low            Low           
+[1493] Low            Low            Low            Moderate      
+[1497] Moderate       Low            Low            Low           
+[1501] Low            Low            Low            Low           
+[1505] Low            Low            Low            Low           
+[1509] Low            Low            Low            Low           
+[1513] Low            Low            Low            Low           
+[1517] Low            Low            Low            Low           
+[1521] Low            Low            Low            Low           
+[1525] Low            Low            Low            Low           
+[1529] Low            Low            Low            Low           
+[1533] Low            Low            Low            Low           
+[1537] Low            Low            Low            Low           
+[1541] Low            Low            Low            Low           
+[1545] Low            Low            Low            Low           
+[1549] Low            Low            Low            Low           
+[1553] Low            Low            Low            Low           
+[1557] Low            Low            Low            Low           
+[1561] Low            Low            Low            Low           
+[1565] Low            Low            Low           
+Levels: Considerable - Considerable + High Low Moderate</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   [1] High           High           High           Low           
+   [5] Low            Low            Low            Low           
+   [9] Low            Low            Low            Low           
+  [13] Low            Low            Low            Low           
+  [17] Low            Low            Low            Moderate      
+  [21] Moderate       Moderate       Moderate       Moderate      
+  [25] Moderate       Moderate       Moderate       Low           
+  [29] Low            Low            Low            Low           
+  [33] Low            Low            Low            Low           
+  [37] Low            Low            High           High          
+  [41] High           High           High           High          
+  [45] High           High           High           High          
+  [49] High           High           High           High          
+  [53] High           High           High           High          
+  [57] High           High           Low            Low           
+  [61] Low            High           High           High          
+  [65] High           High           High           High          
+  [69] High           High           High           High          
+  [73] High           High           High           Low           
+  [77] Low            Low            Moderate       High          
+  [81] High           High           High           Low           
+  [85] Low            Low            Low            Low           
+  [89] Low            Low            Low            Low           
+  [93] Low            Low            Low            Low           
+  [97] Low            Low            Low            Low           
+ [101] Low            Low            Low            Low           
+ [105] Low            Low            Low            Low           
+ [109] Low            Low            Low            Low           
+ [113] Low            Low            Low            Low           
+ [117] Low            Low            Low            Low           
+ [121] Low            Low            Low            Low           
+ [125] Low            Low            Low            Low           
+ [129] Low            Low            Low            Low           
+ [133] Low            Low            Low            Low           
+ [137] Low            Low            Low            Low           
+ [141] Low            Low            Low            Moderate      
+ [145] Moderate       Moderate       Moderate       Moderate      
+ [149] Moderate       Moderate       Moderate       Moderate      
+ [153] Moderate       Moderate       Moderate       Moderate      
+ [157] Moderate       Moderate       Moderate       Moderate      
+ [161] Moderate       Moderate       Moderate       Moderate      
+ [165] Moderate       Moderate       Moderate       Moderate      
+ [169] Moderate       Moderate       Moderate       Moderate      
+ [173] Moderate       Moderate       Moderate       Moderate      
+ [177] High           High           High           High          
+ [181] High           High           High           High          
+ [185] High           High           High           High          
+ [189] Low            Low            Low            Low           
+ [193] Low            Low            Low            Low           
+ [197] Low            Low            Low            Low           
+ [201] Low            Low            Low            Low           
+ [205] Low            Low            Low            Low           
+ [209] Low            Low            Low            Low           
+ [213] Low            Low            Low            Low           
+ [217] Low            Low            Low            Low           
+ [221] Low            Low            Low            Low           
+ [225] Low            Low            Low            Low           
+ [229] Low            Low            Low            Low           
+ [233] Low            Low            Low            Low           
+ [237] Low            Low            Low            Low           
+ [241] Low            Low            Low            Low           
+ [245] High           Low            Low            Low           
+ [249] Low            Low            Low            Low           
+ [253] Low            Low            Low            Low           
+ [257] Low            Low            Low            Low           
+ [261] Low            Low            Low            Low           
+ [265] Low            Low            Low            Low           
+ [269] Low            Low            Low            Low           
+ [273] Low            Low            Low            Low           
+ [277] Low            Low            Low            Low           
+ [281] Low            Low            Low            Low           
+ [285] Low            Low            Low            Low           
+ [289] Low            Low            Low            Low           
+ [293] Low            Low            Low            Low           
+ [297] Low            Low            Low            Low           
+ [301] Low            Low            Low            Low           
+ [305] Low            Low            Low            Low           
+ [309] Low            Low            Low            Low           
+ [313] Low            Low            Low            Low           
+ [317] Low            Low            Low            Low           
+ [321] Low            Low            Low            Low           
+ [325] Low            Low            Low            Low           
+ [329] Low            Low            Low            Low           
+ [333] Low            Low            Low            Low           
+ [337] Low            Low            Low            Low           
+ [341] Low            Low            Low            Low           
+ [345] Low            Low            Low            Low           
+ [349] Low            Low            Low            Low           
+ [353] Low            Low            Low            Low           
+ [357] Low            Low            Low            Low           
+ [361] Low            Low            Low            Low           
+ [365] Low            Low            Low            Low           
+ [369] Moderate       Moderate       Moderate       Low           
+ [373] Low            Low            Low            Low           
+ [377] Low            Low            Low            Low           
+ [381] Low            Low            Low            Low           
+ [385] Low            Low            Low            Low           
+ [389] Low            Low            Low            Low           
+ [393] Low            Low            Low            Moderate      
+ [397] Moderate       Moderate       Moderate       Moderate      
+ [401] Moderate       Moderate       Moderate       Moderate      
+ [405] Moderate       Moderate       Moderate       Moderate      
+ [409] Moderate       Moderate       Moderate       Moderate      
+ [413] Moderate       Moderate       Moderate       Moderate      
+ [417] Moderate       Moderate       Moderate       High          
+ [421] High           High           High           High          
+ [425] High           High           High           High          
+ [429] High           High           High           High          
+ [433] High           High           High           High          
+ [437] High           High           High           High          
+ [441] High           High           High           High          
+ [445] High           High           High           Low           
+ [449] Low            Low            Low            Low           
+ [453] High           High           High           High          
+ [457] High           Moderate       Moderate       Moderate      
+ [461] High           High           High           High          
+ [465] High           High           Considerable - Low           
+ [469] Low            Low            Low            Low           
+ [473] Low            Low            Low            Low           
+ [477] Low            Low            Low            Low           
+ [481] Low            Low            Low            Low           
+ [485] Low            Low            Low            Low           
+ [489] Low            Low            Low            Low           
+ [493] Low            Low            Low            Considerable -
+ [497] Low            Low            Low            Low           
+ [501] Low            Low            Low            Low           
+ [505] Low            Low            Low            Low           
+ [509] Low            Low            Low            Low           
+ [513] Low            Low            Low            Low           
+ [517] Low            Low            Low            Moderate      
+ [521] Moderate       Moderate       Moderate       Moderate      
+ [525] Moderate       Moderate       Low            Low           
+ [529] Low            Low            Low            Low           
+ [533] Low            Low            Low            Low           
+ [537] Low            Low            Low            Low           
+ [541] Low            Low            Low            Low           
+ [545] Low            Low            Low            Low           
+ [549] Low            Low            Low            Low           
+ [553] Low            Low            Low            Low           
+ [557] Low            Low            Low            Low           
+ [561] Low            Low            Low            Low           
+ [565] Low            Low            Low            Low           
+ [569] Low            Low            Low            Low           
+ [573] Low            Low            Low            Low           
+ [577] Low            Low            Low            Low           
+ [581] Low            Low            Low            Low           
+ [585] Low            Low            Low            Low           
+ [589] Low            Low            Low            Low           
+ [593] Low            Low            Low            Low           
+ [597] Low            Low            Low            Low           
+ [601] Moderate       Low            Moderate       Moderate      
+ [605] Moderate       Moderate       Moderate       Moderate      
+ [609] Moderate       Moderate       Moderate       Moderate      
+ [613] High           High           Moderate       Moderate      
+ [617] Moderate       Moderate       Low            Low           
+ [621] Low            Low            Low            Low           
+ [625] Low            Low            Low            Low           
+ [629] Low            Low            Low            Low           
+ [633] Low            Low            Low            Low           
+ [637] Low            Low            Low            Low           
+ [641] Low            High           High           High          
+ [645] High           High           High           High          
+ [649] High           High           High           High          
+ [653] High           High           High           High          
+ [657] High           High           High           High          
+ [661] High           High           High           High          
+ [665] High           High           High           High          
+ [669] High           High           High           High          
+ [673] High           High           Low            Low           
+ [677] Low            Low            Low            Low           
+ [681] Low            Low            Low            Low           
+ [685] Low            Low            Low            Low           
+ [689] Low            Low            Low            Low           
+ [693] Low            Low            Low            Low           
+ [697] Low            Low            Low            Low           
+ [701] Low            Low            Low            Low           
+ [705] Low            Low            Low            Low           
+ [709] Low            Low            Low            Low           
+ [713] High           High           Low            Low           
+ [717] Low            Low            Low            Low           
+ [721] Low            Low            Low            Low           
+ [725] Low            Low            Low            Low           
+ [729] Low            Low            Low            Low           
+ [733] Low            Low            Low            Low           
+ [737] Low            Low            Low            Moderate      
+ [741] Moderate       Moderate       High           High          
+ [745] High           High           High           High          
+ [749] High           High           High           High          
+ [753] High           High           High           High          
+ [757] High           High           High           High          
+ [761] High           High           High           High          
+ [765] High           High           High           High          
+ [769] High           High           High           Considerable -
+ [773] Low            Low            Low            Low           
+ [777] Low            Low            Low            Low           
+ [781] Low            Low            Low            Low           
+ [785] Low            Low            Low            Low           
+ [789] Low            Low            Low            Low           
+ [793] Low            Low            Low            Low           
+ [797] Low            Low            Low            Low           
+ [801] Low            Low            Low            Low           
+ [805] Low            Low            Low            Low           
+ [809] Low            Low            Low            Low           
+ [813] Low            Low            Low            Low           
+ [817] Low            Low            Low            Low           
+ [821] Low            Low            Low            Low           
+ [825] Low            Low            Low            Low           
+ [829] Low            Low            Low            Low           
+ [833] Low            Low            Low            Low           
+ [837] Low            Low            Low            Low           
+ [841] Low            Low            Low            Low           
+ [845] Low            Low            Low            Low           
+ [849] Low            Low            Low            Low           
+ [853] Low            Low            High           High          
+ [857] High           High           High           High          
+ [861] High           High           Moderate       Moderate      
+ [865] Moderate       Moderate       Moderate       Moderate      
+ [869] High           High           High           High          
+ [873] High           High           High           High          
+ [877] High           High           High           High          
+ [881] High           High           High           High          
+ [885] High           High           High           High          
+ [889] High           High           High           High          
+ [893] High           High           High           High          
+ [897] High           High           Low            Low           
+ [901] Low            Low            Low            Low           
+ [905] Low            Low            Low            Low           
+ [909] Low            Low            Low            Low           
+ [913] Low            Low            Low            Low           
+ [917] Low            Low            Low            Low           
+ [921] Low            Low            Low            Low           
+ [925] Low            Low            Low            Low           
+ [929] Low            Low            Low            Low           
+ [933] Low            Low            Low            Low           
+ [937] Low            Low            Low            Low           
+ [941] Low            High           High           High          
+ [945] High           High           High           High          
+ [949] High           High           High           High          
+ [953] High           High           High           High          
+ [957] High           High           High           High          
+ [961] High           High           High           High          
+ [965] High           High           Low            Low           
+ [969] Low            Low            Low            Low           
+ [973] Low            Low            Low            Low           
+ [977] Low            Low            Low            Low           
+ [981] Low            High           High           High          
+ [985] High           High           High           High          
+ [989] High           Moderate       Moderate       Moderate      
+ [993] Moderate       Moderate       Moderate       Moderate      
+ [997] High           High           High           High          
+[1001] High           High           High           High          
+[1005] High           Low            Low            Low           
+[1009] Low            Low            Low            Low           
+[1013] Low            Low            Low            Low           
+[1017] Low            Low            Low            Low           
+[1021] Low            Low            Low            Low           
+[1025] Low            Low            Low            Moderate      
+[1029] Moderate       Moderate       Moderate       Moderate      
+[1033] Moderate       Moderate       Moderate       Low           
+[1037] Low            Low            Moderate       Low           
+[1041] Low            Low            Low            Low           
+[1045] Low            Low            Low            Low           
+[1049] Low            Low            Low            Low           
+[1053] Low            Low            Low            Low           
+[1057] Low            Low            Low            Low           
+[1061] Low            Low            Low            Low           
+[1065] Low            Low            Low            Low           
+[1069] Low            Low            Low            Low           
+[1073] Low            Low            Low            Low           
+[1077] Low            Low            Low            Low           
+[1081] Low            Low            Low            Low           
+[1085] Low            Low            Low            Low           
+[1089] Low            Low            Low            Low           
+[1093] Low            Low            Low            Low           
+[1097] High           High           High           Considerable -
+[1101] Considerable - High           High           High          
+[1105] High           High           High           High          
+[1109] High           High           High           High          
+[1113] Moderate       Moderate       Moderate       Moderate      
+[1117] Moderate       Moderate       Moderate       Moderate      
+[1121] Moderate       Moderate       High           Low           
+[1125] Low            Low            Low            Low           
+[1129] Low            Low            Low            Low           
+[1133] Low            Low            Low            Low           
+[1137] Low            Low            Low            Low           
+[1141] Low            Low            Low            Low           
+[1145] Low            Low            Low            Low           
+[1149] Low            Low            Low            Low           
+[1153] Low            Low            Considerable + Considerable +
+[1157] Considerable + Considerable + Considerable + Considerable +
+[1161] Considerable + Considerable + Considerable + Considerable +
+[1165] Moderate       Considerable + Considerable + Considerable -
+[1169] Low            Low            Low            Low           
+[1173] Low            Low            Low            Low           
+[1177] Low            Low            Low            Low           
+[1181] Low            Low            Low            Low           
+[1185] Low            Low            Low            Low           
+[1189] Low            Low            Low            Low           
+[1193] Low            Low            Low            Low           
+[1197] Low            Low            Low            Low           
+[1201] Low            Low            Low            Low           
+[1205] Low            Low            Low            Low           
+[1209] Low            Low            Low            Low           
+[1213] Low            Low            Low            Low           
+[1217] Low            Low            Low            Low           
+[1221] Low            Low            Low            Low           
+[1225] Low            Low            Low            Low           
+[1229] Low            Low            Low            Low           
+[1233] Low            Low            Low            Low           
+[1237] Low            Low            Low            Low           
+[1241] Low            Low            Low            Low           
+[1245] Low            Low            Low            Low           
+[1249] Low            Low            Low            Low           
+[1253] Low            Low            Low            Low           
+[1257] Low            Low            Low            Low           
+[1261] Low            Low            Low            Low           
+[1265] Low            Low            Moderate       Moderate      
+[1269] Moderate       Moderate       Moderate       Moderate      
+[1273] Moderate       Moderate       Moderate       Moderate      
+[1277] Moderate       Moderate       High           High          
+[1281] High           High           High           High          
+[1285] High           High           High           High          
+[1289] High           High           High           High          
+[1293] High           Considerable - High           High          
+[1297] High           High           High           High          
+[1301] High           High           High           High          
+[1305] High           High           High           High          
+[1309] High           High           High           High          
+[1313] High           High           High           High          
+[1317] High           High           High           High          
+[1321] High           High           Low            Low           
+[1325] Low            Low            Low            Low           
+[1329] Low            Low            Low            Low           
+[1333] Low            Low            Low            Low           
+[1337] Low            Low            Low            Low           
+[1341] Low            Low            Low            Low           
+[1345] Low            Low            Low            Low           
+[1349] Low            Low            Low            Low           
+[1353] Low            Low            Low            Low           
+[1357] Low            Low            Low            Low           
+[1361] Low            Low            Low            Low           
+[1365] Low            Low            Low            Low           
+[1369] Low            Low            Low            Low           
+[1373] Low            Low            Low            Low           
+[1377] Low            Low            Low            Low           
+[1381] Low            Low            Low            Low           
+[1385] Low            Low            Low            Low           
+[1389] Low            Low            Low            Low           
+[1393] Low            Low            Low            Low           
+[1397] Low            Low            Low            Low           
+[1401] Low            Low            Low            Low           
+[1405] Low            Low            Low            Low           
+[1409] Low            Low            Low            Low           
+[1413] Low            Low            Low            Low           
+[1417] Low            Low            Low            Low           
+[1421] Low            Low            Low            Low           
+[1425] Low            Low            Low            Low           
+[1429] Low            Low            Low            Low           
+[1433] Low            Low            Low            Low           
+[1437] Low            Low            Low            Low           
+[1441] Low            Low            Low            High          
+[1445] High           High           High           High          
+[1449] Low            Low            Low            Low           
+[1453] Low            Low            High           High          
+[1457] Moderate       Moderate       Moderate       Moderate      
+[1461] Moderate       Moderate       Moderate       Moderate      
+[1465] Moderate       Moderate       Moderate       High          
+[1469] Moderate       Moderate       Moderate       Moderate      
+[1473] Low            Low            Low            Low           
+[1477] Low            Low            Low            Low           
+[1481] Low            Low            Low            Low           
+[1485] Low            Low            Low            Low           
+[1489] Low            Low            Low            Low           
+[1493] Low            Low            Low            Low           
+[1497] Low            Low            Low            Low           
+[1501] Low            Low            Low            Low           
+[1505] Low            Low            Low            Low           
+[1509] Low            Low            Low            Low           
+[1513] Low            Low            Low            Low           
+[1517] Low            Low            Low            Low           
+[1521] Low            Low            Low            Low           
+[1525] Low            Low            Low            Low           
+[1529] Low            Low            Low            Low           
+[1533] Low            Low            Low            Low           
+[1537] Low            Low            Low            Low           
+[1541] Low            Low            Low            Low           
+[1545] Low            Low            Low            Low           
+[1549] Low            Low            Low            Low           
+[1553] Low            Low            Low            Low           
+[1557] Low            Low            Low            Low           
+[1561] Low            Low            Low           
+Levels: Considerable - Considerable + High Low Moderate</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "factor"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "factor"</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1567</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1563</code></pre>
+</div>
+</div>
+<p><a href="#fig-compare_cms" class="quarto-xref">Figure&nbsp;1</a> displays the confusion matrices for our 3 models. Our FFNN has a clearer diagonal, which is indicative of its stronger performance. The confusion matrix for the RNN is very diffused with widespread misclassifications. <a href="#tbl-accuracy_comparison" class="quarto-xref">Table&nbsp;1</a> confirms this observation is indeed the case, as the RNN had the lowest accuracy (34.6%) and the FFNN had the highest (75.4%).</p>
+<p>The FFNN had some noticeable misclassifications between Considerable- and Moderate. We see that for 103 cases, the model predicted Considerable- instead of Moderate, which shows that it confuses those two classes a lot. Similarly, 112 Low cases were predicted as Moderate, another pair of classes the model struggles with.</p>
+<p>[Talk about RNN]</p>
+<p>In the case of the CNN, almost all predictions go to Low. There is a noticeable concentration on the off-diagonal for Low classifications (717), and a considerable concentration of Moderate classifications (213). The CNN collapsed into predicting these classes in many cases. Also, it completely fails to High or Considerable+. The rows for the respective classes are all zeros. This shows that this model fell for imbalance bias, favouring the majority class Low.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-compare_cms" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-compare_cms-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="DS4i_writeup_files/figure-html/fig-compare_cms-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-compare_cms-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Confusion Matrices Comparing the Final CNN, RNN, and Feed-Forward Models
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div id="tbl-accuracy_comparison" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-accuracy_comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1: Overall Accuracy by Model
+</figcaption>
+<div aria-describedby="tbl-accuracy_comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="table do-not-create-environment cell caption-top table-sm table-striped small" data-quarto-postprocess="true">
+<caption>Overall Accuracy by Model</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Model</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Accuracy</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">FFNN</td>
+<td style="text-align: left;">75.4%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">CNN</td>
+<td style="text-align: left;">68.1%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">RNN</td>
+<td style="text-align: left;">54.6%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+<section id="model-statistics-by-class" class="level3">
+<h3 class="anchored" data-anchor-id="model-statistics-by-class">Model Statistics by Class</h3>
+<p><a href="#tbl-ffn_stats_by_class" class="quarto-xref">Table&nbsp;2</a>, <a href="#tbl-cnn_stats_by_class" class="quarto-xref">Table&nbsp;3</a> and <a href="#tbl-rnn_stats_by_class" class="quarto-xref">Table&nbsp;4</a> summaries our model statistics by class for all 3 models.</p>
+<div class="cell">
+<div id="tbl-ffn_stats_by_class" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ffn_stats_by_class-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2: FFNN Statistics by Class
+</figcaption>
+<div aria-describedby="tbl-ffn_stats_by_class-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="table do-not-create-environment cell caption-top table-sm table-striped small" data-quarto-postprocess="true">
+<caption>FFNN Statistics by Class</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Sensitivity</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Specificity</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Pos Pred Value</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Neg Pred Value</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Precision</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Recall</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">F1</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Prevalence</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Detection Rate</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Detection Prevalence</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Balanced Accuracy</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Class: Considerable -</td>
+<td style="text-align: right;">0.7812500</td>
+<td style="text-align: right;">0.8613782</td>
+<td style="text-align: right;">0.5910165</td>
+<td style="text-align: right;">0.9388646</td>
+<td style="text-align: right;">0.5910165</td>
+<td style="text-align: right;">0.7812500</td>
+<td style="text-align: right;">0.6729475</td>
+<td style="text-align: right;">0.2040816</td>
+<td style="text-align: right;">0.1594388</td>
+<td style="text-align: right;">0.2697704</td>
+<td style="text-align: right;">0.8213141</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Class: Considerable +</td>
+<td style="text-align: right;">0.1772152</td>
+<td style="text-align: right;">0.9865682</td>
+<td style="text-align: right;">0.4117647</td>
+<td style="text-align: right;">0.9576271</td>
+<td style="text-align: right;">0.4117647</td>
+<td style="text-align: right;">0.1772152</td>
+<td style="text-align: right;">0.2477876</td>
+<td style="text-align: right;">0.0503827</td>
+<td style="text-align: right;">0.0089286</td>
+<td style="text-align: right;">0.0216837</td>
+<td style="text-align: right;">0.5818917</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Class: High</td>
+<td style="text-align: right;">0.5600000</td>
+<td style="text-align: right;">0.9909268</td>
+<td style="text-align: right;">0.5000000</td>
+<td style="text-align: right;">0.9928571</td>
+<td style="text-align: right;">0.5000000</td>
+<td style="text-align: right;">0.5600000</td>
+<td style="text-align: right;">0.5283019</td>
+<td style="text-align: right;">0.0159439</td>
+<td style="text-align: right;">0.0089286</td>
+<td style="text-align: right;">0.0178571</td>
+<td style="text-align: right;">0.7754634</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Class: Low</td>
+<td style="text-align: right;">0.8208270</td>
+<td style="text-align: right;">0.9792350</td>
+<td style="text-align: right;">0.9657658</td>
+<td style="text-align: right;">0.8845015</td>
+<td style="text-align: right;">0.9657658</td>
+<td style="text-align: right;">0.8208270</td>
+<td style="text-align: right;">0.8874172</td>
+<td style="text-align: right;">0.4164541</td>
+<td style="text-align: right;">0.3418367</td>
+<td style="text-align: right;">0.3539541</td>
+<td style="text-align: right;">0.9000310</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Class: Moderate</td>
+<td style="text-align: right;">0.7515275</td>
+<td style="text-align: right;">0.8523677</td>
+<td style="text-align: right;">0.6988636</td>
+<td style="text-align: right;">0.8826923</td>
+<td style="text-align: right;">0.6988636</td>
+<td style="text-align: right;">0.7515275</td>
+<td style="text-align: right;">0.7242395</td>
+<td style="text-align: right;">0.3131378</td>
+<td style="text-align: right;">0.2353316</td>
+<td style="text-align: right;">0.3367347</td>
+<td style="text-align: right;">0.8019476</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell">
+<div id="tbl-cnn_stats_by_class" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cnn_stats_by_class-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3: CNN Statistics by Class
+</figcaption>
+<div aria-describedby="tbl-cnn_stats_by_class-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="table do-not-create-environment cell caption-top table-sm table-striped small" data-quarto-postprocess="true">
+<caption>CNN Statistics by Class</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Sensitivity</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Specificity</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Pos Pred Value</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Neg Pred Value</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Precision</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Recall</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">F1</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Prevalence</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Detection Rate</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Detection Prevalence</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Balanced Accuracy</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Class: Considerable -</td>
+<td style="text-align: right;">0.2192982</td>
+<td style="text-align: right;">0.9676531</td>
+<td style="text-align: right;">0.3472222</td>
+<td style="text-align: right;">0.9404682</td>
+<td style="text-align: right;">0.3472222</td>
+<td style="text-align: right;">0.2192982</td>
+<td style="text-align: right;">0.2688172</td>
+<td style="text-align: right;">0.0727505</td>
+<td style="text-align: right;">0.0159541</td>
+<td style="text-align: right;">0.0459477</td>
+<td style="text-align: right;">0.5934757</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Class: Considerable +</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">1.0000000</td>
+<td style="text-align: right;">NaN</td>
+<td style="text-align: right;">0.9757498</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">0.0242502</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">0.5000000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Class: High</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">1.0000000</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Class: Low</td>
+<td style="text-align: right;">0.8273684</td>
+<td style="text-align: right;">0.6564019</td>
+<td style="text-align: right;">0.7875752</td>
+<td style="text-align: right;">0.7117750</td>
+<td style="text-align: right;">0.7875752</td>
+<td style="text-align: right;">0.8273684</td>
+<td style="text-align: right;">0.8069815</td>
+<td style="text-align: right;">0.6062540</td>
+<td style="text-align: right;">0.5015954</td>
+<td style="text-align: right;">0.6368858</td>
+<td style="text-align: right;">0.7418852</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Class: Moderate</td>
+<td style="text-align: right;">0.5505376</td>
+<td style="text-align: right;">0.7813067</td>
+<td style="text-align: right;">0.5150905</td>
+<td style="text-align: right;">0.8046729</td>
+<td style="text-align: right;">0.5150905</td>
+<td style="text-align: right;">0.5505376</td>
+<td style="text-align: right;">0.5322245</td>
+<td style="text-align: right;">0.2967454</td>
+<td style="text-align: right;">0.1633695</td>
+<td style="text-align: right;">0.3171666</td>
+<td style="text-align: right;">0.6659222</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell">
+<div id="tbl-rnn_stats_by_class" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-rnn_stats_by_class-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;4: RNN Statistics by Class
+</figcaption>
+<div aria-describedby="tbl-rnn_stats_by_class-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="table do-not-create-environment cell caption-top table-sm table-striped small" data-quarto-postprocess="true">
+<caption>RNN Statistics by Class</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Sensitivity</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Specificity</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Pos Pred Value</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Neg Pred Value</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Precision</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Recall</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">F1</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Prevalence</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Detection Rate</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Detection Prevalence</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Balanced Accuracy</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Class: Considerable -</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">0.9951724</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">0.9273779</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">NaN</td>
+<td style="text-align: right;">0.0722969</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">0.0044786</td>
+<td style="text-align: right;">0.4975862</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Class: Considerable +</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">0.9921363</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">0.9761444</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">NaN</td>
+<td style="text-align: right;">0.0236724</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">0.0076775</td>
+<td style="text-align: right;">0.4960682</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Class: High</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">0.8048624</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">0.0000000</td>
+<td style="text-align: right;">0.1951376</td>
+<td style="text-align: right;">NA</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Class: Low</td>
+<td style="text-align: right;">0.8345627</td>
+<td style="text-align: right;">0.5276873</td>
+<td style="text-align: right;">0.7319778</td>
+<td style="text-align: right;">0.6735967</td>
+<td style="text-align: right;">0.7319778</td>
+<td style="text-align: right;">0.8345627</td>
+<td style="text-align: right;">0.7799114</td>
+<td style="text-align: right;">0.6071657</td>
+<td style="text-align: right;">0.5067179</td>
+<td style="text-align: right;">0.6922585</td>
+<td style="text-align: right;">0.6811250</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Class: Moderate</td>
+<td style="text-align: right;">0.1336207</td>
+<td style="text-align: right;">0.9135578</td>
+<td style="text-align: right;">0.3949045</td>
+<td style="text-align: right;">0.7140825</td>
+<td style="text-align: right;">0.3949045</td>
+<td style="text-align: right;">0.1336207</td>
+<td style="text-align: right;">0.1996779</td>
+<td style="text-align: right;">0.2968650</td>
+<td style="text-align: right;">0.0396673</td>
+<td style="text-align: right;">0.1004479</td>
+<td style="text-align: right;">0.5235892</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<pre><code></code></pre>
+</section>
 </section>
 
 </main>
