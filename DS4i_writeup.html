@@ -315,8 +315,145 @@ ul.task-list li input[type="checkbox"] {
 <h3 class="anchored" data-anchor-id="e.-missing-values">e. Missing Values</h3>
 </section>
 </section>
-<section id="feature-engineering" class="level2">
-<h2 class="anchored" data-anchor-id="feature-engineering">Feature Engineering</h2>
+<section id="data-cleaning-and-feature-engineering" class="level2">
+<h2 class="anchored" data-anchor-id="data-cleaning-and-feature-engineering">Data Cleaning and Feature Engineering</h2>
+<p>Feature engineering mainly consisted of constructing temporal variables for the models. In particular, a feed forward neural network does not natively capture any time series trends. Given that the above exploratory analysis highlights that observed avalanche risk varies according to the season, and time of year, several variable were constructed to take this into account.</p>
+<p><br></p>
+<p><br></p>
+<p>Firstly, before removing any observations that contained large amount of missing values, we constructed constructed several variable marking the samples time of day, day of the week, month and year from the date. Next, we created a variable to represent the subsequent seasons in the data, as we observed a trend that avalanche risk appeared to be increasing year on year. The first season of avalanche recordings begins in December in 2009 and ends in April. We constructed a categorical variable to represent each season from 2009 to 2025 beginning from December into the following year.</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 4376</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-hover caption-top table-sm table-striped small" data-quarto-postprocess="true">
+<caption>Missing Value Exploration</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Variable</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Missing (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">AV.Cat</td>
+<td style="text-align: right;">23.3718</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Ski.Pen</td>
+<td style="text-align: right;">22.5283</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Summit.Wind.Dir</td>
+<td style="text-align: right;">12.3512</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Crystals</td>
+<td style="text-align: right;">9.2587</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Summit.Wind.Speed</td>
+<td style="text-align: right;">8.5184</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Summit.Air.Temp</td>
+<td style="text-align: right;">7.0659</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Snow.Index</td>
+<td style="text-align: right;">6.9815</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Max.Temp.Grad</td>
+<td style="text-align: right;">6.6535</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Max.Hardness.Grad</td>
+<td style="text-align: right;">5.8945</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Wetness</td>
+<td style="text-align: right;">5.3978</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Insolation</td>
+<td style="text-align: right;">4.7512</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Snow.Temp</td>
+<td style="text-align: right;">3.8422</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">OAH</td>
+<td style="text-align: right;">3.4580</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Aspect</td>
+<td style="text-align: right;">3.3268</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">No.Settle</td>
+<td style="text-align: right;">2.7083</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Total.Snow.Depth</td>
+<td style="text-align: right;">1.5275</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Wind.Dir</td>
+<td style="text-align: right;">1.4806</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Wind.Speed</td>
+<td style="text-align: right;">0.4967</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Foot.Pen</td>
+<td style="text-align: right;">0.3936</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Incline</td>
+<td style="text-align: right;">0.3374</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Air.Temp</td>
+<td style="text-align: right;">0.3186</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Cloud</td>
+<td style="text-align: right;">0.2718</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Alt</td>
+<td style="text-align: right;">0.0562</td>
+</tr>
+</tbody><tfoot>
+<tr class="odd">
+<td style="text-align: left; padding: 0;"><span style="font-style: italic;">Note: </span></td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding: 0;"><sup></sup> All values rounded to 4 decimal places.</td>
+<td style="text-align: right;"></td>
+</tr>
+</tfoot>
+
+</table>
+</div>
+</div>
+<p>Missing values were also a challenge. Table ? presents the percentage of missing values for each feature in the data. <em>Av.Cat</em> was the first variable we felt should be eliminated. We could not find what this variable represented, and it had implausible values eg (NA, 3, -2, 2, 1, 4, 8800, -1, 0, 1021, 4400, -9999, 99, 88, 44, 5031, 121 ). Shown in Figure ? below, we observed not discernible trend in the relationship between Ski penetration and OAH, save for High risk avalanches. Overall, we removed this feature, as the contribution of snow precipitation to the risk would likely be well represented by other variables in the data. Lastly, we removed Summit wind direction as well, (roughly 12% missing). Similarly, to <em>Ski.pen</em>, we notice not discernible trend, and decided to dropped this feature as well.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="DS4i_writeup_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Having dropped the above variables, we were left with roughly 35.7633588 % non-complete samples in the data. We dropped the remaining samples that contained missing values to maintain complete cases for the models.</p>
 <section id="modeling-methodology" class="level3">
 <h3 class="anchored" data-anchor-id="modeling-methodology">Modeling Methodology</h3>
 <p>There are three main models used in this project. Firstly, a feed forward neural network (FFN), a convolutional neural network (CNN) and a recurrent neural network (RNN). The idea behind the feed forward neural network is that it would likely leverage the categorical variables, like forecasted avalanche risk, well in predicting the target. However, CNN and RNN were more likely to leverage any time series trends present in the data.</p>
@@ -509,6 +646,12 @@ window.addEventListener('DOMContentLoaded', function(){
 <h3 class="anchored" data-anchor-id="data-preprocessing-of-neural-networks-models">Data Preprocessing of Neural Networks models</h3>
 <p>To prepare the data for CNN and RNN, we constructed an array with 3 dimensions which include the number of samples, the time window length and the number features. Each training sample is created by sliding a fixed window across the data. Within the array, the columns represent individual time steps, and the depth represent the features of the data. Since our prediction is one day, each training example represents the observations within the window, for the next day prediction. Furthermore, the data was standardized to ensure the algorithms were not distorted by the different scales of the features. Lastly, the data was also one hot encoded, such that each categorical variable is split into multiple binary variable demarcating each category.</p>
 <p>To preserve the temporal trends of the data, for the CNN and RNN the train and test split was not randomly shuffled. Instead, the first 80% of avalanche records were used as training examples, and the remaining became the test set.</p>
+</section>
+</section>
+<section id="convolutional-neural-network" class="level2">
+<h2 class="anchored" data-anchor-id="convolutional-neural-network">Convolutional Neural Network</h2>
+<p>The selection of the convolution neural network and recurrent neural netowrk parameters involved two stages. Firstly, several candidate data sets were created with various time windows. In our cases, we tested a window of 3 days, 7 days, 30 days and 120 days. We kept the search parameters more narrow in this stage, and estimated many models in order to assess what prediction window would be most appropriate, according to validation accuracy.</p>
+<p>In the second stage, a more broad grid search was conducted on the chosen window, and the best model was chosen according to the highest validation accuracy. In all our tests presented, we assessed architectures with two convolutional layers using the Relu function in those latent layers, and the softmax function in our input layer to create the predictions. More complex architectures did not performly better, or meaningfully better.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div>
@@ -518,13 +661,64 @@ window.addEventListener('DOMContentLoaded', function(){
 </div>
 </div>
 </div>
+<p>Considering Figure ? above, we decided on a prediction window of 7 days. Overall, out of the models tested, most perform best with a window of roughly 3 to 7 days, while 30 days and 120 days were shown to be meaningfully worse than former two options. Overall, validation accuracy between 3 to 7 days was competitive. However, 7 days appeared to be more robust, as the set of models with a 3 day prediction contained performances that achieved a much lower accuracy at the extreme end.</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
 <pre><code>          used  (Mb) gc trigger  (Mb) max used  (Mb)
-Ncells 2829369 151.2    5273944 281.7  4143424 221.3
-Vcells 6207998  47.4   12255594  93.6  8388608  64.0</code></pre>
+Ncells 2859220 152.7    5303820 283.3  4143828 221.4
+Vcells 6531092  49.9   12255594  93.6  9562672  73.0</code></pre>
 </div>
 </div>
+<p>After completing the above search, an expanded search with the below hyperamaters was completed.</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-hover caption-top table-sm table-striped small" data-quarto-postprocess="true">
+<caption>Expanded Grid Search</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">hyperparameter</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">values</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">filters1</td>
+<td style="text-align: left;">16, 32, 64</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">filters2</td>
+<td style="text-align: left;">16, 32, 64</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">kernel_sz</td>
+<td style="text-align: left;">5, 15</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">drop1</td>
+<td style="text-align: left;">0.5, 0.7</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">drop2</td>
+<td style="text-align: left;">0.5, 0.7</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="DS4i_writeup_files/figure-html/final_cnn_search_viz-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The validation accuracy of the top 30 models is presented in Figure ? above. The Best performance overall was a validation accuracy of roughly 69%. We stuck with this model, as validation accuracy had not improved meaningfully over the course of the expanded search. The best performing model during the prediction window search acheived a validation accurayc of 0.6722355. The final selected model involved 32 filters in the first layer, followed by a dropout of 70%, then 16 layers in the second layers, followed by dropout of 70% and global average pooling into the the final output layer.</p>
+</section>
+<section id="reccurrent-neural-network" class="level2">
+<h2 class="anchored" data-anchor-id="reccurrent-neural-network">Reccurrent Neural Network</h2>
+<p>The approach for the Reccurent Neural Network was the same as the CNN discussed above. Firstly a search over numerous candidate wndow sizes was completed, and a subsequent expanded search was done as well. In Figure ? below, the validation accuracy of the models test is presented. We used a combination of two Long Short-Term memory layers (LSTM), with dropout and varied the LSTM units and dropout values in the grid search.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div>
@@ -533,14 +727,52 @@ Vcells 6207998  47.4   12255594  93.6  8388608  64.0</code></pre>
 </figure>
 </div>
 </div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.6890166</code></pre>
+</div>
+<p>The window search for the recurrent neural network involved more competitive performances. In this case, a window of 30 days appears more robust overall, containing fewer worse performing models towards the extreme end. We therefore, conducted an exapnded grid search using that window, the results of which are presented in Figure ? below. The hypermarameters of for grid search is presented in the below table.</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-hover caption-top table-sm table-striped small" data-quarto-postprocess="true">
+<caption>RNN: grid search parameters</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Hyperparameter</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Values</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">units1</td>
+<td style="text-align: left;">16, 32, 64</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">units2</td>
+<td style="text-align: left;">16, 32, 64</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">drop1</td>
+<td style="text-align: left;">0.3, 0.5, 0.7</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">drop2</td>
+<td style="text-align: left;">0.3, 0.5, 0.7</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
-</section>
 </section>
 <section id="modelling" class="level2">
 <h2 class="anchored" data-anchor-id="modelling">Modelling</h2>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="DS4i_writeup_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Out of the more expanded grid search, the best performing model achieved a validation accuracy of roughly 64%. We fitted this model to the full training data and used that to predict onto the test set. Overall, we were satisfied with this search as the validation accuracy had not improved drastically compared to the search across various windows done above. For example, the best performing model in the first stage of search achieved an accuracy of roughly 0.5950676%.</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
 <pre><code>   [1] 5 5 5 4 4 4 4 4 4 4 4 4 4 4 4 5 5 4 5 5 4 5 5 5 4 4 4 4 4 4 4 4 4 4 4 4 4
@@ -598,14 +830,14 @@ Vcells 6207998  47.4   12255594  93.6  8388608  64.0</code></pre>
 H2O is not running yet, starting it now...
 
 Note:  In case of errors look at the following log files:
-    C:\Users\Matthew\AppData\Local\Temp\RtmpU32Vy5\file6c403bc6629a/h2o_Matthew_started_from_r.out
-    C:\Users\Matthew\AppData\Local\Temp\RtmpU32Vy5\file6c40652263f0/h2o_Matthew_started_from_r.err
+    C:\Users\Matthew\AppData\Local\Temp\RtmpiSaors\file795045872836/h2o_Matthew_started_from_r.out
+    C:\Users\Matthew\AppData\Local\Temp\RtmpiSaors\file79506b84bb2/h2o_Matthew_started_from_r.err
 
 
-Starting H2O JVM and connecting: . Connection successful!
+Starting H2O JVM and connecting:  Connection successful!
 
 R is connected to the H2O cluster: 
-    H2O cluster uptime:         6 seconds 747 milliseconds 
+    H2O cluster uptime:         4 seconds 294 milliseconds 
     H2O cluster timezone:       Africa/Harare 
     H2O data parsing timezone:  UTC 
     H2O cluster version:        3.44.0.3 
@@ -679,7 +911,7 @@ R is connected to the H2O cluster:
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="DS4i_writeup_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="DS4i_writeup_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
