@@ -1464,12 +1464,24 @@ After completing the above search, an expanded search with the hyperamaters pres
 
 
 ```{r fiiting_final_cnn}
-# #best model  had 16 filters with 2 layers,  and kernel size 15,  0.7 dropout between layers
 
 
 
-
-#   input <- layer_input(shape = c(dim(X.train)[2], F_)) # (L, F)
+# W_ <- pre_data(w = 7, h = 1)
+# 
+# y.test <- W_[[1]]
+# y.train <- W_[[2]]
+# X.train <- W_[[3]]
+# X.test <- W_[[4]]
+# cl_weights <- W_[[5]]
+# F_ <- W_[[6]]
+# 
+# dim(X.test)
+# dim(y.test)
+# dim(X.train)
+# dim(y.train)
+# 
+# input <- layer_input(shape = c(dim(X.train)[2], F_)) # (L, F)
 # 
 #   output <- input %>%
 #     layer_conv_1d(filters = 32, kernel_size = 15, padding = "same", activation = "relu") %>%
@@ -1512,8 +1524,14 @@ After completing the above search, an expanded search with the hyperamaters pres
 # pred_cnn  <- predict(final_cnn_model, X.test)
 # 
 # pred_cnn <- max.col(pred_cnn)
+#Temporal labels for cnn
 # 
-# save(pred_cnn, file   = "pred_cnn")
+# temporal_labels_cnn <- max.col(y.test)
+# save(temporal_labels_cnn, file = "temporal_labels_rnn")
+
+
+load("temporal_labels_rnn")
+save(pred_cnn, file   = "pred_cnn")
 
 load("pred_cnn")
 
@@ -1722,17 +1740,17 @@ kable(grid_summary, format = "html",
 
 
 ```{r rnn_fitting}
-
-library(keras3)
-
-W_ <- pre_data(w = 30, h = 1) #using 30 days
-
-y.test <- W_[[1]]
-y.train <- W_[[2]]
-X.train <- W_[[3]]
-X.test <- W_[[4]]
-cl_weights <- W_[[5]]
-F_ <- W_[[6]]
+# 
+# library(keras3)
+# 
+# W_ <- pre_data(w = 30, h = 1) #using 30 days
+# 
+# y.test <- W_[[1]]
+# y.train <- W_[[2]]
+# X.train <- W_[[3]]
+# X.test <- W_[[4]]
+# cl_weights <- W_[[5]]
+# F_ <- W_[[6]]
 # 
 # set.seed(1)
 # tf$keras$utils$set_random_seed(123L)
@@ -1865,22 +1883,33 @@ Out of the more expanded grid search, the best performing model achieved a valid
 
 
 
-    input <- layer_input(shape = c(dim(X.train)[2], F_)) # (timesteps, features)
+# W_ <- pre_data(w = 30, h = 1) #using 30 days
+# 
+# y.test <- W_[[1]]
+# y.train <- W_[[2]]
+# X.train <- W_[[3]]
+# X.test <- W_[[4]]
+# cl_weights <- W_[[5]]
+# F_ <- W_[[6]]
 
-    output <- input %>%
-      layer_lstm(units = 64, return_sequences = TRUE) %>%
-      layer_dropout(rate = 0.7) %>%
-      layer_lstm(units = 16, return_sequences = FALSE) %>%
-      layer_dropout(rate = 0.5) %>%
-      layer_dense(units = 5, activation = "softmax")
 
-    final_rnn_model <- keras_model(inputs = input, outputs = output)
-
-    final_rnn_model %>% compile(
-      optimizer = "adam",
-      loss = "categorical_crossentropy",
-      metrics = "accuracy"
-    )
+# 
+#     input <- layer_input(shape = c(dim(X.train)[2], F_)) # (timesteps, features)
+# 
+#     output <- input %>%
+#       layer_lstm(units = 64, return_sequences = TRUE) %>%
+#       layer_dropout(rate = 0.7) %>%
+#       layer_lstm(units = 16, return_sequences = FALSE) %>%
+#       layer_dropout(rate = 0.5) %>%
+#       layer_dense(units = 5, activation = "softmax")
+# 
+#     final_rnn_model <- keras_model(inputs = input, outputs = output)
+# 
+#     final_rnn_model %>% compile(
+#       optimizer = "adam",
+#       loss = "categorical_crossentropy",
+#       metrics = "accuracy"
+#     )
 
 
 
@@ -1895,16 +1924,21 @@ Out of the more expanded grid search, the best performing model achieved a valid
   # )
 
   # true_labels <- apply(y.test, 1, max)
-pred_rnn  <- predict(final_rnn_model, X.test)
-
-
-
-pred_rnn <- max.col(pred_rnn)
-
-
-
-save(pred_rnn,  file = "pred_rnn")
-
+# pred_rnn  <- predict(final_rnn_model, X.test)
+# 
+# dim(X.test)
+# 
+# pred_rnn <- max.col(pred_rnn)
+# 
+# 
+# 
+# save(pred_rnn,  file = "pred_rnn")
+#
+#labels for test  set later
+# 
+# temporal_labels_rnn <- max.col(y.test)
+# save(temporal_labels_rnn, file = "temporal_labels_rnn")
+load("temporal_labels_rnn")
 load("pred_rnn")
 
 #pred_rnn
@@ -2210,7 +2244,7 @@ search_criteria <- list(
 
 
 
-# best_model <-  h2o.loadModel("models/h2o_nn_balanced_grid_model_3") #loading h2o model
+#best_model <-  h2o.loadModel("models/h2o_nn_balanced_grid_model_3") #loading h2o model
 # load("h2o_grid_perf")
 ```
 
@@ -2442,9 +2476,9 @@ load("FFN_final_model")
 
 ```{r}
 
-# imp_data <- as.data.frame(h2o.varimp(best_model)) %>% 
+# imp_data <- as.data.frame(h2o.varimp(best_model)) %>%
 #    mutate(variable = reorder(variable, relative_importance),
-#           rank = row_number()) %>% 
+#           rank = row_number()) %>%
 #   filter(rank <= 30)
 # 
 # save(imp_data, file = "imp_data")
@@ -2490,27 +2524,35 @@ load("true_labels")
 
 load("pred_cnn")
 load("pred_rnn")
+
 pred_cnn_labels <- factor(levels(true_labels)[pred_cnn],
                    levels = levels(true_labels))
 
 
 
-pred_rnn_labels <- factor(levels(true_labels)[pred_rnn + 1],
+pred_rnn_labels <- factor(levels(true_labels)[pred_rnn],
                    levels = levels(true_labels))
 
 
 
+#Labels for CNNN and RNN
 
-# temporal_labels <- max.col(y.test)
-# 
-# 
-# temporal_labels <- factor(levels(true_labels)[temporal_labels],
+#Test set changes for each one, because different windows were used
+
+
+
+# temporal_labels_rnn <- factor(levels(true_labels)[temporal_labels_rnn],
 #                    levels = levels(true_labels))
 # 
-# save(temporal_labels, file = "temporal_labels")
+# temporal_labels_cnn <- factor(levels(true_labels)[temporal_labels_cnn],
+#                    levels = levels(true_labels))
+# 
+# save(temporal_labels_rnn, file = "temporal_labels_rnn")
+# save(temporal_labels_cnn, file = "temporal_labels_cnn")
 
-load("temporal_labels")
-
+load("temporal_labels_cnn")
+load("temporal_labels_rnn")
+length("temporal_labels")
 #---------------------------------------------------HERE-------------------------------------------------------
 
 #pred_rnn_labels <---- predictions for RNN loaded above
@@ -2518,7 +2560,9 @@ load("temporal_labels")
 #pred_ffn_labels <---- predictions for ffn loaded above
 
 
-mean(pred_rnn_labels == temporal_labels)
+mean(pred_rnn_labels == temporal_labels_rnn)
+mean(pred_cnn_labels == temporal_labels_cnn)
+
 #temporal_labels <----- test set labels for cnn and rnn
 #true_labels <----------- test set for ffn (randomly shuffled)
 
@@ -2531,7 +2575,7 @@ mean(pred_rnn_labels == temporal_labels)
 
 ```{r, echo = FALSE}
 # Getting FFN in order
-pred_ffn_labels <- best_pred_df[,"predict"]
+# pred_ffn_labels <- best_pred_df[,"predict"]
 
 true_labels <- test$OAH
 pred_ffn_labels <- factor(pred_ffn_labels, levels = levels(true_labels))
