@@ -2575,13 +2575,13 @@ rnn_cm <- confusionMatrix(pred_rnn_labels, temporal_labels_rnn)
 
 ```
 
-@fig-compare_cms displays the confusion matrices for our 3 models. Our FFNN has a clearer diagonal, which is indicative of its stronger performance. The confusion matrix for the RNN is very diffused with widespread misclassifications. @tbl-accuracy_comparison confirms this observation is indeed the case, as the RNN had the lowest accuracy (34.6%) and the FFNN had the highest (75.4%).
+@fig-compare_cms displays the confusion matrices for our 3 models. Our FFNN has a clearer diagonal, which is indicative of its stronger performance. The confusion matrix for the RNN is very diffused with widespread misclassifications. @tbl-overall_stats confirms this observation is indeed the case, as the RNN had the lowest accuracy (54.6%) and the FFNN had the highest (75.4%).
 
 The FFNN had some noticeable misclassifications between Considerable- and Moderate. We see that for 103 cases, the model predicted Considerable- instead of Moderate, which shows that it confuses those two classes a lot. Similarly, 112 Low cases were predicted as Moderate, another pair of classes the model struggles with.
 
-\[Talk about RNN\]
+The diagonal of the RNN is the weakest of them all.Its correct predictions are concentrated in Low (792) with spillover to Moderate (62), and its misclassifications are concentrated in Low (232) and High (165) predictions which were actually Moderate instances. This tells us the model often confused Moderate cases as either Low (underestimated hazard) or High (overestimated hazard).
 
-In the case of the CNN, almost all predictions go to Low. There is a noticeable concentration on the off-diagonal for Low classifications (717), and a considerable concentration of Moderate classifications (213). The CNN collapsed into predicting these classes in many cases. Also, it completely fails to High or Considerable+. The rows for the respective classes are all zeros. This shows that this model fell for imbalance bias, favouring the majority class Low.
+In the case of the CNN, almost all predictions go to Low. There is a noticeable concentration on the diagonal for Low classifications (786), and a considerable concentration of Moderate classifications (256). On the off-diagonal, the model misclassified 150 Low instances as Moderate, and 173 Moderate instances as Low. Clearly, the CNN collapsed into predicting these two classes in many cases, and often confused the two classes. Also, it completely fails to predict High or Considerable+ classes. The rows for these respective classes are all zeros. This shows that this model fell for imbalance bias, favouring the majority class Low and second most abundance Moderate.
 
 ```{r fig-compare_cms, echo = FALSE}
 #| fig-cap: "Confusion Matrices Comparing the Final CNN, RNN, and Feed-Forward Models"
@@ -2605,25 +2605,56 @@ p3 <- plot_cm(rnn_cm, "RNN Confusion Matrix")
 grid.arrange(p1, p2, p3, nrow = 3)
 ```
 
-```{r tbl-accuracy_comparison, echo = FALSE}
-# Accuracy table summary
-accuracy_tbl <- data.frame(
-  Model = c("FFNN", "CNN", "RNN"),
-  Accuracy = paste0(
-    round(c(
-      ffn_cm$overall["Accuracy"],
-      cnn_cm$overall["Accuracy"],
-      rnn_cm$overall["Accuracy"]
-    ) * 100, 1), "%")
+```{r tbl-accuracy_comparison, eval = FALSE, echo = FALSE}
+# # Accuracy table summary
+# accuracy_tbl <- data.frame(
+#   Model = c("FFNN", "CNN", "RNN"),
+#   Accuracy = paste0(
+#     round(c(
+#       ffn_cm$overall["Accuracy"],
+#       cnn_cm$overall["Accuracy"],
+#       rnn_cm$overall["Accuracy"]
+#     ) * 100, 1), "%")
+# )
+# 
+# kable(accuracy_tbl, caption = "Overall Accuracy by Model") %>%
+#   kable_styling(full_width = FALSE)
+```
+
+### Overall Model Performance
+
+In @tbl-overall_stats below, we have an overview of each model's performance. The overall key insights that can be dervied are:
+
+- The FFNN clearly dominates with the highest accuracy, recall, specificity, and precision scores. It would be the best model for both detecting and correctly rejecting classes.
+- The CNN serves as a middle grounf, with acceptable accuracy but low recall. This means this model misses many real cases of considerable avalanche hazards. 
+- The RNN fails overall. Its accuracy, recall and precision metrics are all low, making it unreliable for classification.
+
+```{r tbl-overall_stats, echo = FALSE}
+get_overall_stats <- function(cm_obj) {
+  data.frame(
+    Accuracy     = round(cm_obj$overall["Accuracy"], 3),
+    Kappa        = round(cm_obj$overall["Kappa"], 3),
+    Recall  = round(mean(cm_obj$byClass[,"Sensitivity"], na.rm = TRUE), 3),
+    Specificity  = round(mean(cm_obj$byClass[,"Specificity"], na.rm = TRUE), 3),
+    Precision    = round(mean(cm_obj$byClass[,"Pos Pred Value"], na.rm = TRUE), 3)
+    )
+}
+
+# Build comparison table
+model_comparison <- rbind(
+  FFNN = get_overall_stats(ffn_cm),
+  CNN = get_overall_stats(cnn_cm),
+  RNN = get_overall_stats(rnn_cm)
 )
 
-kable(accuracy_tbl, caption = "Overall Accuracy by Model") %>%
-  kable_styling(full_width = FALSE)
+kable(as.data.frame(model_comparison), caption = "Overall Model performance Statistics") %>% kable_styling()
 ```
+
+The FFNN's specificity was 0.934, the highest value observed. This tells us that this model is very goof at ruling out cases that do not belong to a class. Its recall was 0.618, which means the model correctly identifies ~62% of true cases or in other words, it catches more actual danger levels compared to CNN and RNN. The CNN and RNN specificity scores were 0.881 and 0.847 respectively, which indicates they have fair ability to avoid false alarms of avalanche hazards, but not up to par with the FFNN's ability. Notable, the RNN's precision was 0.282, which means when it predicts, its only correct abour 28% of the time. This means the RNN is wrong more often than its not. Contrast that with the CNN's 0.550 precision (correct a little over half the time) and the FFNN's 0.633 (correct around 63% of the time).
 
 ### Model Statistics by Class
 
-@tbl-ffn_stats_by_class, @tbl-cnn_stats_by_class and @tbl-rnn_stats_by_class summaries our model statistics by class for all 3 models.
+Looking at performance statistics by class can help us gain useful insight into each models strenghths and weaknesses, providing a more detailed overview of model behaviour. @tbl-ffn_stats_by_class, @tbl-cnn_stats_by_class and @tbl-rnn_stats_by_class summarise our model statistics by class.
 
 ```{r tbl-ffn_stats_by_class, echo = FALSE}
 
@@ -2640,5 +2671,10 @@ kable(as.data.frame(cnn_cm$byClass), caption = "CNN Statistics by Class") %>% ka
 kable(as.data.frame(rnn_cm$byClass), caption = "RNN Statistics by Class") %>% kable_styling()
 ```
 
-```{}
-```
+We will start with the FFNN statistics detailed in @tbl-ffn_stats_by_class. It was especially good at recognising the common classes such as Low and Moderate danger, correctly identifying around 82% of Low cases and 75% of moderate cases. This means that it both caughts most of the true cases and rarely mislabeled other classes as these. However, the FFNN struggled with the rarer categories. For example, it only detected 18% of Considerable+ cases. This suggests some model bias towards classes that were better represented.
+
+The CNN statistics detailed in @tbl-cnn_stats_by_class show that this model had mized results. It was able to capture 83% of Low danger cases, which is the majority class, but its performnace dropped sharply for the minority cases. It has 0% sensitivity for High and Considerable+ cases meaning it completely failed to identify these two. Additionally, it only detected 22% of Considerable- cases.
+
+Even on a class-by-class basis, the RNN performed poorly overall. It was able to catch about 83% of Low hazard cases. Beyond that, its performance collapsed. It missed all Considerable-, Considerable+, and High cases (zero sensitivity across these classes). It only managed to detect 13% of Moderate cases. Moreover, its specificity for the Low class was just 53%, meaning it frequently mislabeled other classes as Low. Just poor performance overall.
+
+
