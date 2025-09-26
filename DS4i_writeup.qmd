@@ -639,8 +639,6 @@ Feature engineering mainly consisted of constructing temporal variables for the 
 
 <br>
 
-<br>
-
 Firstly, before removing any observations that contained large amount of missing values, we constructed constructed several variable marking the samples time of day, day of the week, month and year from the date. Next, we created a variable to represent the subsequent seasons in the data, as we observed a trend that avalanche risk appeared to be increasing year on year. The first season of avalanche recordings begins in December in 2009 and ends in April. We constructed a categorical variable to represent each season from 2009 to 2025 beginning from December into the following year.
 
 ```{r read_data}
@@ -709,7 +707,7 @@ missing_df <- missing_df %>%
   filter(`Missing (%)` > 0) %>% 
   arrange(desc(`Missing (%)`),)
 
-sum(!complete.cases(data))
+#sum(!complete.cases(data))
 
 
 ```
@@ -731,7 +729,7 @@ x1 <- unique(data$AV.Cat)
 
 ```
 
-Missing values were also a challenge. Table ? presents the percentage of missing values for each feature in the data. *Av.Cat* was the first variable we felt should be eliminated. We could not find what this variable represented, and it had implausible values eg (`r x1` ). Shown in Figure ? below, we observed no discernible trend in the relationship between Ski penetration and OAH, save for High risk avalanches. Overall, we removed this feature, as the contribution of snow precipitation to the risk would likely be well represented by other variables in the data. Lastly, we removed Summit wind direction as well, (roughly 12% missing). Similarly, to *Ski.pen*, we notice no discernible trend, and decided to drop this feature as well.
+Missing values were also a challenge. Table ? presents the percentage of missing values for each feature in the data that had misisng values. *Av.Cat* was the first variable we felt should be eliminated. We could not find what this variable represented, and it had implausible values ( For example : `r x1` ). Shown in Figure ? below, we observed no discernible trend in the relationship between Ski penetration and OAH, save for High risk avalanches. Overall, we removed this feature, as the contribution of snow precipitation to the risk would likely be well represented by other variables in the data. Lastly, we removed Summit wind direction as well, (roughly 12% missing). Similarly, to *Ski.pen*, we notice no discernible trend, and decided to drop this feature as well.
 
 ```{r}
 
@@ -760,6 +758,13 @@ annotate_figure(p_all,
 
 
 ```
+
+Lastly, we also dropped categorical variables that had very high cardinality, which included _OsGrid_ and _Location_. _Osgrid_ appeared to be some kind of ID variable with over 3000 unique values. When one hot encoding this would make our data set unnecessarily complex, and we surmised that this variable likely would not be indicative of risk. Likewise, we also dropped Location for similar reasoning. We had the latitiude and longitude of included in the data as well as the _Area_ indicative which we expected to be more indicative of avalanche risk, so we dropped this feature as well to reduce unnecessary complexity. 
+```{r}
+
+```
+
+
 
 ```{r}
 
@@ -860,7 +865,7 @@ To preserve the temporal trends of the data, for the CNN and RNN the train and t
 
 ## Convolutional Neural Network
 
-The selection of the convolution neural network and recurrent neural netowrk parameters involved two stages. Firstly, several candidate data sets were created with various time windows. In our cases, we tested a window of 3 days, 7 days, 30 days and 120 days. We kept the search parameters more narrow in this stage, and estimated many models in order to assess what prediction window would be most appropriate, according to validation accuracy. To estimate validation accuracy we used cross validation with 20% holdout set.
+The selection of the convolution neural network and recurrent neural netowrk parameters involved two stages. Firstly, several candidate data sets were created with various time windows. In our cases, we tested a window of 3 days, 7 days, 30 days and 120 days. We kept the search parameters more narrow in this stage, and estimated many models in order to assess what prediction window would be most appropriate, according to validation accuracy. To estimate validation accuracy we used cross validation with 20% holdout set. All models were trained for 60 epochs save for the Feed forward Neural Network.
 
 In the second stage, a more broad grid search was conducted on the chosen window, and the best model was chosen according to the highest validation accuracy. In all our tests presented for the CNN, we assessed architectures with two convolutional layers using the Relu function in those latent layers, and the softmax function in our input layer to create the class predictions. More complex architectures did not perform better, or meaningfully better.
 
@@ -968,6 +973,8 @@ te <- idx[(number.training + 1):N_samp] #Testing indices
 
 y <- y - 1 # Now categories are {0,1,2,3,4,5,}
 
+n.classes <- length(unique(y))
+
 #test for randomness being better (didnt work)
 # idx <- 1:N_samp
 # set.seed(1)
@@ -1032,10 +1039,10 @@ round(apply(X.train[ , , numeric.indexes, drop = FALSE], 3, sd),   3)
 #Since we are doing a multiclass prediction we need to use softmax
 #This means using the tocategorical() function on y
 
-y.test <- to_categorical(y.test, num_classes = 5)
+y.test <- to_categorical(y.test, num_classes = n.classes)
 
 
-y.train <- to_categorical(y.train, num_classes = 5)
+y.train <- to_categorical(y.train, num_classes = n.classes)
 
 list(y.test, y.train, X.train, X.test, class_weights, F_)
 
@@ -1548,7 +1555,7 @@ The approach for the Reccurent Neural Network was the same as the CNN discussed 
       layer_dropout(rate = grid$drop1[i]) %>%
       layer_lstm(units = grid$units2[i], return_sequences = FALSE) %>%
       layer_dropout(rate = grid$drop2[i]) %>%
-      layer_dense(units = 6, activation = "softmax")
+      layer_dense(units = 5, activation = "softmax")
 
     model <- keras_model(inputs = input, outputs = output)
 
@@ -1681,14 +1688,16 @@ kable(grid_summary, format = "html",
 
 ```{r}
 
-# W_ <- pre_data(w = 30, h = 1) #using 30 days
-# 
-# y.test <- W_[[1]]
-# y.train <- W_[[2]]
-# X.train <- W_[[3]]
-# X.test <- W_[[4]]
-# cl_weights <- W_[[5]]
-# F_ <- W_[[6]]
+library(keras3)
+
+W_ <- pre_data(w = 30, h = 1) #using 30 days
+
+y.test <- W_[[1]]
+y.train <- W_[[2]]
+X.train <- W_[[3]]
+X.test <- W_[[4]]
+cl_weights <- W_[[5]]
+F_ <- W_[[6]]
 # 
 # set.seed(1)
 # tf$keras$utils$set_random_seed(123L)
@@ -1821,36 +1830,45 @@ Out of the more expanded grid search, the best performing model achieved a valid
 
 
 
-#     input <- layer_input(shape = c(dim(X.train)[2], F_)) # (timesteps, features)
-# 
-#     output <- input %>%
-#       layer_lstm(units = 64, return_sequences = TRUE) %>%
-#       layer_dropout(rate = 0.7) %>%
-#       layer_lstm(units = 16, return_sequences = FALSE) %>%
-#       layer_dropout(rate = 0.5) %>%
-#       layer_dense(units = 5, activation = "softmax")
-# 
-#     final_rnn_model <- keras_model(inputs = input, outputs = output)
-# 
-#     final_rnn_model %>% compile(
-#       optimizer = "adam",
-#       loss = "categorical_crossentropy",
-#       metrics = "accuracy"
-#     )
-# 
-# 
-# 
-# 
-# 
-# 
-# # true_labels <- apply(y.test, 1, max)
-# pred_rnn  <- predict(final_rnn_model, X.test)
-# 
-# 
-# 
-# pred_rnn <- max.col(pred_rnn)
-# 
-# save(pred_rnn,  file = "pred_rnn")
+    input <- layer_input(shape = c(dim(X.train)[2], F_)) # (timesteps, features)
+
+    output <- input %>%
+      layer_lstm(units = 64, return_sequences = TRUE) %>%
+      layer_dropout(rate = 0.7) %>%
+      layer_lstm(units = 16, return_sequences = FALSE) %>%
+      layer_dropout(rate = 0.5) %>%
+      layer_dense(units = 5, activation = "softmax")
+
+    final_rnn_model <- keras_model(inputs = input, outputs = output)
+
+    final_rnn_model %>% compile(
+      optimizer = "adam",
+      loss = "categorical_crossentropy",
+      metrics = "accuracy"
+    )
+
+
+
+  # history <- final_rnn_model() %>% fit(
+  #   X.train, y.train,
+  #   epochs = 60,
+  #   batch_size = 64,
+  #   verbose = 0,
+  #   validation_split = 0.2,
+  #   shuffle = FALSE
+  #   # = cl_weights
+  # )
+
+  # true_labels <- apply(y.test, 1, max)
+pred_rnn  <- predict(final_rnn_model, X.test)
+
+
+
+pred_rnn <- max.col(pred_rnn)
+
+
+
+save(pred_rnn,  file = "pred_rnn")
 
 load("pred_rnn")
 
@@ -1963,6 +1981,9 @@ kable(tbl_df, format = "html", escape = FALSE,
   column_spec(2, width = "60%", monospace = TRUE)
 
 ```
+
+
+Each model was trained for a maximum of 200 epochs. An early stopping mechanism was employed to prevent overfitting, which terminated training if the validation set logloss did not improve by a tolerance of at least 1e-4 over 10 consecutive scoring intervals.
 
 ```{r h2o-initialise}
 ## ---------------------------
@@ -2164,13 +2185,13 @@ search_criteria <- list(
 # 
 # save(best_model, file = "FFN_final_model")
 
-#load("FFN_final_model")
+load("FFN_final_model")
 
 
 
 #plot of performance
 
-perf.df <- as.data.frame(grid_perf@summary_table) 
+#perf.df <- as.data.frame(grid_perf@summary_table) 
 
 
 
@@ -2415,7 +2436,7 @@ ggplot(data = imp_data, aes(x = relative_importance, y = variable, fill = relati
 # pred_cnn
 # pred_rnn
 
-# true_labels <- test$OAH
+ true_labels <- test$OAH
 # pred_ffn_labels <- factor(pred_ffn_labels, levels = levels(true_labels))
 # save(pred_ffn_labels, file = "pred_ffn_labels")
 # save(true_labels, file = "true_labels")
@@ -2433,7 +2454,7 @@ pred_cnn_labels <- factor(levels(true_labels)[pred_cnn],
 
 
 
-pred_rnn_labels <- factor(levels(true_labels)[pred_rnn],
+pred_rnn_labels <- factor(levels(true_labels)[pred_rnn + 1],
                    levels = levels(true_labels))
 
 
@@ -2455,7 +2476,7 @@ load("temporal_labels")
 #pred_ffn_labels <---- predictions for ffn loaded above
 
 
-
+mean(pred_rnn_labels == temporal_labels)
 #temporal_labels <----- test set labels for cnn and rnn
 #true_labels <----------- test set for ffn (randomly shuffled)
 
