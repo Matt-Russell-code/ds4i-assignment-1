@@ -65,7 +65,7 @@ knitr::include_graphics("av.jpg")
 
 ## Literature Review
 
-Snow avalanches are a recognised hazard in snow-prone mountain regions worldwide. Unlike in the Alps, avalanches in Scotland rarely impact settlements and infrastructure, but pose significant risks to recreational users in the Scottish Highlands (Diggins, 2009; Ward, 1980). The rising popularity of winter activities such as climbing, walking, and skiing has increased exposure to avalanche-prone terrain, resulting in injuries and occasional fatalities each year (Scottish Avalanche Information Service \[SAIS\], 2024). These risks prompted studies of Scottish snowpack and forecasting startegies beginning in the 1970s (Langmuir, 1970; Spink, 1970; Beattie, 1976; Ward, 1980; Ward & Beattie, 1985). However, early work was largely descriptive, relying on snow-pit measurements and expert judgement to link snow properties and weather to avalanche risk. Building on this, Ward (1984) applied one of the first predictive avalanche forecasting models for Scotland.
+Snow avalanches are a recognised hazard in snow-prone mountain regions worldwide. Unlike in the Alps, avalanches in Scotland rarely impact settlements and infrastructure, but pose significant risks to recreational users in the Scottish Highlands (Bain, 2024; Diggins, 2009; Ward, 1980). The rising popularity of winter activities such as climbing, walking, and skiing has increased exposure to avalanche-prone terrain, resulting in injuries and occasional fatalities each year (Scottish Avalanche Information Service \[SAIS\], 2024; Webster, 2020). These risks prompted studies of Scottish snowpack and forecasting startegies beginning in the 1970s (Langmuir, 1970; Spink, 1970; Beattie, 1976; Ward, 1980; Ward & Beattie, 1985). However, early work was largely descriptive, relying on snow-pit measurements and expert judgement to link snow properties and weather to avalanche risk. Building on this, Ward (1984) applied one of the first predictive avalanche forecasting models for Scotland.
 
 Avalanche modelling is inherently complex, where predictions depending on multiple interacting factors (Choubin et al., 2019; Herwijen et al., 2016; Hendrick et al., 2023; Pozdnoukhov et al., 2008; Singh & Ganju, 2008). This challenge is heightened in regions with highly variable weather (Sharma & Ganju, 1999). Early statistical methods, such as nearest neighbours, supported forecasters by relating current weather to past avalanche events, however, were prone to overfitting and struggles with high-dimensional data (Blagovechshenskiy et al., 2023; Kala et al., 2025; Pozdnoukhov et al., 2018; Singh & Ganju, 2008). Using a dataset from Lochaber, Scotland, Pozdnoukhov et al. (2008) reported that support vector machines (SVMs) performed similarly to nearest neighbours while handling high-dimensional data more effectively and producing richer forecasts. SVMs for avalanche forecasting have also proven successful in Iran, India, Switzerland, and Tibet (Choubin et al., 2019; Rahmati et al., 2019; Schirmer et al., 2009; Tiwari et al., 2021; Wen et al., 2022). 
 
@@ -910,7 +910,7 @@ To preserve temporal trends for the CNN and RNN, the train and test split was no
 
 CNN and RNN hyperparameter selection involved two stages. Firstly, several candidate datasets were created with time windows of 3 days, 7 days, 30 days and 120 days. A narrow search was used, training many models to identify the most appropriate window based on validation accuracy, estimated using cross-validation with a 20% holdout set. All models were trained for 60 epochs, except the FNN.
 
-In the second stage, a broader grid search was conducted on the chosen window, selecting the model with the highest validation accuracy. In all our tests presented for the CNN, we assessed architectures with two convolutional layers using the ReLU function in those latent layers, and the softmax function in our input layer to create the class predictions. More complex architectures did not perform better, or meaningfully better. Measures to control for class imbalance were taken for both the cnn and rnn by calculating weights, inversely proportional to the frequency of observations of that class in the training set. 
+In the second stage, a broader grid search was conducted on the chosen window, selecting the model with the highest validation accuracy. In all our tests presented for the CNN, we assessed architectures with two convolutional layers using the ReLU function in those latent layers, and the softmax function in our input layer to create the class predictions. More complex architectures did not perform better, or meaningfully better. Measures to control for class imbalance were taken for both the cnn and rnn by calculating weights, inversely proportional to the frequency of observations of that class in the training set.
 
 ```{r Keras_data_preprocessing_function}
 
@@ -2622,14 +2622,13 @@ acc_rnn <- round(mean(pred_rnn_labels == temporal_labels_rnn) * 100)
 acc_ffn <- round(mean(pred_ffn_labels == true_labels) *100)
 ```
 
-@fig-compare_cms displays the confusion matrices for our 3 models. Our FFNN has a clearer diagonal, which is indicative of its stronger performance. The confusion matrix for the RNN is very diffused with widespread misclassifications. @tbl-overall_stats confirms this observation is indeed the case, as the RNN had the lowest accuracy (`r acc_rnn`%) and the FFNN had the highest (`r acc_ffn`%). One limitation of the approach for evaluating  the CNN and RNN is that, since the training and tests sets are not shuffled, and high risk avalanches are rare,  there are no high risk avalanches in the test set. Therefore, the models ability to distinguish high risk cases is not measured well beyond.
+@fig-compare_cms displays the confusion matrices for our 3 models. Our FFNN has a clearer diagonal, which is indicative of its stronger performance. The confusion matrix for the RNN is very diffused with widespread misclassifications. @tbl-overall_stats confirms this observation is indeed the case, as the RNN had the lowest accuracy (`r acc_rnn`%) and the FFNN had the highest (`r acc_ffn`%). One limitation of the approach for evaluating the CNN and RNN is that, since the training and tests sets are not shuffled, and high risk avalanches are rare, there are no high risk avalanches in the test set. Therefore, the models ability to distinguish high risk cases is not measured well beyond.
 
 The FFNN had some noticeable misclassifications between Considerable- and Moderate. We see that for 103 cases, the model predicted Considerable- instead of Moderate, which shows that it confuses those two classes a lot. Similarly, 112 Low cases were predicted as Moderate, another pair of classes the model struggles with.
 
 The diagonal of the RNN is the weakest of them all. Its correct predictions are concentrated in Low (752) with spillover to Moderate (165), and its misclassifications are concentrated in Low (197) and Moderate (299) predictions which were actually Moderate instances. This tells us the model often confused Moderate cases as either Low (underestimated hazard) or moderate (overestimated hazard).
 
 In the case of the CNN, almost all predictions go to Low. There is a noticeable concentration on the diagonal for Low classifications (735), and a considerable concentration of Moderate classifications (270). On the off-diagonal, the model misclassified 205 Low instances as Moderate, and 148 Moderate instances as Low. Clearly, the CNN collapsed into predicting these two classes in many cases, and often confused the two classes. The rows for these respective classes are all zeros. This shows that this model fell for imbalance bias, favouring the majority class Low and second most abundance Moderate.
-
 
 ```{r fig-compare_cms, echo = FALSE}
 #| fig-cap: "Confusion Matrices Comparing the Final CNN, RNN, and Feed-Forward Models"
@@ -2673,9 +2672,9 @@ grid.arrange(p1, p2, p3, nrow = 3)
 
 In @tbl-overall_stats below, we have an overview of each model's performance. The overall key insights that can be dervied are:
 
-- The FFNN clearly dominates with the highest accuracy, recall, specificity, and precision scores. It would be the best model for both detecting and correctly rejecting classes.
-- The CNN serves as a middle grounf, with acceptable accuracy but low recall. This means this model misses many real cases of considerable avalanche hazards. 
-- The RNN fails overall. Its accuracy, recall and precision metrics are all low, making it unreliable for classification.
+-   The FFNN clearly dominates with the highest accuracy, recall, specificity, and precision scores. It would be the best model for both detecting and correctly rejecting classes.
+-   The CNN serves as a middle grounf, with acceptable accuracy but low recall. This means this model misses many real cases of considerable avalanche hazards.
+-   The RNN fails overall. Its accuracy, recall and precision metrics are all low, making it unreliable for classification.
 
 ```{r tbl-overall_stats, echo = FALSE}
 get_overall_stats <- function(cm_obj) {
@@ -2698,7 +2697,7 @@ model_comparison <- rbind(
 kable(as.data.frame(model_comparison), caption = "Overall Model performance Statistics") %>% kable_styling()
 ```
 
-The FFNN's specificity was 0.934, the highest value observed. This tells us that this model is very good at ruling out cases that do not belong to a class. Its recall was 0.618, which means the model correctly identifies ~62% of true cases or in other words, it catches more actual danger levels compared to CNN and RNN. The CNN and RNN specificity scores were 0.880 and 0.849 respectively, which indicates they have fair ability to avoid false alarms of avalanche hazards, but not up to par with the FFNN's ability. Notably, the RNN's precision was 0.311, which means when it predicts, its only correct abour 31% of the time. This means the RNN is wrong more often than its not. Contrast that with the CNN's 0.439 precision (correct a little under half the time) and the FFNN's 0.633 (correct around 63% of the time).
+The FFNN's specificity was 0.934, the highest value observed. This tells us that this model is very good at ruling out cases that do not belong to a class. Its recall was 0.618, which means the model correctly identifies \~62% of true cases or in other words, it catches more actual danger levels compared to CNN and RNN. The CNN and RNN specificity scores were 0.880 and 0.849 respectively, which indicates they have fair ability to avoid false alarms of avalanche hazards, but not up to par with the FFNN's ability. Notably, the RNN's precision was 0.311, which means when it predicts, its only correct abour 31% of the time. This means the RNN is wrong more often than its not. Contrast that with the CNN's 0.439 precision (correct a little under half the time) and the FFNN's 0.633 (correct around 63% of the time).
 
 ### Model Statistics by Class
 
@@ -2727,11 +2726,11 @@ Even on a class-by-class basis, the RNN performed poorly overall. It was able to
 
 ## Discussion
 
-In this study, we aimed to compare the ability of CNN, RNN, and FFNN models in  predicting avalanches hazard levels. This is a multi-factorial investigation, as many different variables contribute to avalanche outcomes. Because the nature of this problem is sequential and we were able to preprocess that data to fit a time series context, we expected the CNN and RNN to outperform the FFNN since they have the added time series advantage.
+In this study, we aimed to compare the ability of CNN, RNN, and FFNN models in predicting avalanches hazard levels. This is a multi-factorial investigation, as many different variables contribute to avalanche outcomes. Because the nature of this problem is sequential and we were able to preprocess that data to fit a time series context, we expected the CNN and RNN to outperform the FFNN since they have the added time series advantage.
 
 ### Summary of Findings
 
-The FFNN turned out to be the best-performing model overall. It showed the most balanced detection and was the only one that managed to give acceptable performance across hazard levels. The CNN struggled with the minority classes and mainly acted as a majority-class (Low hazard) detector despite the controls put in place to re-weight the classes. This is unsatisfactory because in a real forecasting setting, it's of great importance that we can detect the higher-risk cases. The RNN underperformed across the board, missing nearly all the minority class instances (Considerable+, Considerable-), and doing _fairly_ well with the majority cases but still not as well as the other two models. This strongly disagrees with our initial hypothesis that sequence models would benefit from time series dependencies.
+The FFNN turned out to be the best-performing model overall. It showed the most balanced detection and was the only one that managed to give acceptable performance across hazard levels. The CNN struggled with the minority classes and mainly acted as a majority-class (Low hazard) detector despite the controls put in place to re-weight the classes. This is unsatisfactory because in a real forecasting setting, it's of great importance that we can detect the higher-risk cases. The RNN underperformed across the board, missing nearly all the minority class instances (Considerable+, Considerable-), and doing *fairly* well with the majority cases but still not as well as the other two models. This strongly disagrees with our initial hypothesis that sequence models would benefit from time series dependencies.
 
 ### Strenghts and Weaknesses
 
@@ -2739,17 +2738,11 @@ A clear strength across all models is that they handled the majority class fairl
 
 ### Improvements & Future Contributions
 
-
-Another  limitation of the present  study is that largely complete  cases  were used in the data set.  However, in practice avalanche forecasters do not have such  luxuries. Forecasts have to  be  made  regardless  of whether some data  points  are  missing. At the begining  of the  study, we considered imputation, although  we agreed that  this would  be beyond  the  scope of the aims  of evalauting neural netwrok performance. Developing an imputation model  for  this dataset could be a way of meaningfully improving the its practical use and its accuracy  overall. 
-
+Another limitation of the present study is that largely complete cases were used in the data set. However, in practice avalanche forecasters do not have such luxuries. Forecasts have to be made regardless of whether some data points are missing. At the begining of the study, we considered imputation, although we agreed that this would be beyond the scope of the aims of evalauting neural netwrok performance. Developing an imputation model for this dataset could be a way of meaningfully improving the its practical use and its accuracy overall.
 
 There are several improvements that can be made going forward:
 
-Directly addressing the class imbalance by further exploring data generation or sampling techniques to help the models learn more about the high-risk hazard levels that are rare in the current dataset.
-- Literature shows that climate change is altering avalanche formation and risk. This means that future models need to take into acccount not just the historical data, but the shifting weather and snowpack patterns.
-- Scotland has very localised weather conditions where patterns in the eastern region can differ greatly from the west. Building seperate models for different regions or microclimates may improve local accuracy and forecast reliability.
-- Exploring alternative model types could strengthen predictions. Ensemble techniques such as Gradient Boosting or hybrid deep learning ensembles could potentially handle the categorical nature of this data better than the implemented architectures.
-- Further experimentation showed that training a model on a dataset completed with simple imputation performed about the same in terms of accuracy as the model trained only on complete cases. This finding is important because, in real-world forecasting, decisions often need to be made with incomplete information. Exploring more imputation techniques could therefore be a valuable direction for improving model robustness
+Directly addressing the class imbalance by further exploring data generation or sampling techniques to help the models learn more about the high-risk hazard levels that are rare in the current dataset. - Literature shows that climate change is altering avalanche formation and risk. This means that future models need to take into acccount not just the historical data, but the shifting weather and snowpack patterns. - Scotland has very localised weather conditions where patterns in the eastern region can differ greatly from the west. Building seperate models for different regions or microclimates may improve local accuracy and forecast reliability. - Exploring alternative model types could strengthen predictions. Ensemble techniques such as Gradient Boosting or hybrid deep learning ensembles could potentially handle the categorical nature of this data better than the implemented architectures. - Further experimentation showed that training a model on a dataset completed with simple imputation performed about the same in terms of accuracy as the model trained only on complete cases. This finding is important because, in real-world forecasting, decisions often need to be made with incomplete information. Exploring more imputation techniques could therefore be a valuable direction for improving model robustness
 
 ## Conclusion
 
