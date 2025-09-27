@@ -908,8 +908,6 @@ RNNs are designed to capture sequential dependencies by incorporating feedback c
 
 A FFNN-MLP consists of an input layer, one or more hidden layers of perceptron nodes, and an output layer. Each hidden node computes a weighted sum of its inputs, passes it through a non-linear activation function, and forwards the result to the next layer. The weights, which determine the influence of each input, are initialised randomly and updated iteratively through backpropagation using an optimiser such as gradient descent. The activation functions (e.g., ReLU, sigmoid) introduce non-linearity, enabling the model to capture complex relationships between predictors and the target.
 
-\[add section on RNN\]
-
 ### Data Preprocessing of Neural Networks models
 
 To prepare the data for CNN and RNN, we constructed a 3-dimensional array (number of samples × the time window length × the number of features). Each training sample was created by sliding a fixed window across the data. Within the array, columns represent time steps, and depth represent data features. Since we predict one day ahead, each sample represents the observations within the window, for the next day prediction. Data were standardised to avoid distortion from differing feature scales, and one-hot encoded so each categorical variable is split into multiple binary variable demarcating each category.
