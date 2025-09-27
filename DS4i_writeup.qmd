@@ -85,9 +85,9 @@ This limited interest likely stems from the highly localised nature of avalanche
 
 The present study aims to extend forecasting research in Scotland both spatially and methodologically by applying three NNs (Feedforward, Convolutional, and Recurrent) trained on combined data from the following six regions of Scotland: Creah Meagaidh, Glencoe, Lochaber, Northern Cairngorms, Southern Cairngorms, and Torridon.
 
-\<insert paragraph explaining modelling approaches of prev papers + this project’s modelling approaches. I.e. the neural net architecture\>
+In this project, we use a feed-forward multilayer perceptron (FFNN-MLP), a convolutional neural network (CNN), and a recurrent neural network (RNN) to model avalanche risk. Each model was chosen for its particular strengths: the FFNN-MLP works well with categorical predictors, the CNN is good at identifying spatial and short-term temporal patterns, and the RNN is suited to capturing longer-term sequential trends over time.
 
-Hypothesis???? We can workshop together
+Avalanche risk is sequential in nature because current conditions are influenced by how weather and snowpack have developed over previous days, weeks, or months. For this reason, we hypothesise that the CNN and RNN will perform better than the FFNN-MLP, as they can account for these temporal patterns.
 
 ## Context and Dataset
 
