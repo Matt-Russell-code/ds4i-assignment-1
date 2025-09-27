@@ -2486,10 +2486,49 @@ load("FFN_final_model")
 #write.csv(metrics_tbl, "h2o_nn_per_class_metrics.csv", row.names = FALSE)
 ```
 
+
+```{r}
+#| echo: FALSE
+
+# Note from Sanana: stole this chunk and placed it in the results section
+
+# #| label: fig-var-imp-ffnn
+# #| tbl-cap: "Variable Importance for FFN-MLP."
+# 
+# # imp_data <- as.data.frame(h2o.varimp(best_model)) %>%
+# #    mutate(variable = reorder(variable, relative_importance),
+# #           rank = row_number()) %>%
+# #   filter(rank <= 30)
+# # 
+# # save(imp_data, file = "imp_data")
+# 
+# 
+# load("imp_data")
+# #h2o.varimp_plot(best_model, num_of_features = 50)
+# 
+# ggplot(data = imp_data, aes(x = relative_importance, y = variable, fill = relative_importance))+
+#   geom_col()+
+#   labs(
+#        fill = "Relative Importance",
+#        x = "Relative Importance")
+```
+
+## Results and Discussion
+
+### Feature Importance
+
+In @fig-var-imp-ffnn, we have the feature importance plot. We used the importance plot derived from the FFNN since this was our most balanced model (to be discussed in more detail in the subsections to follow). We believe it best captures the multi-factorial nature of this problem and gives more reliable insights into which features are most influential in avalanche forecasting.
+
+The FAH variable clearly dominates, as FAH.Moderate, FAH.Low, FAH.Considerable-, and FAH.Considerable+ are the most influential predictors with the highest relative importance values. This shows that avalanche hazard categories strongly drive the model’s predictions. Altitude (Alt) also plays a major role, ranking just below the FAH features, which highlights elevation as a critical factor in avalanche outcomes.
+
+Snow index comes in at a moderate level of importance. It has predictive power, but not as strong as FAH. Certain seasons like season12, season5, and season3 also show moderate importance. This suggests seasonal trends do matter, but no single season dominates the prediction. If avalanches were restricted to one specific time/season window, we would have seen that season stand out much more.
+
+For the features with lower but still potentially useful importance, we have geographic area, specifically Area.Torridon and Area.Glencoe. Here, they contribute only a little. This suggests that spatial differences matter less, especially compared to the strong influence of FAH. Lastly, precipitation ranks the lowest. A detailed breakdown of precipitation types adds little predictive power beyond snow index, which is clearly more influential.
+
 ```{r}
 #| echo: FALSE
 #| label: fig-var-imp-ffnn
-#| tbl-cap: "Variable Importance for FFNN-MLP."
+#| tbl-cap: "Variable Importance for FFN-MLP."
 
 # imp_data <- as.data.frame(h2o.varimp(best_model)) %>%
 #    mutate(variable = reorder(variable, relative_importance),
@@ -2509,7 +2548,8 @@ ggplot(data = imp_data, aes(x = relative_importance, y = variable, fill = relati
        x = "Relative Importance")
 ```
 
-## Results and Discussion
+Overall, the FAH values are by far the most important predictors, followed by altitude and snow index. Seasonal and spatial attributes matter too but they are less powerful in comparison, while precipitation types add little value to predictive performance gains.
+
 
 ```{r sanana_work}
 
