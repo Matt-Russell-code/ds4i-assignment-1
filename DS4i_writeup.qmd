@@ -905,7 +905,7 @@ To preserve temporal trends for the CNN and RNN, the train and test split was no
 
 CNN and RNN hyperparameter selection involved two stages. Firstly, several candidate datasets were created with time windows of 3 days, 7 days, 30 days and 120 days. A narrow search was used, training many models to identify the most appropriate window based on validation accuracy, estimated using cross-validation with a 20% holdout set. All models were trained for 60 epochs, except the FNN.
 
-In the second stage, a broader grid search was conducted on the chosen window, selecting the model with the highest validation accuracy. In all our tests presented for the CNN, we assessed architectures with two convolutional layers using the ReLU function in those latent layers, and the softmax function in our input layer to create the class predictions. More complex architectures did not perform better, or meaningfully better.
+In the second stage, a broader grid search was conducted on the chosen window, selecting the model with the highest validation accuracy. In all our tests presented for the CNN, we assessed architectures with two convolutional layers using the ReLU function in those latent layers, and the softmax function in our input layer to create the class predictions. More complex architectures did not perform better, or meaningfully better. Measures to control for class imbalance were taken for both the cnn and rnn by calculating weights, inversely proportional to the frequency of observations of that class in the training set. 
 
 ```{r Keras_data_preprocessing_function}
 
@@ -1489,16 +1489,16 @@ After completing the initial window search, an expanded grid search using the hy
 
 ```{r fiiting_final_cnn}
 
+library(keras3)
 
+W_ <- pre_data(w = 7, h = 1)
 
-# W_ <- pre_data(w = 7, h = 1)
-# 
-# y.test <- W_[[1]]
-# y.train <- W_[[2]]
-# X.train <- W_[[3]]
-# X.test <- W_[[4]]
-# cl_weights <- W_[[5]]
-# F_ <- W_[[6]]
+y.test <- W_[[1]]
+y.train <- W_[[2]]
+X.train <- W_[[3]]
+X.test <- W_[[4]]
+cl_weights <- W_[[5]]
+F_ <- W_[[6]]
 # 
 # dim(X.test)
 # dim(y.test)
@@ -1529,8 +1529,8 @@ After completing the initial window search, an expanded grid search using the hy
 #     batch_size = 64,
 #     verbose = 0,
 #     validation_split = 0,
-#     shuffle = FALSE
-#     # = cl_weights
+#     shuffle = FALSE,
+#      class_weight = cl_weights
 #   )
 # 
 # final_cnn_model  <- model
@@ -1548,13 +1548,14 @@ After completing the initial window search, an expanded grid search using the hy
 # pred_cnn  <- predict(final_cnn_model, X.test)
 # 
 # pred_cnn <- max.col(pred_cnn)
-#Temporal labels for cnn
+# save(pred_cnn, file = "pred_cnn")
+##Temporal labels for cnn
 # 
 # temporal_labels_cnn <- max.col(y.test)
 # save(temporal_labels_cnn, file = "temporal_labels_rnn")
-
-
-load("temporal_labels_rnn")
+# 
+# 
+# load("temporal_labels_rnn")
 #save(pred_cnn, file   = "pred_cnn")
 
 load("pred_cnn")
@@ -1909,8 +1910,8 @@ From the expanded grid search, the best performing model achieved a validation a
 # X.test <- W_[[4]]
 # cl_weights <- W_[[5]]
 # F_ <- W_[[6]]
-
-
+# 
+# 
 # 
 #     input <- layer_input(shape = c(dim(X.train)[2], F_)) # (timesteps, features)
 # 
@@ -1928,20 +1929,20 @@ From the expanded grid search, the best performing model achieved a validation a
 #       loss = "categorical_crossentropy",
 #       metrics = "accuracy"
 #     )
-
-
-
-  # history <- final_rnn_model() %>% fit(
-  #   X.train, y.train,
-  #   epochs = 60,
-  #   batch_size = 64,
-  #   verbose = 0,
-  #   validation_split = 0.2,
-  #   shuffle = FALSE
-  #   # = cl_weights
-  # )
-
-  # true_labels <- apply(y.test, 1, max)
+# 
+# 
+# 
+#   history <- final_rnn_model %>% fit(
+#     X.train, y.train,
+#     epochs = 60,
+#     batch_size = 64,
+#     verbose = 0,
+#     validation_split = 0.2,
+#     shuffle = FALSE,
+#     class_weight = cl_weights
+#   )
+# 
+# true_labels <- apply(y.test, 1, max)
 # pred_rnn  <- predict(final_rnn_model, X.test)
 # 
 # dim(X.test)
@@ -1951,11 +1952,13 @@ From the expanded grid search, the best performing model achieved a validation a
 # 
 # 
 # save(pred_rnn,  file = "pred_rnn")
-#
-#labels for test  set later
+# 
+# ##labels for test  set later
 # 
 # temporal_labels_rnn <- max.col(y.test)
 # save(temporal_labels_rnn, file = "temporal_labels_rnn")
+
+
 load("temporal_labels_rnn")
 load("pred_rnn")
 
@@ -2541,19 +2544,22 @@ pred_rnn_labels <- factor(levels(true_labels)[pred_rnn],
 #Test set changes for each one, because different windows were used
 
 
+load("temporal_labels_cnn")
+load("temporal_labels_rnn")
 
-# temporal_labels_rnn <- factor(levels(true_labels)[temporal_labels_rnn],
-#                    levels = levels(true_labels))
-# 
-# temporal_labels_cnn <- factor(levels(true_labels)[temporal_labels_cnn],
-#                    levels = levels(true_labels))
+temporal_labels_rnn <- factor(levels(true_labels)[temporal_labels_rnn],
+                   levels = levels(true_labels))
+
+temporal_labels_cnn <- factor(levels(true_labels)[temporal_labels_cnn],
+                   levels = levels(true_labels))
+
+head(temporal_labels_cnn)
+head(pred_cnn_labels)
 # 
 # save(temporal_labels_rnn, file = "temporal_labels_rnn")
 # save(temporal_labels_cnn, file = "temporal_labels_cnn")
 
-load("temporal_labels_cnn")
-load("temporal_labels_rnn")
-length("temporal_labels")
+
 #---------------------------------------------------HERE-------------------------------------------------------
 
 #pred_rnn_labels <---- predictions for RNN loaded above
@@ -2593,28 +2599,31 @@ ffn_cm <- confusionMatrix(pred_ffn_labels, true_labels)
 
 
 # Checking
-class(pred_cnn_labels)
-class(pred_rnn_labels)
-#class(temporal_labels)
-
-length(pred_cnn_labels) # Why are you longer :/
-length(pred_rnn_labels)
+# class(pred_cnn_labels)
+# class(pred_rnn_labels)
+# #class(temporal_labels)
+# 
+# length(pred_cnn_labels) # Why are you longer :/
+# length(pred_rnn_labels)
 #length(temporal_labels)
 
 # "Fixing" CNN preds
 #pred_cnn_labels <- pred_cnn_labels[1:length(temporal_labels)]
 
 # Create the confusion matrices
-cnn_cm <- confusionMatrix(pred_cnn_labels, temporal_labels_cnn)
-rnn_cm <- confusionMatrix(pred_rnn_labels, temporal_labels_rnn)
+# cnn_cm <- confusionMatrix(pred_cnn_labels, temporal_labels_cnn)
+# rnn_cm <- confusionMatrix(pred_rnn_labels, temporal_labels_rnn)
 
+
+acc_rnn <- round(mean(pred_rnn_labels == temporal_labels_rnn) * 100)
+acc_ffn <- round(mean(pred_ffn_labels == true_labels) *100)
 ```
 
-@fig-compare_cms displays the confusion matrices for our 3 models. Our FFNN has a clearer diagonal, which is indicative of its stronger performance. The confusion matrix for the RNN is very diffused with widespread misclassifications. @tbl-overall_stats confirms this observation is indeed the case, as the RNN had the lowest accuracy (54.6%) and the FFNN had the highest (75.4%).
+@fig-compare_cms displays the confusion matrices for our 3 models. Our FFNN has a clearer diagonal, which is indicative of its stronger performance. The confusion matrix for the RNN is very diffused with widespread misclassifications. @tbl-overall_stats confirms this observation is indeed the case, as the RNN had the lowest accuracy (`r acc_rnn`%) and the FFNN had the highest (acc_ffn%).
 
 The FFNN had some noticeable misclassifications between Considerable- and Moderate. We see that for 103 cases, the model predicted Considerable- instead of Moderate, which shows that it confuses those two classes a lot. Similarly, 112 Low cases were predicted as Moderate, another pair of classes the model struggles with.
 
-The diagonal of the RNN is the weakest of them all.Its correct predictions are concentrated in Low (792) with spillover to Moderate (62), and its misclassifications are concentrated in Low (232) and High (165) predictions which were actually Moderate instances. This tells us the model often confused Moderate cases as either Low (underestimated hazard) or High (overestimated hazard).
+The diagonal of the RNN is the weakest of them all. Its correct predictions are concentrated in Low (735) with spillover to Moderate (205), and its misclassifications are concentrated in Low (148) and High (165) predictions which were actually Moderate instances. This tells us the model often confused Moderate cases as either Low (underestimated hazard) or High (overestimated hazard).
 
 In the case of the CNN, almost all predictions go to Low. There is a noticeable concentration on the diagonal for Low classifications (786), and a considerable concentration of Moderate classifications (256). On the off-diagonal, the model misclassified 150 Low instances as Moderate, and 173 Moderate instances as Low. Clearly, the CNN collapsed into predicting these two classes in many cases, and often confused the two classes. Also, it completely fails to predict High or Considerable+ classes. The rows for these respective classes are all zeros. This shows that this model fell for imbalance bias, favouring the majority class Low and second most abundance Moderate.
 
@@ -2685,7 +2694,7 @@ model_comparison <- rbind(
 kable(as.data.frame(model_comparison), caption = "Overall Model performance Statistics") %>% kable_styling()
 ```
 
-The FFNN's specificity was 0.934, the highest value observed. This tells us that this model is very goof at ruling out cases that do not belong to a class. Its recall was 0.618, which means the model correctly identifies ~62% of true cases or in other words, it catches more actual danger levels compared to CNN and RNN. The CNN and RNN specificity scores were 0.881 and 0.847 respectively, which indicates they have fair ability to avoid false alarms of avalanche hazards, but not up to par with the FFNN's ability. Notable, the RNN's precision was 0.282, which means when it predicts, its only correct abour 28% of the time. This means the RNN is wrong more often than its not. Contrast that with the CNN's 0.550 precision (correct a little over half the time) and the FFNN's 0.633 (correct around 63% of the time).
+The FFNN's specificity was 0.934, the highest value observed. This tells us that this model is very good at ruling out cases that do not belong to a class. Its recall was 0.618, which means the model correctly identifies ~62% of true cases or in other words, it catches more actual danger levels compared to CNN and RNN. The CNN and RNN specificity scores were 0.881 and 0.847 respectively, which indicates they have fair ability to avoid false alarms of avalanche hazards, but not up to par with the FFNN's ability. Notable, the RNN's precision was 0.282, which means when it predicts, its only correct abour 28% of the time. This means the RNN is wrong more often than its not. Contrast that with the CNN's 0.550 precision (correct a little over half the time) and the FFNN's 0.633 (correct around 63% of the time).
 
 ### Model Statistics by Class
 
