@@ -61,25 +61,23 @@ knitr::include_graphics("av.jpg")
 
 [Photo by Nicolas Cool on Unsplash]{style="font-size:12px"}
 
-## Introduction
+## Abstract
 
-## Literature Review
+## Introducion and Literature Review
 
-Snow avalanches are a recognised hazard in snow-prone mountain regions worldwide. Unlike more alpine regios, avalanches in Scotland rarely impact settlements and infrastructure, but pose significant risks to recreational users in the Scottish Highlands (Bain, 2024; Diggins, 2009; Ward, 1980; WSL Institute for Snow and Avalanche Research SLF \[WSL\], 2016). The rising popularity of winter activities such as climbing, walking, and skiing has increased exposure to avalanche-prone terrain, resulting in injuries and occasional fatalities each year (Scottish Avalanche Information Service \[SAIS\], 2024; Webster, 2020, WSL, 2016). These risks prompted studies of Scottish snowpack and forecasting strategies beginning in the 1970s (Langmuir, 1970; Spink, 1970; Beattie, 1976; Ward, 1980; Ward et al., 1985). However, early work was largely descriptive, relying on snow-pit measurements and expert judgement to link snow properties and weather to avalanche risk. Building on this, Ward (1984a and 1984b) applied one of the first predictive avalanche forecasting models for Scotland.
+Snow avalanches are a hazard in snow-prone regions. Unlike more alpine regions, avalanches in Scotland rarely impact settlements and infrastructure, but pose risks to recreational users (Bain, 2024; Diggins, 2009; Ward, 1980; WSL Institute for Snow and Avalanche Research SLF \[WSL\], 2016). Rising popularity of winter activities such as climbing, walking, and skiing has increased exposure to avalanche-prone terrain, resulting in injuries and occasional fatalities each year (Scottish Avalanche Information Service \[SAIS\], 2024; Webster, 2020, WSL, 2016). These risks prompted studies of Scottish snowpack and forecasting strategies beginning in the 1970s (Langmuir, 1970; Spink, 1970; Beattie, 1976; Ward, 1980; Ward et al., 1985). However, early work was largely descriptive, relying on snow-pit measurements and expert judgement. Building on this, Ward (1984a and 1984b) applied one of the first predictive avalanche forecasting models for Scotland.
 
-Avalanche modelling is inherently complex, where predictions depend on multiple interacting factors (Choubin et al., 2019; Helbig et al., 2015; Hendrick et al., 2023; Pozdnoukhov et al., 2008; Singh & Ganju, 2008). This challenge is heightened in regions with variable weather (Sharma & Ganju, 1999). Early statistical methods, such as nearest neighbours, supported forecasters by relating current weather to past avalanche events, however, were prone to overfitting and struggled with high-dimensional data (Blagovechshenskiy et al., 2023; Kala et al., 2025; Pozdnoukhov et al., 2018; Singh & Ganju, 2008). Using a dataset from Lochaber, Scotland, Pozdnoukhov et al. (2008) reported that support vector machines (SVMs) performed similarly to nearest neighbours while handling high-dimensional data more effectively and producing richer forecasts. SVMs for avalanche forecasting have also proven successful in Iran, India, Switzerland, and Tibet (Choubin et al., 2019; Rahmati et al., 2019; Schirmer et al., 2009; Tiwari et al., 2021; Wen et al., 2022). 
+Avalanche modelling is inherently complex, where predictions depend on multiple interacting factors (Choubin et al., 2019; Helbig et al., 2015; Hendrick et al., 2023; Pozdnoukhov et al., 2008; Singh & Ganju, 2008). This challenge is heightened in regions with variable weather (Sharma & Ganju, 1999). Early statistical methods, like nearest neighbours, supported forecasters by relating current weather to past avalanche events, however, were prone to overfitting and struggled with high-dimensional data (Blagovechshenskiy et al., 2023; Kala et al., 2025; Pozdnoukhov et al., 2018; Singh & Ganju, 2008). Using a dataset from Lochaber, Scotland, Pozdnoukhov et al. (2008) reported that support vector machines (SVMs) performed similarly to nearest neighbours while handling high-dimensional data more effectively and producing richer forecasts. SVMs have also proven successful in Iran, India, Switzerland, and Tibet (Choubin et al., 2019; Rahmati et al., 2019; Schirmer et al., 2009; Tiwari et al., 2021; Wen et al., 2022). 
 
-Recently, more complex machine learning (ML) algorithms such as regression trees, random forests, and neural networks have demonstrated strong predictive performance in avalanche forecasting (Blagovechshenskiy et al., 2023; Choubin et al., 2019; Gauthier et al., 2025; Hendrick et al., 2023; Rahmati et al., 2019; Singh & Ganju, 2018; Tiwari et al., 2021; Wen et al., 2022). Avalanche datasets are often high-dimensional, and using forecaster-led feature selection can be highly subjective (Helbig et al., 2015; Pozdnoukhov et al., 2008). Hybrid approaches, which combine ML tools (e.g., variable importance plots) with forecaster-led feature selection have shown practical value (Gauthier et al., 2025). However, fully data-driven forecasting methods, particularly neural networks (NNs), offer important advantages.
+Recently, more complex machine learning (ML) algorithms (regression trees, random forests, neural networks) have demonstrated strong predictive performance in avalanche forecasting (Blagovechshenskiy et al., 2023; Choubin et al., 2019; Gauthier et al., 2025; Hendrick et al., 2023; Rahmati et al., 2019; Singh & Ganju, 2018; Tiwari et al., 2021; Wen et al., 2022). Avalanche datasets are often high-dimensional, and using forecaster-led feature selection can be highly subjective (Helbig et al., 2015; Pozdnoukhov et al., 2008). Hybrid approaches combining ML tools with expert-led feature selection have shown practical value (Gauthier et al., 2025). However, fully data-driven forecasting methods, particularly neural networks (NNs), offer important advantages.
 
 NNs simulate brain processes through interconnected nodes, capturing complex, nonlinear relationships (Blagovechshenskiy et al., 2023; Sharma et al., 2023; Tu, 1996). By processing inputs simultaneously, patterns are learned without prior knowledge of which variables matter most (Blagovechshenskiy et al., 2023; Fromm & Schonberger, 2022; Sharma et al., 2023). Applications in Switzerland, Kazakhstan, and India show that NNs not only perform strongly but can assess the relative importance of variables (Fromm & Schonberger; Sharma et al., 2023; Singh & Ganju, 2008). This makes them particularly well suited for high-dimensional avalanche datasets and situations with limited domain knowledge or uncertain predictors.
 
 Despite advances in data-driven avalanche forecasting worldwide, research specific to Scotland remains limited in three ways:
 
-\(1\) Few published studies exist (only 9 relevant peer-reviewed papers exist on Scopus, with the most recent study conducted in 2011 (keywords: ( "avalanche forecasting" OR "avalanche prediction" ) AND Scotland)).
-
-\(2\) The restricted range of statistical approaches explored (only KNN and SVM) (Heierli et al., 2004; Pozdnoukhov et al., 2008; Pozdnoukhov et al., 2011; Purves et al., 2003).
-
-\(3\) The focus on only a few regions in Scotland (primarily the Cairngorms and Lochaber regions).
+1.  Few published studies exist (only 9 relevant peer-reviewed papers exist on Scopus, with the most recent study conducted in 2011 (keywords: ( "avalanche forecasting" OR "avalanche prediction" ) AND Scotland)).
+2.  The restricted range of statistical approaches explored (only KNN and SVM) (Heierli et al., 2004; Pozdnoukhov et al., 2008; Pozdnoukhov et al., 2011; Purves et al., 2003).
+3.  The focus on only a few regions in Scotland (primarily the Cairngorms and Lochaber regions).
 
 This limited interest likely stems from the highly localised nature of avalanche risk in Scotland, which generally occurs in remote areas, affecting relatively few people (Diggins, 2009; SAIS, 2024). Nevertheless, improved avalanche forecasting is increasingly important under changing climate conditions, which may alter snowpack properties and avalanche risk (Gauthier et al., 2025; Werritty & Sugden, 2013). A detailed discussion of climate change, however, is beyond this paper's scope.
 
@@ -196,7 +194,7 @@ kable(area_hazard_table)
 
 <br>
 
-Data cover the Scottish winters (November to April) from the December 2009 to March 2025. Predictor variables are categorised into three main groups: (1) position and topography, (2) weather, and (3) snowpack test, all collected at the forecast location. Each observation also includes the date and the forecast area (metadata). For an overview of the predictors available, see @tbl-pred .
+Data span winters (November to April) from the December 2009 to March 2025. Predictors are categorised into: (1) position and topography, (2) weather, and (3) snowpack test, all collected at the forecast location. Each observation includes the date and the forecast area (metadata). For an overview of the predictors available, see @tbl-pred .
 
 ```{r}
 #| echo: FALSE
@@ -307,11 +305,11 @@ if (knitr::is_html_output()) {
 
 ```
 
-The Scottish avalanche dataset contains several features that are moderately to strongly correlated, while others appear largely independent (@fig-feat-cor). From a modelling perspective, highly correlated features can increase complexity and obscure unique contributors, however, can also capture the multifactorial nature of avalanche risk. The presence of correlated variables is not inherently problematic, since NNs can learn non-linear interactions. However, strong correlations can increase the risk of overfitting if the network memorises patterns rather than generalising to new data.
+The Scottish avalanche dataset contains several features that are moderately to strongly correlated, while others appear largely independent (@fig-feat-cor). The presence of correlated variables is not inherently problematic, since NNs can learn non-linear interactions. However, strong correlations can increase the risk of overfitting if the network memorises patterns rather than generalising to new data.
 
 The highest correlation found was between *summit.air.temperature* and *air.temperature* (r = `r round(top_pairs[1,4], 2)`), indicating strong redundancy. Nevertheless, both variables were retained as each likely capture a different aspect relevant to forecasting (i.e., summit conditions versus broader conditions). *Air.temperature* is an identified key driver of avalanche conditions and is expected to be an important predictor in the NNs (Fromm & Schonberger, 2022; Gauthier et al., 2025; Pozdnoukhouv et al., 2018; Souckova et al., 2022; Ward,1980). Exploration of *air.temperature* across *observed.avalanche.hazard (OAH)* levels further supports its importance in forecasting (@fig-box-OAH). Higher hazard categories are generally associated with lower observed *air.temperatures*, with “Considerable-”, “Considerable+”, and “High” hazards centred below 0 °C. “Low” hazard days show medians above freezing and wider variability. The transition at “Moderate” hazard, where temperatures cluster around 0 °C, reflects conditions that can either stabilise or destabilise the snowpack through freeze-thaw cycles. These patterns highlight Scotland's sensitivity to rapid temperature shifts and their impact on avalanche activity (Diggins, 2009; Pozdnoukhov et al., 2008).
 
-Other correlations with 0.5\<\|r\|\< 0.80 are moderately strong but remain informative and manageable, as NNs can accommodate interdependent inputs.
+Other moderate correlations (0.5\<\|r\|\< 0.80) remain informative and manageable for NNs.
 
 ```{r}
 #| echo: FALSE
@@ -518,7 +516,7 @@ p_counts <- ggplot(month_totals, aes(x = month_in_season, y = month_total)) +
 
 ```
 
-Monthly *OAH* patterns reveal clear seasonal trends (@fig-season-bar-hist). Early (November-December) and late (April-May) months are dominated by "Low" and "Moderate" hazards, while mid-season (Jan-Mar) sees more "Considerable" and "High" hazards. Most forecasts occur between December-March, highlighting the period of greatest avalanche risk (SAIS, 2024). These patterns reflect cyclical snowpack development, with mid-winter weather instability driving higher-risk avalanches (Diggins, 2009; Podzdnoukhov et al., 2008; Purves et al., 2003). For modelling, this seasonality indicates that hazard levels are unevenly distributed, however, NNs can accommodate complex, changing relationships among variables.
+Monthly *OAH* patterns reveal clear seasonal trends (@fig-season-bar-hist). Early (November-December) and late (April-May) months are dominated by "Low" and "Moderate" hazards, while mid-season (Jan-Mar) sees more "Considerable" and "High" hazards. Most forecasts occur between December-March, highlighting the period of greatest avalanche risk (SAIS, 2024). These patterns reflect cyclical snowpack development, with mid-winter weather instability driving higher-risk avalanches (Diggins, 2009; Podzdnoukhov et al., 2008; Purves et al., 2003).
 
 ```{r}
 #| echo: FALSE
@@ -637,11 +635,9 @@ df_prop <- as.data.frame(tab_prop) %>%
 
 ```
 
-Lastly, @fig-FAH-OAH shows the relationship between *forecast.avalanche.hazard (FAH)* on day *t* and *OAH* on day *t+1*. Each column sums to 100%, showing how outcomes were distributed for each forecast level. "Low" hazard forecasts were highly accurate, with `r round(tab_prop[1,1]*100, 2)`% confirmed the following day. This indicates that forecasters were most successful in predicting stable snowpack conditions and "Low" hazard scenarios.
+Lastly, @fig-FAH-OAH shows the relationship between *forecast.avalanche.hazard (FAH)* (day *t*) and *OAH* (day *t+1*). Each column sums to 100%, showing how outcomes were distributed for each forecast level. "Low" forecasts were highly accurate (`r round(tab_prop[1,1]*100, 2)`%), while intermediate levels ("Moderate", "Considerable-") had weaker agreement, often spilling into neighbouring categories. "High" forecasts were least reliable, frequently over-predicting extreme conditions.
 
-For intermediate levels such as “Moderate” and “Considerable-” agreement weakens. About half of “Moderate” forecasts matched the following day’s observations, with spillover into “Low” and “Considerable-”. “Considerable-” forecasts split almost evenly among “Moderate,” “Considerable-” and “Considerable+”, highlighting the challenge of differentiating neighbouring hazard categories and the sensitivity of intermediate thresholds.
-
-“High” hazard forecasts showed weaker reliability, with fewer than one-quarter corresponding to observed “High” conditions. Most aligned with “Considerable-” or “Considerable+” outcomes, reflecting a tendency to over-predict extreme conditions or difficulty anticipating when weather and snowpack instabilities escalate into high-risk scenarios.
+The agreement between *OAH* and *FAH* are highest in stable "Low"-risk conditions and lowest at the extremes, with middle categories showing uncertainty.
 
 ```{r OAH-FAH-plot}
 #| echo: FALSE
@@ -671,7 +667,7 @@ final_fah_oah_corrplot <- annotate_figure(fah_oah_corrplot,
 final_fah_oah_corrplot
 ```
 
-The agreement between OAH and FAH are highest in stable "Low"-risk conditions and lowest at the extremes, with middle categories showing uncertainty. NNs can capture these patterns well, learning that misclassifications most often occur between neighbouring hazard levels, instead of treating all errors equally. Class imbalances will also need to be addressed during model training to ensure the network does not simply default to predicting the most common outcomes
+Class imbalances will need to be addressed during model training to ensure the network does not simply default to predicting the most common outcomes.
 
 ## Data Cleaning and Feature Engineering
 
@@ -756,7 +752,7 @@ x1 <- unique(data$AV.Cat)
 
 ```
 
-Missing values were also a challenge. @tbl-missing-val presents the percentage of missing values for features with incomplete data. *Av.Cat* was removed because its meaning was unclear and it contained implausible values (e.g., `r x1`). @fig-ski-summit-wind shows no clear relationship between *ski.penetration* and *OAH*, except for "High" risk avalanches; we therefore excluded it since snowfall effects are likely better represented by other variables. *Summit.wind.direction* (`r round(missing_df[missing_df$Variable == "Summit.Wind.Dir", "Missing (%)"], 2)`% missing) was also dropped for lack of a discernible trend.
+@tbl-missing-val presents the percentage of missing values for features with incomplete data. *Av.Cat* was removed because its meaning was unclear and it contained implausible values (e.g., `r x1`). @fig-ski-summit-wind shows no clear relationship between *ski.penetration* and *OAH*, except for "High" risk avalanches; we therefore excluded it since snowfall effects are likely better represented by other variables. *Summit.wind.direction* (`r round(missing_df[missing_df$Variable == "Summit.Wind.Dir", "Missing (%)"], 2)`% missing) was also dropped for lack of a discernible trend.
 
 ```{r}
 #| echo: FALSE
@@ -818,7 +814,7 @@ comp <- round(sum(!complete.cases(data_edit))/sum(complete.cases(data_edit)) * 1
 
 ```
 
-Having dropped these variables, we were left with roughly `r comp`% incomplete samples. We dropped the remaining samples that contained missing values to maintain complete cases for modelling. While retaining more observations would be ideal, the remaining \~7000 were sufficient for representative results.
+After removing variables, `r comp`% of samples remained incomplete and were subsequently dropped. While retaining more observations would be ideal, the remaining \~7000 were sufficient for representative results.
 
 ```{r date_time}
 
@@ -884,9 +880,9 @@ test <- data[-train.idx,] #Testing Data
 
 ## Modeling Methodology
 
-There are three main models used in this project to exploit different structural properties of the data: a convolutional neural network (CNN), a recurrent neural network (RNN), and a feedforward multilayer perceptron neural network network (FFNN-MLP). The FFNN-MLP was expected to handle categorical predictors (e.g., forecasted avalanche risk) effectively, while the CNNs and RNNs were targeted at uncovering temporal or sequential patterns.
+Three main models were used in this project to exploit different structural properties of the data: a convolutional neural network (CNN), a recurrent neural network (RNN), and a feedforward multilayer perceptron neural network network (FFNN-MLP). The FFNN-MLP was expected to handle categorical predictors (e.g., forecasted avalanche risk) effectively, while the CNNs and RNNs were targeted at uncovering temporal or sequential patterns.
 
-CNNs process data by applying convolutional filters (small weight matrices) that slide across the input space. Each filter computes dot products with local patches of the data, producing feature maps that emphasise spatial or temporal patterns based on the type of filters used. Non-linear activations are then applied, followed by pooling layers that down sample the feature maps to reduce dimensionality while preserving the most important information. One can stack numerous layers of convolutions to learn deeper trends in the data, although we found that two layers were a good balance between the model’s complexity and ability to generalise.
+CNNs process data by applying convolutional filters (small weight matrices) that slide across the input space. Each filter computes dot products with local patches of the data, producing feature maps that emphasise spatial or temporal patterns based on the type of filters used. Non-linear activations are then applied, followed by pooling layers to down-sample the maps and reduce dimensionality while preserving key information. Multiple convolutional layers can be stacked, though two layers were found to balance complexity and generalisation.
 
 ```{r}
 #| echo: false
@@ -904,7 +900,7 @@ Credit: OpenAI (2025a and 2025b)
 
 RNNs are designed to capture sequential dependencies by incorporating feedback connections. At each time step, the hidden state depends not only on the current input but also on the state from the previous step. This architecture makes RNNs well suited for modeling temporal dynamics in sequential data.
 
-A FFNN-MLP consists of an input layer, one or more hidden layers of perceptron nodes, and an output layer. Each hidden node computes a weighted sum of its inputs, passes it through a non-linear activation function, and forwards the result to the next layer. The weights, which determine the influence of each input, are initialised randomly and updated iteratively through backpropagation using an optimiser such as gradient descent. The activation functions (e.g., ReLU, sigmoid) introduce non-linearity, enabling the model to capture complex relationships between predictors and the target.
+A FFNN-MLP consists of an input layer, hidden layers of perceptron nodes, and an output layer. Each hidden node computes a weighted sum of its inputs, applies a non-linear activation, and forwards the result to the next layer. The weights are initialised randomly and updated through backpropogation using an optimiser such as gradient descent. Activation functions (e.g., ReLu, sigmoid) introduce non-linearity enabling the model to capture complex relationships between predictors and the target.
 
 ### Data Preprocessing of Neural Networks models
 
@@ -2014,19 +2010,17 @@ library(pdp)       # Used to generate Partial Dependence Plots for model interpr
 set.seed(123)
 ```
 
-The FFNN-MLP was developed for multi-class classification using the H2o deep learning framework. The objective was to predict a five-level categorical outcome based on a high-dimensional feature set.
+The FFNN-MLP architecture was optimised through a randomised grid-search to identify the most effective combination of hyperparameters. Candidate models has consistent input and output layers, while hidden layers varied. The input layer comprised 61 nodes, corresponding to the full set of hot-one encoded engineered predictor variables, plus bias.
 
-The FFNN-MLP architecture was systematically optimised through a randomised discrete grid-search to identify the most effective combination of hyperparameters. All candidate models were structured with a consistent input and output layer, while the hidden layer configuration was varied. The input layer comprised 61 nodes, corresponding to the full set of hot-one encoded engineered predictor variables, plus the bias.
+The grid-search explored 2-4 hidden layers with neuron configurations such as \[256, 128, 64\], \[512, 256, 128\], and \[128, 64\]. The RectifierWithDropout activation promoted non-linearity and mitigated overfitting. The output layer had five neurons, with softmax to generate class probabilities.
 
-The grid-search explored architectures containing between two and four hidden layers. Neuron configurations tested included dense layers such as \[256, 128, 64\], \[512, 256, 128\], and \[128, 64\]. The RectifierWithDropout activation function was initially considered to promote non-linearity and mitigate overfitting. The output layer contained five neurons and employed a softmax activation function to generate a probability distribution over the classes.
-
-To counteract the effects of an imbalanced class distribution in the training data, a class-balancing strategy was implemented. Each training observation was assigned a weight inversely proportional to its class frequency, thereby increasing the influence of minority classes during the optimisation of the loss function.
+To address class imbalance, each training observation was weighted inversely to its class frequency, increasing the influence of minority classes during optimisation.
 
 ```{r}
 n1 <- 4*3*3*2*3
 ```
 
-The randomised grid-search evaluated a maximum of `r n1` candidate models, exploring a predefined hyperparameter space. Key hyperparameters and their search ranges are detailed in @tbl-ffnn-param below.
+The randomised grid-search evaluated a maximum of `r n1` candidate models, exploring a predefined hyperparameter space. Key hyperparameters and their search ranges are detailed in @tbl-ffnn-param .
 
 ```{r}
 #| echo: FALSE
@@ -2068,7 +2062,7 @@ kable(tbl_df, format = "html", escape = FALSE) %>%
 
 ```
 
-Each model was trained for a maximum of 200 epochs. An early stopping mechanism was employed to prevent overfitting, which terminated training if the validation set logloss did not improve by a tolerance of at least 1e-4 over 10 consecutive scoring intervals.
+Models were trained for up to 200 epochs with early stopping, terminating if validation logloss did not improve by at least 1e-4 over 10 consecutive intervals.
 
 ```{r h2o-initialise}
 ## ---------------------------
@@ -2745,7 +2739,7 @@ Overall, the *FAH* drives predictions, followed by *altitude* and *snow.index*, 
 ```{r}
 #| echo: FALSE
 #| label: fig-var-imp-ffnn
-#| tbl-cap: "Variable Importance for FFN-MLP."
+#| fig-cap: "Variable Importance for FFN-MLP."
 
 # imp_data <- as.data.frame(h2o.varimp(best_model)) %>%
 #    mutate(variable = reorder(variable, relative_importance),
@@ -2777,14 +2771,14 @@ A clear strength across all models is that they handled the majority class fairl
 
 ### Improvements & Future Contributions
 
-Another limitation of the present study is that largely complete cases were used in the data set. However, in practice avalanche forecasters do not have such luxuries. Forecasts have to be made regardless of whether some data points are missing. At the beginning of the study, we considered imputation, although we agreed that this would be beyond the scope of the aims of evaluating neural network performance. Developing an imputation model for this dataset could be a way of meaningfully improving its practical use, robustness, and accuracy overall.
+While the present study used only complete cases for modelling, avalanche forecasters in practice must often make predictions despite missing data. Imputation was considered, but fell outside the scope of evaluating NN performance. Developing an imputation model for this dataset could be a way of meaningfully improving its practical use, robustness, and accuracy overall.
 
 There are several other improvements that can be made going forward:
 
-1.  Directly addressing the class imbalance by further exploring data generation or sampling techniques to help the models learn more about the high-risk hazard levels that are rare in the current dataset.
-2.  Literature shows that climate change is altering avalanche formation and risk. This means that future models need to take into account not just the historical data, but the shifting weather and snowpack patterns.
-3.  Scotland has very localised weather conditions where patterns in the eastern region can differ greatly from the west. Building separate models for different regions or microclimates may improve local accuracy and forecast reliability.
-4.  Exploring alternative model types could strengthen predictions. Ensemble techniques such as Gradient Boosting or hybrid deep learning ensembles could potentially handle the categorical nature of this data better than the implemented architectures.
+1.  Address class imbalance through data generation or sampling techniques to better capture rarer high-risk hazards.
+2.  Incorporate climate change effects by accounting for evolving weather and snowpack conditions alongside historical data.
+3.  Explore building region-specific models to reflect Scotland's highly localised weather patterns and improve forecast reliability.
+4.  Explore alternative model types, such as gradient boosting or hybrid deep learning ensembles, to better handle categorical data and strengthen predictions.
 
 ## Conclusion
 
