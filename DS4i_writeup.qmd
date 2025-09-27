@@ -63,7 +63,7 @@ knitr::include_graphics("av.jpg")
 
 ## Abstract
 
-## Introducion and Literature Review
+## Introduction and Literature Review
 
 Snow avalanches are a hazard in snow-prone regions. Unlike more alpine regions, avalanches in Scotland rarely impact settlements and infrastructure, but pose risks to recreational users (Bain, 2024; Diggins, 2009; Ward, 1980; WSL Institute for Snow and Avalanche Research SLF \[WSL\], 2016). Rising popularity of winter activities such as climbing, walking, and skiing has increased exposure to avalanche-prone terrain, resulting in injuries and occasional fatalities each year (Scottish Avalanche Information Service \[SAIS\], 2024; Webster, 2020, WSL, 2016). These risks prompted studies of Scottish snowpack and forecasting strategies beginning in the 1970s (Langmuir, 1970; Spink, 1970; Beattie, 1976; Ward, 1980; Ward et al., 1985). However, early work was largely descriptive, relying on snow-pit measurements and expert judgement. Building on this, Ward (1984a and 1984b) applied one of the first predictive avalanche forecasting models for Scotland.
 
