@@ -2710,7 +2710,7 @@ The CNN statistics detailed in @tbl-cnn_stats_by_class show that this model had 
 
 Even on a class-by-class basis, the RNN performed poorly overall. It was able to catch about 83% of Low hazard cases. Beyond that, its performance collapsed. It missed all Considerable-, Considerable+, and High cases (zero sensitivity across these classes). It only managed to detect 13% of Moderate cases. Moreover, its specificity for the Low class was just 53%, meaning it frequently mislabeled other classes as Low. Just poor performance overall.
 
-## Discussion & Conclusion
+## Discussion
 
 In this study, we aimed to compare the ability of CNN, RNN, and FFNN models in  predicting avalanches hazard levels. This is a multi-factorial investigation, as many different variables contribute to avalanche outcomes. Because the nature of this problem is sequential and we were able to preprocess that data to fit a time series context, we expected the CNN and RNN to outperform the FFNN since they have the added time series advantage.
 
