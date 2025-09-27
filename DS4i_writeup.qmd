@@ -411,7 +411,7 @@ cumulative_high <- heavy_snow %>%
   pull(cum_prop)
 ```
 
-The distribution of *OAH* levels varies clearly across different precipitation types (@fig-precip-bar). "Low" hazard predominates under conditions of none (0) or trace (2) precipitation, whereas higher hazard categories become increasingly prevalent as snowfall intensity increases. Heavy snow (level 10) is associated with a substantially larger share of “Considerable” and “High” hazard ratings (`r round(cumulative_high*100, 2)` %). This aligns with existing knowledge of the Scottish climate, where rapid weather shifts and frequent rain or snow-on-snow events contribute to unstable snowpack conditions (Pozdnoukhov et al., 2008; Purves et al., 2003).
+The distribution of *OAH* levels varies clearly across different precipitation types (@fig-precip-bar). "Low" hazard predominates under conditions of none (0) or trace (2) precipitation, whereas higher hazard categories become increasingly prevalent as snowfall intensity increases. Heavy snow (level 10) is associated with a substantially larger share of “Considerable” and “High” hazard ratings (`r round(cumulative_high*100, 2)` %). This aligns with existing knowledge of the Scottish climate, where rapid weather shifts and frequent rain or snow-on-snow events contribute to unstable snowpack conditions (Diggins, 2009; Pozdnoukhov et al., 2008; Purves et al., 2003; Ward, 1980).
 
 ```{r}
 #| echo: FALSE
