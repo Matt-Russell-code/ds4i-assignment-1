@@ -2578,8 +2578,6 @@ mean(pred_cnn_labels == temporal_labels_cnn)
 
 ```
 
-## Discussion
-
 ### Confusion Matrices
 
 ```{r, echo = FALSE}
@@ -2720,3 +2718,29 @@ We will start with the FFNN statistics detailed in @tbl-ffn_stats_by_class. It w
 The CNN statistics detailed in @tbl-cnn_stats_by_class show that this model had mized results. It was able to capture 83% of Low danger cases, which is the majority class, but its performnace dropped sharply for the minority cases. It has 0% sensitivity for High and Considerable+ cases meaning it completely failed to identify these two. Additionally, it only detected 22% of Considerable- cases.
 
 Even on a class-by-class basis, the RNN performed poorly overall. It was able to catch about 83% of Low hazard cases. Beyond that, its performance collapsed. It missed all Considerable-, Considerable+, and High cases (zero sensitivity across these classes). It only managed to detect 13% of Moderate cases. Moreover, its specificity for the Low class was just 53%, meaning it frequently mislabeled other classes as Low. Just poor performance overall.
+
+## Discussion
+
+In this study, we aimed to compare the ability of CNN, RNN, and FFNN models in  predicting avalanches hazard levels. This is a multi-factorial investigation, as many different variables contribute to avalanche outcomes. Because the nature of this problem is sequential and we were able to preprocess that data to fit a time series context, we expected the CNN and RNN to outperform the FFNN since they have the added time series advantage.
+
+### Summary of Findings
+
+The FFNN turned out to be the best-performing model overall. It showed the most balanced detection and was the only one that managed to give acceptable performance across hazard levels. The CNN struggled with the minority classes and mainly acted as a majority-class (Low hazard) detector. This is unsatisfactory because in a real forecasting setting, it's of great importance that we can detect the high-risk cases. The RNN underperformed across the board, missing nearly all the minority class instances (High, Considerable+, Considerable-), and doing _fairly_ well with the majority cases but still not as well as the other two models. This strongly disagrees with our initial hypothesis that sequence models would benefit from time series dependencies.
+
+### Strenghts and Weaknesses
+
+A clear strenght across all models is that they handled the majority class fairly well. This suggests that with a more balanced dataset where all classes have enough representation, similar architectures could perform much better. On the other hand, all three models showed clear bias toward the most common categories. None of them did especially well with the high-risk, minority classes. The highlights a weakness in applying these models directly without addressing the class imbalance.
+
+### Improvements & Future Contributions
+
+There are several improvements that can be made going forward:
+
+- Directly addressing the class imbalance by further exploring data generation or sampling techniques to help the models learn more about the high-risk hazard levels that are rare in the current dataset.
+- Literature shows that climate change is altering avalanche formation and risk. This means that future models need to take into acccount not just the historical data, but the shifting weather and snowpack patterns.
+- Scotland has very localised weather conditions where patterns in the eastern region can differ greatly from the west. Building seperate models for different regions or microclimates may improve local accuracy and forecast reliability.
+- Exploring alternative model types could strengthen predictions. Ensemble techniques such as Gradient Boosting or hybrid deep learning ensembles could potentially handle the categorical nature of this data better than the implemented architectures.
+- Further experimentation showed that training a model on a dataset completed with simple imputation performed about the same in terms of accuracy as the model trained only on complete cases. This finding is important because, in real-world forecasting, decisions often need to be made with incomplete information. Exploring more imputation techniques could therefore be a valuable direction for improving model robustness
+
+## Conclusion
+
+Our objective requires reliable detection across all avalanche danger levels, not just the majority ones. In this study, the FFNN came closest to meeting this requirement, but even it struggled with the minority, high-risk cases. Future work should focus on reducing class imbalance, exploring region-specific models, and experimenting with ensemble approaches to ensure that high-risk avalanche conditions are consistently and accurately detected.
