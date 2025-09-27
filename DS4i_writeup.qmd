@@ -906,7 +906,7 @@ Credit: OpenAI (2025a and 2025b)
 
 RNNs are designed to capture sequential dependencies by incorporating feedback connections. At each time step, the hidden state depends not only on the current input but also on the state from the previous step. This architecture makes RNNs well suited for modeling temporal dynamics in sequential data.
 
-A FFN-MLP consists of an input layer, one or more hidden layers of perceptron nodes, and an output layer. Each hidden node computes a weighted sum of its inputs, passes it through a non-linear activation function, and forwards the result to the next layer. The weights, which determine the influence of each input, are initialised randomly and updated iteratively through backpropagation using an optimiser such as gradient descent. The activation functions (e.g., ReLU, sigmoid) introduce non-linearity, enabling the model to capture complex relationships between predictors and the target.
+A FFNN-MLP consists of an input layer, one or more hidden layers of perceptron nodes, and an output layer. Each hidden node computes a weighted sum of its inputs, passes it through a non-linear activation function, and forwards the result to the next layer. The weights, which determine the influence of each input, are initialised randomly and updated iteratively through backpropagation using an optimiser such as gradient descent. The activation functions (e.g., ReLU, sigmoid) introduce non-linearity, enabling the model to capture complex relationships between predictors and the target.
 
 \[add section on RNN\]
 
@@ -2018,7 +2018,7 @@ library(pdp)       # Used to generate Partial Dependence Plots for model interpr
 set.seed(123)
 ```
 
-The FFN-MLP was developed for multi-class classification using the H2O deep learning framework. The objective was to predict a five level categorical outcome based on a high-dimensional feature set.
+The FFNN-MLP was developed for multi-class classification using the H2O deep learning framework. The objective was to predict a five level categorical outcome based on a high-dimensional feature set.
 
 The FFNN-MLP architecture was systematically optimised through a randomised discrete grid search to identify the most effective combination of hyperparameters. All candidate models were structured with a consistent input and output layer, while the hidden layer configuration was varied. The input layer comprised 61 nodes, corresponding to the full set of hot-one encoded engineered predictor variables, plus the bias.
 
@@ -2035,7 +2035,7 @@ The randomised grid search evaluated a maximum of `r n1` candidate models, explo
 ```{r}
 #| echo: FALSE
 #| label: tbl-ffnn-param
-#| tbl-cap: "FFN-MLP Hyperparameter Grid."
+#| tbl-cap: "FFNN-MLP Hyperparameter Grid."
 
 summary_df <- data.frame(
   Hyperparameter = c("hidden",
@@ -2491,7 +2491,7 @@ load("FFN_final_model")
 ```{r}
 #| echo: FALSE
 #| label: fig-var-imp-ffnn
-#| tbl-cap: "Variable Importance for FFN-MLP."
+#| tbl-cap: "Variable Importance for FFNN-MLP."
 
 # imp_data <- as.data.frame(h2o.varimp(best_model)) %>%
 #    mutate(variable = reorder(variable, relative_importance),
@@ -2706,7 +2706,7 @@ model_comparison <- rbind(
 kable(as.data.frame(model_comparison), caption = "Overall Model performance Statistics") %>% kable_styling()
 ```
 
-The FFNN-MLP's specificity was 0.934, the highest value observed. This tells us that this model is very good at ruling out cases that do not belong to a class. Its recall was 0.618, which means the model correctly identifies \~62% of true cases or in other words, it catches more actual danger levels compared to CNN and RNN. The CNN and RNN specificity scores were 0.880 and 0.849 respectively, which indicates they have fair ability to avoid false alarms of avalanche hazards, but not up to par with the FFNN's ability. Notably, the RNN's precision was 0.311, which means when it predicts, its only correct abour 31% of the time. This means the RNN is wrong more often than its not. Contrast that with the CNN's 0.439 precision (correct a little under half the time) and the FFNN's 0.633 (correct around 63% of the time).
+The FFNN-MLP's specificity was 0.934, the highest value observed. This tells us that this model is very good at ruling out cases that do not belong to a class. Its recall was 0.618, which means the model correctly identifies \~62% of true cases or in other words, it catches more actual danger levels compared to CNN and RNN. The CNN and RNN specificity scores were 0.880 and 0.849 respectively, which indicates they have fair ability to avoid false alarms of avalanche hazards, but not up to par with the FFNN-MLP's ability. Notably, the RNN's precision was 0.311, which means when it predicts, its only correct abour 31% of the time. This means the RNN is wrong more often than its not. Contrast that with the CNN's 0.439 precision (correct a little under half the time) and the FFNN-MLP's 0.633 (correct around 63% of the time).
 
 ### Model Statistics by Class
 
