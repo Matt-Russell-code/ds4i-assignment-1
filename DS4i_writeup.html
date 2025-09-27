@@ -932,47 +932,12 @@ Figure&nbsp;12
 </section>
 <section id="results" class="level2">
 <h2 class="anchored" data-anchor-id="results">Results</h2>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] Considerable + Moderate       Considerable - Low            Low           
-[6] Moderate      
-Levels: Considerable - Considerable + High Low Moderate</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] Moderate       Considerable + Considerable + Considerable + Moderate      
-[6] Moderate      
-Levels: Considerable - Considerable + High Low Moderate</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.5943698</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.649649</code></pre>
-</div>
-</div>
-</section>
-<section id="discussion" class="level2">
-<h2 class="anchored" data-anchor-id="discussion">Discussion</h2>
 <section id="confusion-matrices" class="level3">
 <h3 class="anchored" data-anchor-id="confusion-matrices">Confusion Matrices</h3>
-<div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "factor"</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] "factor"</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 1567</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 1563</code></pre>
-</div>
-</div>
-<p><a href="#fig-compare_cms" class="quarto-xref">Figure&nbsp;13</a> displays the confusion matrices for our 3 models. Our FFNN has a clearer diagonal, which is indicative of its stronger performance. The confusion matrix for the RNN is very diffused with widespread misclassifications. <a href="#tbl-overall_stats" class="quarto-xref">Table&nbsp;8</a> confirms this observation is indeed the case, as the RNN had the lowest accuracy (54.6%) and the FFNN had the highest (75.4%).</p>
+<p><a href="#fig-compare_cms" class="quarto-xref">Figure&nbsp;13</a> displays the confusion matrices for our 3 models. Our FFNN has a clearer diagonal, which is indicative of its stronger performance. The confusion matrix for the RNN is very diffused with widespread misclassifications. <a href="#tbl-overall_stats" class="quarto-xref">Table&nbsp;8</a> confirms this observation is indeed the case, as the RNN had the lowest accuracy (59%) and the FFNN had the highest (75%). One limitation of the approach for evaluating the CNN and RNN is that, since the training and tests sets are not shuffled, and high risk avalanches are rare, there are no high risk avalanches in the test set. Therefore, the models ability to distinguish high risk cases is not measured well beyond.</p>
 <p>The FFNN had some noticeable misclassifications between Considerable- and Moderate. We see that for 103 cases, the model predicted Considerable- instead of Moderate, which shows that it confuses those two classes a lot. Similarly, 112 Low cases were predicted as Moderate, another pair of classes the model struggles with.</p>
-<p>The diagonal of the RNN is the weakest of them all.Its correct predictions are concentrated in Low (792) with spillover to Moderate (62), and its misclassifications are concentrated in Low (232) and High (165) predictions which were actually Moderate instances. This tells us the model often confused Moderate cases as either Low (underestimated hazard) or High (overestimated hazard).</p>
-<p>In the case of the CNN, almost all predictions go to Low. There is a noticeable concentration on the diagonal for Low classifications (786), and a considerable concentration of Moderate classifications (256). On the off-diagonal, the model misclassified 150 Low instances as Moderate, and 173 Moderate instances as Low. Clearly, the CNN collapsed into predicting these two classes in many cases, and often confused the two classes. Also, it completely fails to predict High or Considerable+ classes. The rows for these respective classes are all zeros. This shows that this model fell for imbalance bias, favouring the majority class Low and second most abundance Moderate.</p>
+<p>The diagonal of the RNN is the weakest of them all. Its correct predictions are concentrated in Low (752) with spillover to Moderate (165), and its misclassifications are concentrated in Low (197) and Moderate (299) predictions which were actually Moderate instances. This tells us the model often confused Moderate cases as either Low (underestimated hazard) or moderate (overestimated hazard).</p>
+<p>In the case of the CNN, almost all predictions go to Low. There is a noticeable concentration on the diagonal for Low classifications (735), and a considerable concentration of Moderate classifications (270). On the off-diagonal, the model misclassified 205 Low instances as Moderate, and 148 Moderate instances as Low. Clearly, the CNN collapsed into predicting these two classes in many cases, and often confused the two classes. The rows for these respective classes are all zeros. This shows that this model fell for imbalance bias, favouring the majority class Low and second most abundance Moderate.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-compare_cms" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -1060,7 +1025,7 @@ Table&nbsp;8: Overall Model performance Statistics
 </figure>
 </div>
 </div>
-<p>The FFNN’s specificity was 0.934, the highest value observed. This tells us that this model is very good at ruling out cases that do not belong to a class. Its recall was 0.618, which means the model correctly identifies ~62% of true cases or in other words, it catches more actual danger levels compared to CNN and RNN. The CNN and RNN specificity scores were 0.881 and 0.847 respectively, which indicates they have fair ability to avoid false alarms of avalanche hazards, but not up to par with the FFNN’s ability. Notable, the RNN’s precision was 0.282, which means when it predicts, its only correct abour 28% of the time. This means the RNN is wrong more often than its not. Contrast that with the CNN’s 0.550 precision (correct a little over half the time) and the FFNN’s 0.633 (correct around 63% of the time).</p>
+<p>The FFNN’s specificity was 0.934, the highest value observed. This tells us that this model is very good at ruling out cases that do not belong to a class. Its recall was 0.618, which means the model correctly identifies ~62% of true cases or in other words, it catches more actual danger levels compared to CNN and RNN. The CNN and RNN specificity scores were 0.880 and 0.849 respectively, which indicates they have fair ability to avoid false alarms of avalanche hazards, but not up to par with the FFNN’s ability. Notably, the RNN’s precision was 0.311, which means when it predicts, its only correct abour 31% of the time. This means the RNN is wrong more often than its not. Contrast that with the CNN’s 0.439 precision (correct a little under half the time) and the FFNN’s 0.633 (correct around 63% of the time).</p>
 </section>
 <section id="model-statistics-by-class" class="level3">
 <h3 class="anchored" data-anchor-id="model-statistics-by-class">Model Statistics by Class</h3>
@@ -1378,9 +1343,36 @@ Table&nbsp;11: RNN Statistics by Class
 </div>
 </div>
 <p>We will start with the FFNN statistics detailed in <a href="#tbl-ffn_stats_by_class" class="quarto-xref">Table&nbsp;9</a>. It was especially good at recognising the common classes such as Low and Moderate danger, correctly identifying around 82% of Low cases and 75% of moderate cases. This means that it both caughts most of the true cases and rarely mislabeled other classes as these. However, the FFNN struggled with the rarer categories. For example, it only detected 18% of Considerable+ cases. This suggests some model bias towards classes that were better represented.</p>
-<p>The CNN statistics detailed in <a href="#tbl-cnn_stats_by_class" class="quarto-xref">Table&nbsp;10</a> show that this model had mized results. It was able to capture 83% of Low danger cases, which is the majority class, but its performnace dropped sharply for the minority cases. It has 0% sensitivity for High and Considerable+ cases meaning it completely failed to identify these two. Additionally, it only detected 22% of Considerable- cases.</p>
-<p>Even on a class-by-class basis, the RNN performed poorly overall. It was able to catch about 83% of Low hazard cases. Beyond that, its performance collapsed. It missed all Considerable-, Considerable+, and High cases (zero sensitivity across these classes). It only managed to detect 13% of Moderate cases. Moreover, its specificity for the Low class was just 53%, meaning it frequently mislabeled other classes as Low. Just poor performance overall.</p>
+<p>The CNN statistics detailed in <a href="#tbl-cnn_stats_by_class" class="quarto-xref">Table&nbsp;10</a> show that this model had mized results. It was able to capture 82% of Low danger cases, which is the majority class, but its performance dropped sharply for the minority cases. Additionally, it only detected 3.5% of Considerable- cases.</p>
+<p>Even on a class-by-class basis, the RNN performed poorly overall. It was able to catch about 79% of Low hazard cases. Beyond that, its performance collapsed. It missed all Considerable- cases (0 sensitivity overall). It only managed to detect 35% of Moderate cases. Moreover, its specificity for the Low class was just 52%, meaning it frequently mislabeled other classes as Low.</p>
 </section>
+</section>
+<section id="discussion" class="level2">
+<h2 class="anchored" data-anchor-id="discussion">Discussion</h2>
+<p>In this study, we aimed to compare the ability of CNN, RNN, and FFNN models in predicting avalanches hazard levels. This is a multi-factorial investigation, as many different variables contribute to avalanche outcomes. Because the nature of this problem is sequential and we were able to preprocess that data to fit a time series context, we expected the CNN and RNN to outperform the FFNN since they have the added time series advantage.</p>
+<section id="summary-of-findings" class="level3">
+<h3 class="anchored" data-anchor-id="summary-of-findings">Summary of Findings</h3>
+<p>The FFNN turned out to be the best-performing model overall. It showed the most balanced detection and was the only one that managed to give acceptable performance across hazard levels. The CNN struggled with the minority classes and mainly acted as a majority-class (Low hazard) detector despite the controls put in place to re-weight the classes. This is unsatisfactory because in a real forecasting setting, it’s of great importance that we can detect the higher-risk cases. The RNN underperformed across the board, missing nearly all the minority class instances (Considerable+, Considerable-), and doing <em>fairly</em> well with the majority cases but still not as well as the other two models. This strongly disagrees with our initial hypothesis that sequence models would benefit from time series dependencies.</p>
+</section>
+<section id="strenghts-and-weaknesses" class="level3">
+<h3 class="anchored" data-anchor-id="strenghts-and-weaknesses">Strenghts and Weaknesses</h3>
+<p>A clear strength across all models is that they handled the majority class fairly well. This suggests that with a more balanced dataset where all classes have enough representation, similar architectures could perform much better. On the other hand, all three models showed clear bias toward the most common categories. None of them did especially well with the higher-risk, minority classes. The highlights a weakness in applying these models directly without addressing the class imbalance, and customizing the class weights more in favour of the minority classes could help counteract this measure.</p>
+</section>
+<section id="improvements-future-contributions" class="level3">
+<h3 class="anchored" data-anchor-id="improvements-future-contributions">Improvements &amp; Future Contributions</h3>
+<p>There are several improvements that can be made going forward:</p>
+<ul>
+<li>Directly addressing the class imbalance by further exploring data generation or sampling techniques to help the models learn more about the high-risk hazard levels that are rare in the current dataset.</li>
+<li>Literature shows that climate change is altering avalanche formation and risk. This means that future models need to take into acccount not just the historical data, but the shifting weather and snowpack patterns.</li>
+<li>Scotland has very localised weather conditions where patterns in the eastern region can differ greatly from the west. Building seperate models for different regions or microclimates may improve local accuracy and forecast reliability.</li>
+<li>Exploring alternative model types could strengthen predictions. Ensemble techniques such as Gradient Boosting or hybrid deep learning ensembles could potentially handle the categorical nature of this data better than the implemented architectures.</li>
+<li>Further experimentation showed that training a model on a dataset completed with simple imputation performed about the same in terms of accuracy as the model trained only on complete cases. This finding is important because, in real-world forecasting, decisions often need to be made with incomplete information. Exploring more imputation techniques could therefore be a valuable direction for improving model robustness</li>
+</ul>
+</section>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>Our objective requires reliable detection across all avalanche danger levels, not just the majority ones. In this study, the FFNN came closest to meeting this requirement, but even it struggled with the minority, high-risk cases. Future work should focus on reducing class imbalance, exploring region-specific models, and experimenting with ensemble approaches to ensure that high-risk avalanche conditions are consistently and accurately detected.</p>
 </section>
 
 </main>
