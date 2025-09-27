@@ -65,9 +65,9 @@ knitr::include_graphics("av.jpg")
 
 ## Literature Review
 
-Snow avalanches are a recognised hazard in snow-prone mountain regions worldwide. Unlike in the Alps, avalanches in Scotland rarely impact settlements and infrastructure, but pose significant risks to recreational users in the Scottish Highlands (Bain, 2024; Diggins, 2009; Ward, 1980). The rising popularity of winter activities such as climbing, walking, and skiing has increased exposure to avalanche-prone terrain, resulting in injuries and occasional fatalities each year (Scottish Avalanche Information Service \[SAIS\], 2024; Webster, 2020). These risks prompted studies of Scottish snowpack and forecasting startegies beginning in the 1970s (Langmuir, 1970; Spink, 1970; Beattie, 1976; Ward, 1980; Ward et al., 1985). However, early work was largely descriptive, relying on snow-pit measurements and expert judgement to link snow properties and weather to avalanche risk. Building on this, Ward (1984a and 1984b) applied one of the first predictive avalanche forecasting models for Scotland.
+Snow avalanches are a recognised hazard in snow-prone mountain regions worldwide. Unlike in the Alps, avalanches in Scotland rarely impact settlements and infrastructure, but pose significant risks to recreational users in the Scottish Highlands (Bain, 2024; Diggins, 2009; Ward, 1980; WSL Institute for Snow and Avalanche Research SLF \[WSL\], 2016). The rising popularity of winter activities such as climbing, walking, and skiing has increased exposure to avalanche-prone terrain, resulting in injuries and occasional fatalities each year (Scottish Avalanche Information Service \[SAIS\], 2024; Webster, 2020, WSL, 2016). These risks prompted studies of Scottish snowpack and forecasting startegies beginning in the 1970s (Langmuir, 1970; Spink, 1970; Beattie, 1976; Ward, 1980; Ward et al., 1985). However, early work was largely descriptive, relying on snow-pit measurements and expert judgement to link snow properties and weather to avalanche risk. Building on this, Ward (1984a and 1984b) applied one of the first predictive avalanche forecasting models for Scotland.
 
-Avalanche modelling is inherently complex, where predictions depending on multiple interacting factors (Choubin et al., 2019; Herwijen et al., 2016; Hendrick et al., 2023; Pozdnoukhov et al., 2008; Singh & Ganju, 2008). This challenge is heightened in regions with highly variable weather (Sharma & Ganju, 1999). Early statistical methods, such as nearest neighbours, supported forecasters by relating current weather to past avalanche events, however, were prone to overfitting and struggles with high-dimensional data (Blagovechshenskiy et al., 2023; Kala et al., 2025; Pozdnoukhov et al., 2018; Singh & Ganju, 2008). Using a dataset from Lochaber, Scotland, Pozdnoukhov et al. (2008) reported that support vector machines (SVMs) performed similarly to nearest neighbours while handling high-dimensional data more effectively and producing richer forecasts. SVMs for avalanche forecasting have also proven successful in Iran, India, Switzerland, and Tibet (Choubin et al., 2019; Rahmati et al., 2019; Schirmer et al., 2009; Tiwari et al., 2021; Wen et al., 2022). 
+Avalanche modelling is inherently complex, where predictions depending on multiple interacting factors (Choubin et al., 2019; Helbig et al., 2015; Hendrick et al., 2023; Pozdnoukhov et al., 2008; Singh & Ganju, 2008). This challenge is heightened in regions with highly variable weather (Sharma & Ganju, 1999). Early statistical methods, such as nearest neighbours, supported forecasters by relating current weather to past avalanche events, however, were prone to overfitting and struggles with high-dimensional data (Blagovechshenskiy et al., 2023; Kala et al., 2025; Pozdnoukhov et al., 2018; Singh & Ganju, 2008). Using a dataset from Lochaber, Scotland, Pozdnoukhov et al. (2008) reported that support vector machines (SVMs) performed similarly to nearest neighbours while handling high-dimensional data more effectively and producing richer forecasts. SVMs for avalanche forecasting have also proven successful in Iran, India, Switzerland, and Tibet (Choubin et al., 2019; Rahmati et al., 2019; Schirmer et al., 2009; Tiwari et al., 2021; Wen et al., 2022). 
 
 In recent years, more complex machine learning (ML) algorithms such as regression trees, random forests, and neural networks have demonstrated strong predictive performance in avalanche forecasting (Blagovechshenskiy et al., 2023; Choubin et al., 2019; Gauthier et al., 2025; Hendrick et al., 2023; Rahmati et al., 2019; Singh & Ganju, 2018; Tiwari et al., 2021; Wen et al., 2022). Avalanche datasets are often high-dimensional, and using forecaster-led feature selection can be highly subjective and variable (Helbig et al., 2015; Pozdnoukhov et al., 2008). Hybrid approaches, which combine ML tools (e.g., variable importance plots) with forecaster-led feature selection have shown practical value (Gauthier et al., 2025). However, fully data-driven forecasting methods, particularly neural networks (NNs), offer important advantages.
 
@@ -77,7 +77,7 @@ Despite advances in data-driven avalanche forecasting worldwide, research specif
 
 \(1\) Few published studies exist (only 9 relevant peer-reviewed papers exist on Scopus, with the most recent study conducted in 2011 (keywords: ( "avalanche forecasting" OR "avalanche prediction" ) AND Scotland))
 
-\(2\) The restricted range of statistical approaches explored (only KNN and SVM) (Joachim et al., 2004; Pozdnoukhov et al., 2008; Pozdnoukhov et al., 2011; Purves et al., 2003)
+\(2\) The restricted range of statistical approaches explored (only KNN and SVM) (Heierli et al., 2004; Pozdnoukhov et al., 2008; Pozdnoukhov et al., 2011; Purves et al., 2003)
 
 \(3\) The focus on only a few regions in Scotland (primarily the Cairngorms and Lochaber regions)
 
@@ -91,7 +91,7 @@ Hypothesis???? We can workshop together
 
 ## Context and Dataset
 
-Scotland has a mild, wet, temperate maritime climate influenced by the North Atlantic Ocean and persistent south-westerly winds (Pozdnoukhov et al., 2008; Scottish Government, 2011). These conditions produce rapid temperature changes, frequent heavy precipitation (snow or rain), and strong winds. With its highest peak, Ben Nevis (1345 m), Scotland's mountains are low compared to alpine ranges (\~4000 m), resulting in a snowpack that is typically shallower, wetter, and more variable (Britannica, 2025; Pozdnoukhov et al., 2008; WSL Institute for Snow and Avalanche Research SLF, 2016). Rapid freeze-thaw cycles, rain-on-snow, and wind redistribution further destabilise snow, creating avalanche risks that can appear and disappear within a short time (Diggins, 2009; Pozdnoukhov et al., 2008; Purves et al., 2003; Scottish Government, 2011). Snowpack conditions also differ regionally; the West is strongly maritime, with mild and wet winters, while the North and East are colder and drier (MetOffice, 2010). Scotland’s climate is thus highly variable spatially and temporally, adding to the complexity of avalanche risk prediction.
+Scotland has a mild, wet, temperate maritime climate influenced by the North Atlantic Ocean and persistent south-westerly winds (Pozdnoukhov et al., 2008; Scottish Government, 2011). These conditions produce rapid temperature changes, frequent heavy precipitation (snow or rain), and strong winds. With its highest peak, Ben Nevis (1345 m), Scotland's mountains are low compared to alpine ranges (\~4000 m), resulting in a snowpack that is typically shallower, wetter, and more variable (Britannica, 2025; Pozdnoukhov et al., 2008; WSL, 2016). Rapid freeze-thaw cycles, rain-on-snow, and wind redistribution further destabilise snow, creating avalanche risks that can appear and disappear within a short time (Diggins, 2009; Pozdnoukhov et al., 2008; Purves et al., 2003; Scottish Government, 2011). Snowpack conditions also differ regionally; the West is strongly maritime, with mild and wet winters, while the North and East are colder and drier (MetOffice, 2010). Scotland’s climate is thus highly variable spatially and temporally, adding to the complexity of avalanche risk prediction.
 
 This paper uses a 15-year archive of avalanche forecasts from Scotland across the six areas of Creah Meagaidh, Glencoe, Lochaber, Northern Cairngorms, Southern Cairngorms, and Torridon, produced by the SAIS (2025). @fig-map-obs illustrates the spatial distribution of observations, with points marking individual events and labels indicating area locations. Total observations by area and hazard category (@tbl-area-hazard) reflect differences in observation frequency rather than absolute avalanche activity. Cairngorms (Northern and Southern) and Lochaber, located in the colder and drier North and East, have the most recorded observations, whereas Torridon in the maritime West has substantially fewer. "Low" and "Moderate" hazard levels dominate across all areas, while "High" hazard events are rare and concentrated in Northern Cairngorms and Lochaber.
 
@@ -2750,20 +2750,73 @@ Our objective requires reliable detection across all avalanche danger levels, no
 
 ## References
 
-1.   Beattie, B. 1976. The densification of a seasonal snowpack in the Cairngorms with relation to avalanches. B.Sc. (professional) dissertation. University of Lancaster.
+1.  Bain, D. 2024. *Avalanche awareness in Scotland*. Sports Scotland Glenmore Lodge. Available: <https://www.glenmorelodge.org.uk/avalanche-awareness-in-scotland/> \[2025, September 11\].
 
-2.  Choubin, B., Borji, M., Mosavi, A., Sajedi-Hosseini, F., Singh, V.P. & Shamshirband, S. 2019. Snow avalanche hazard prediction using machine learning methods. *Journal of Hydrology*. 577. DOI: 10.1016/j.jhydrol.2019.123929
+2.  Beattie, B. 1976. The densification of a seasonal snowpack in the Cairngorms with relation to avalanches. B.Sc. (professional) dissertation. University of Lancaster.
 
-3.  Helbig, N.
+3.  Blagovechshenskiy, V., Medeu, A., Gulyayeva, T., Zhdanov, V., Ranova, S., Kamalbekova, A. & Aldabergen, U. 2023. Application of artificial intelligence in the assessment and forecast of avalanche danger in the Ile Alatau Ridge. *Water*. 15(7). DOI: 10.3390/w15071438
 
-4.  Langmuir, E. 1970. Snow profiles in Scotland. *Weather*. 25(5):205-209. DOI: 10.1002/j.1477-8696.1970.tb03262.x
+4.  Britannica. 2026. *Ben Nevis*. Available: <https://www.britannica.com/place/Ben-Nevis> \[2025, September 10\].
 
-5.  Spink, P.C. 1970. Scottish snowbeds in summer 1969. *Weather*. 25(5): 201-204. DOI: 10.1002/j.1477-8696.1970.tb03261.x
+5.  Choubin, B., Borji, M., Mosavi, A., Sajedi-Hosseini, F., Singh, V.P. & Shamshirband, S. 2019. Snow avalanche hazard prediction using machine learning methods. *Journal of Hydrology*. 577. DOI: 10.1016/j.jhydrol.2019.123929
 
-6.  Ward, R.G.W. 1980. Avalanche hazard in the Cairngorm Mountains, Scotland. *Journal of Glaciology*. 26(94):31-41. DOI: 10.3189/S0022143000201020
+6.  Diggins, M. 2009. The challenges for Scottish avalanche forecasters observing a maritime snowpack. *Proceedings of the International Snow Science Workshop*. 22-24. Available: <https://arc.lib.montana.edu/snow-science/objects/issw-2009-0024-0026.pdf> \[2025, September 10\].
 
-7.  Ward, R.G.W. 1984a. Avalanche prediction in Scotland: I. A survey of avalanche activity. *Applied Geography*. 4(2):91-108. DOI: 10.1016/0143-6228(84)90016-X
+7.  Fromm, R. & Schonberger, C. 2022. Estimating the danger of snow avalanches with machine learning approach using a comprehensive snow cover model. *Machine Learning with Applications*. 10. DOI: 10.1016/j.mlwa.2022.100405
 
-8.  Ward, R.G.W. 1984b. Avalanche prediction in Scotland: II. Development of a predictive model. *Applied Geography*. 4(2):109-133. DOI: 10.1016/0143-6228(84)90017-1
+8.  Gauthier, F., Laliberte, J. & Meloche, F. 2025. Assessing the predictive capability of several machine learning algorithms to forecast snow avalanches using numerical weather prediction model in eastern Canada. *EGUsphere*. DOI: 10.5194/egusphere-2025-1572
 
-9.  Ward, R.G.W., Langmuir, E.D.G. & Beattie, B. 1985. Snow profiles and avalanche activity in the Cairngorm Mountains, Scotland. *Journal of Glaciology*. 31(107):18-27. DOI: 10.3189/S0022143000004949
+9.  Heierli, J., Purves, R.S., Felber, A. & Kowalski, J. 2004. Verification of nearest-neighbours interpretations in avalanche forecasting. *Annals of Glaciology*. 38:84-88. DOI: 10.3189/172756404781815095
+
+10. Helbig, N., van Herwijnen, A. & Jonas, T. 2015. Forecasting wet-snow avalanche probability in mountainous terrain. *Cold Regions Science and Technology*. 120:219-226. DOI: 10.1016/j.coldregions.2015.07.001
+
+11. Hendrick, M., Techel, F., Volpi, M., Olvski, T., Perez-Guillen, van Herwijnen, A. & Schweizer, J. 2023. Automated prediction of wet-snow avalanche activity in the Swiss Alps. *Journal of Glaciology*. 69(277):1365-1378. DOI: 10.1017/jog.2023.24
+
+12. Kala, M., Jain, S., Singh, A. & Krishnan, N.C. 2025. Addressing class imbalance in avalanche forecasting. *Cold Regions Science and Technology*. 231. DOI: 10.1016/j.coldregions.2024.104411
+
+13. Langmuir, E. 1970. Snow profiles in Scotland. *Weather*. 25(5):205-209. DOI: 10.1002/j.1477-8696.1970.tb03262.x
+
+14. MetOffice. 2010. *UK regional climates*. Available: <https://www.metoffice.gov.uk/research/climate/maps-and-data/regional-climates/index> \[2025, September 11\].
+
+15. Pozdnoukhov, A., Purves, R.S. & Kanevski, M. 2008. Applying machine learning methods to avalanche forecasting. *Annals of Glaciology*. 49:107-113. DOI: 10.3189/172756408787814870
+
+16. Pozdnoukhov, A., Matasci, G., Kanevski, M. & Purves, R.S. 2011. Spatio-temporal avalanche forecasting with Support Vector Machines. *Nat. Hazards Earth Syst. Sci.* 11:367-382. DOI: 10.5194/nhess-11-367-2011
+
+17. Purves, R.S., Morrison, K.W., Moss, G. & Wright, D.S.B. Nearest neighbours for avalanche forecasting in Scotland - Development, verification and optimisation of a model. *Cold Regions Science and Technology*. 37(3):343-355. DOI: 10.1016/S0165-232X(03)00075-2
+
+18. Rahmati, O., Ghorbanzadeh, O., Teimurian, T., Mohammadi, F., Tiefenbacher, J.P., Falah, F., Pirasteh, S., Ngo, P.T.T. & Bui, D.T. 2019. Spatial modeling of snow avalanche using machine learning models and geo-environmental factors: Comparison of effectiveness in two mountain regions. *Remote Sensing*. 11(24). DOI: 10.3390/rs11242995
+
+19. Schirmer, M., Lehning, M. & Schweizer, J. 2009. Statistical forecasting of regional avalanche danger using simulated snow-cover data. *Journal of Glaciology*. 55(193):761-768. DOI: 10.3189/002214309790152429
+
+20. Scottish Avalanche Information Service. 2024. *Reviews of the winter season*. Available: <https://www.sais.gov.uk/sais-annual-reports/> \[2025, September 13\].
+
+21. Scottish Avalanche Information Service. 2025. *Avalanche information for the Scottish mountains*. Available: <https://www.sais.gov.uk/> \[2025, September 5\].
+
+22. Scottish Government. 2011. *Scotland's marine atlas: Information for the National Marine Plan*. Available: <https://www.gov.scot/publications/scotlands-marine-atlas-information-national-marine-plan/pages/7/> \[2025, September, 10\].
+
+23. Sharma, V., Kumar, S. & Sushil, R. 2023. A neural network model for automated prediction of avalanche danger level. *Nat. Hazards Earth Syst. Sci.* 23:2523-2530. DOI: 10.5194/nhess-23-2523-2023
+
+24. Singh, A. & Ganju, A. 2008. Artificial neural networks for snow avalanche forecasting in Indian Himalaya. *Proceedings of the 12th International Conference of
+    International Association for Computer Methods and Advances in Geomechanics (IACMAG)*. 1-6 October 2008. Gao, India. 1664-1670. Available: <https://www.researchgate.net/publication/263651736_Artificial_Neural_Networks_for_Snow_Avalanche_Forecasting_in_Indian_Himalaya> \[2025, September 13\].
+
+25. Spink, P.C. 1970. Scottish snowbeds in summer 1969. *Weather*. 25(5): 201-204. DOI: 10.1002/j.1477-8696.1970.tb03261.x
+
+26. Tiwari, A., Arun, G. & Vishwakarma, B.D. 2021. Parameter importance assessment improves efficacy of machine learning methods for predicting snow avalanche sites in Leh-Manali Highway, India. *Science of The Total Environment*. 794. DOI: 10.1016/j.scitotenv.2021.148738
+
+27. Tu, J.V. 1996. Advantages and disadvantages of using artificial neural network versus logistic regression for predicting medical outcomes. *Journal of Clinical Epidemiology*. 49(11):1225-1231. DOI: 10.1016/S0895-4356(96)00002-9
+
+28. Ward, R.G.W. 1980. Avalanche hazard in the Cairngorm Mountains, Scotland. *Journal of Glaciology*. 26(94):31-41. DOI: 10.3189/S0022143000201020
+
+29. Ward, R.G.W. 1984a. Avalanche prediction in Scotland: I. A survey of avalanche activity. *Applied Geography*. 4(2):91-108. DOI: 10.1016/0143-6228(84)90016-X
+
+30. Ward, R.G.W. 1984b. Avalanche prediction in Scotland: II. Development of a predictive model. *Applied Geography*. 4(2):109-133. DOI: 10.1016/0143-6228(84)90017-1
+
+31. Ward, R.G.W., Langmuir, E.D.G. & Beattie, B. 1985. Snow profiles and avalanche activity in the Cairngorm Mountains, Scotland. *Journal of Glaciology*. 31(107):18-27. DOI: 10.3189/S0022143000004949
+
+32. Webster, H. 2020. *Avalanches in Scotland - interview with Mark Diggins*. Walkhighlands. Available: <https://www.walkhighlands.co.uk/news/avalanches-in-scotland-interview-with-mark-diggins/> \[2025, September 10\].
+
+33. Wen, H., Wu, X., Liao, X., Wang, D., Huang, K. & Wunnemann, B. 2022. Application of machine learning methods for snow avalanche susceptibility mapping in the Parlung Tsangpo catchement, southeastern Qinghai-Tibet Plateau. *Cold Regions Science and Technology*. 198. DOI: 10.1016/j.coldregions.2022.103535
+
+34. Werritty, A. & Sugden, D. 2012. Climate change and Scotland: Recent trends and impacts. *Earth and Environmental Science Transactions of The Royal Society of Edinburgh*. 103(2):133-147. DOI: 10.1017/S1755691013000030
+
+35. WSL Institute for Snow and Avalanche Research SLF. 2016. *Scotland - Avalanche warning experts exchange*. Available: <https://www.slf.ch/en/news/scotland-avalanche-warning-experts-exchange/?utm_source=chatgpt.com> \[2025, September 12\].
