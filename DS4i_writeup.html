@@ -133,6 +133,7 @@ Figure&nbsp;1: Observed avalanche hazard (OAH): Scotland.
 </div>
 </div>
 </div>
+<p><br></p>
 <div class="cell">
 <div id="tbl-area-hazard" class="cell quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
@@ -224,6 +225,7 @@ Table&nbsp;1: Overall total observations by area and hazard category.
 </figure>
 </div>
 </div>
+<p><br></p>
 <p>Data cover the Scottish winters (November to April) from the December 2009 to March 2025. Predictor variables are categorised into three main groups, including (1) position and topography, (2) weather, and (3) snowpack test, all collected at the forecast location. Each observation also includes the date and the forecast area (metadata). For an overview of the predictors available, see <a href="#tbl-pred" class="quarto-xref">Table&nbsp;2</a> below.</p>
 <div class="cell">
 <div id="tbl-pred" class="cell quarto-float quarto-figure quarto-figure-center anchored">
@@ -290,6 +292,7 @@ Figure&nbsp;2: Map of feature correlations.
 </div>
 </div>
 </div>
+<p><br></p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-box-OAH" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -343,7 +346,7 @@ Figure&nbsp;5: Seasonality of observed avalanche hazard (OAH): Nov–May.
 </section>
 <section id="d.-fah-vs-oah" class="level3">
 <h3 class="anchored" data-anchor-id="d.-fah-vs-oah">d.&nbsp;FAH vs OAH</h3>
-<p>Lastly, <a href="#fig-FAH-OAH" class="quarto-xref">Figure&nbsp;6</a> shows the relationship between <em>forecast avalanche hazard (FAH)</em> on day <em>t</em> and <em>OAH</em> on day <em>t+1</em>. Each column sums to 100%, showing how outcomes were distributed given a specific forecast level. Forecasts of “Low” hazard were highly accurate, with 86.51 % of cases confirmed the following day. This indicates that forecasters were most successful in predicting stable snowpack conditions and low hazard scenarios.</p>
+<p>Lastly, <a href="#fig-FAH-OAH" class="quarto-xref">Figure&nbsp;6</a> shows the relationship between <em>forecast avalanche hazard (FAH)</em> on day <em>t</em> and <em>OAH</em> on day <em>t+1</em>. Each column sums to 100%, showing how outcomes were distributed given a specific forecast level. Forecasts of “Low” hazard were highly accurate, with 86.51% of cases confirmed the following day. This indicates that forecasters were most successful in predicting stable snowpack conditions and low hazard scenarios.</p>
 <p>For intermediate levels such as “Moderate” and “Considerable –” the agreement weakens. Only about half of “Moderate” forecasts matched the following day’s observations, with a substantial spillover into “Low” and “Considerable –”. “Considerable –” forecasts split almost evenly between being observed as “Moderate,” “Considerable –,” and “Considerable +.” This pattern shows that there is a challenge in differentiating between neighbouring hazard categories, which may highlight the subjectivity and sensitivity of these intermediate hazard thresholds.</p>
 <p>Forecasts of “High” hazard showed weaker reliability. Fewer than one-quarter of these forecasts corresponded to an observed “High” hazard the next day. Most “High” forecasts aligned with “Considerable –” or “Considerable +” outcomes. This shows that there is a tendency towards over-prediction of extreme conditions, or difficulty in anticipating when weather and snowpack instabilities will escalate into truly high-risk scenarios.</p>
 <div class="cell">
@@ -365,8 +368,9 @@ Figure&nbsp;6: FAH (day t) → OAH (day t+1) proportions.
 </section>
 <section id="data-cleaning-and-feature-engineering" class="level2">
 <h2 class="anchored" data-anchor-id="data-cleaning-and-feature-engineering">Data Cleaning and Feature Engineering</h2>
-<p>Feature engineering focused on creating temporal variables to capture trends not natively handled by a feedforward neural network (FNN). Given that EDA highlighted that <em>OAH</em> varies according to the season and time of year, several variables were derived.</p>
+<p>Feature engineering focused on creating temporal variables to capture trends not natively handled by a feedforward neural network (FFNN). Given that EDA highlighted that <em>OAH</em> varies according to the season and time of year, several variables were derived.</p>
 <p>Before removing observations with extensive missing values, we extracted the time of day, day of the week, month, and year from each date. Next, a categorical variable for each avalanche season (December-April, 2009-2025) was created to account for the observed year-on-year increase in risk.</p>
+<p>Missing values were also a challenge. <a href="#tbl-missing-val" class="quarto-xref">Table&nbsp;3</a> presents the percentage of missing values for features with incomplete data. <em>Av.Cat</em> was removed because its meaning was unclear and it contained implausible values (e.g., NA, 3, -2, 2, 1, 4, 8800, -1, 0, 1021, 4400, -9999, 99, 88, 44, 5031, 121). <a href="#fig-ski-summit-wind" class="quarto-xref">Figure&nbsp;7</a> shows no clear relationship between <em>ski penetration</em> and <em>OAH</em>, except for “High” risk avalanches; we therefore excluded it since snowfall effects are likely better represented by other variables. <em>Summit wind direction</em> (12.35% missing) was also dropped for lack of a discernible trend.</p>
 <div class="cell">
 <div id="tbl-missing-val" class="cell quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
@@ -494,7 +498,7 @@ Table&nbsp;3: Missing value exploration.
 </figure>
 </div>
 </div>
-<p>Missing values were also a challenge. <a href="#tbl-missing-val" class="quarto-xref">Table&nbsp;3</a> presents the percentage of missing values for features with incomplete data. <em>Av.Cat</em> was removed because its meaning was unclear and it contained implausible values (e.g., NA, 3, -2, 2, 1, 4, 8800, -1, 0, 1021, 4400, -9999, 99, 88, 44, 5031, 121). <a href="#fig-ski-summit-wind" class="quarto-xref">Figure&nbsp;7</a> shows no clear relationship between <em>ski penetration</em> and <em>OAH</em>, except for “High” risk avalanches; we therefore excluded it since snowfall effects are likely better represented by other variables. <em>Summit wind direction</em> (12.35% missing) was also dropped for lack of a discernible trend.</p>
+<p><br></p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-ski-summit-wind" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -509,192 +513,21 @@ Figure&nbsp;7: Boxplots of ski penetration and summit wind direction by avalanch
 </div>
 </div>
 </div>
+<p><br></p>
 <p>Lastly, we dropped high-cardinality categorical variables, including <em>osgrid</em> and <em>location. osgrid</em> appeared to be an ID variable with &gt;3000 unique values, which would make one-hot encoding overly complex and was unlikely to indicate risk. <em>Location</em> was also removed, since <em>latitude</em>, <em>longitude</em>, and <em>area</em> already captured spatial information more effectively.</p>
-<p>Having dropped these variables, we were left with roughly 36 % incomplete samples. We dropped the remaining samples that contained missing values to maintain complete cases for the models. While retaining more observations would be ideal, the remaining ~7000 were sufficient for representative results. Later, fitting our best model to an imputed dataset yielded a similar accuracy to the complete cases.</p>
+<p>Having dropped these variables, we were left with roughly 36% incomplete samples. We dropped the remaining samples that contained missing values to maintain complete cases for the models. While retaining more observations would be ideal, the remaining ~7000 were sufficient for representative results. Later, fitting our best model to an imputed dataset yielded a similar accuracy to the complete cases.</p>
 </section>
 <section id="modeling-methodology" class="level2">
 <h2 class="anchored" data-anchor-id="modeling-methodology">Modeling Methodology</h2>
-<p>There are three main models used in this project to exploit different structural properties of the data: a feedforward multilayer perceptron neural network network (FFN-MLP), a convolutional neural network (CNN), and a recurrent neural network (RNN). The FFN-MLP was expected to handle categorical predictors (e.g., forecasted avalanche risk) effectively, while the CNNs and RNNs were targeted at uncovering temporal or sequential patterns.</p>
-<p>A FFN-MLP consists of an input layer, one or more hidden layers of perceptron nodes, and an output layer. Each hidden node computes a weighted sum of its inputs, passes it through a non-linear activation function, and forwards the result to the next layer. The weights, which determine the influence of each input, are initialised randomly and updated iteratively through backpropagation using an optimiser such as gradient descent. The activation functions (e.g., ReLU, sigmoid) introduce non-linearity, enabling the model to capture complex relationships between predictors and the target.</p>
+<p>There are three main models used in this project to exploit different structural properties of the data: a convolutional neural network (CNN), a recurrent neural network (RNN), and a feedforward multilayer perceptron neural network network (FFNN-MLP). The FFNN-MLP was expected to handle categorical predictors (e.g., forecasted avalanche risk) effectively, while the CNNs and RNNs were targeted at uncovering temporal or sequential patterns.</p>
 <p>CNNs process data by applying convolutional filters (small weight matrices) that slide across the input space. Each filter computes dot products with local patches of the data, producing feature maps that emphasise spatial or temporal patterns based on the type of filters used. Non-linear activations are then applied, followed by pooling layers that down sample the feature maps to reduce dimensionality while preserving the most important information. One can stack numerous layers of convolutions to learn deeper trends in the data, although we found that 2 layers were a good balance between the model’s complexity and ability to generalise.</p>
-<p>RNNs are designed to capture sequential dependencies by incorporating feedback connections. At each time step, the hidden state depends not only on the current input but also on the state from the previous step. This architecture makes RNNs well suited for modeling temporal dynamics in sequential data.</p>
-<!-- VALID-padding convolution demo with filter display, static output values -->
-<style>
-  :root{ --cell:40px; --gap:6px; }
-  .wrap{font-family:system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; color:#111}
-  .row{display:flex; gap:18px; align-items:flex-start}
-  .col{flex:1}
-  .label{font-size:13px; color:#444; margin: 4px 0 8px; font-weight:600}
-  .board, .out{display:grid; gap:var(--gap); position:relative; padding:6px; border:1px solid #ddd; border-radius:12px; background:#fff}
-  .board{grid-template-columns:repeat(5, var(--cell)); grid-auto-rows:var(--cell)}
-  .out{grid-template-columns:repeat(3, var(--cell)); grid-auto-rows:var(--cell)}
-  .cell, .ocell{display:flex; align-items:center; justify-content:center; font-weight:600; border:1px solid #ccc; border-radius:8px}
-  .cell{background:#fff}
-  .ocell{background:#f8fbff; border-color:#bcd7ff}
-  .ocell.active{background:#e9f3ff}
-  .hl{position:absolute; border:2px solid #0a84ff; border-radius:12px; box-shadow:0 0 0 3px rgba(10,132,255,.15) inset; pointer-events:none; transition:left .22s, top .22s}
-  .controls{display:flex; gap:10px; align-items:center; padding:8px; border:1px solid #eee; border-radius:10px; background:#fafafa; margin:10px 0}
-  .btn{padding:6px 10px; border:1px solid #bbb; border-radius:10px; background:#fff; cursor:pointer}
-  .mini{font-size:12px; color:#555}
-  .kernel{display:grid; grid-template-columns:repeat(3, var(--cell)); grid-auto-rows:var(--cell); gap:var(--gap); padding:6px; border:1px dashed #bbb; border-radius:10px; background:#fff; margin-top:10px}
-  .kcell{display:flex; align-items:center; justify-content:center; font-weight:600; border:1px solid #ccc; border-radius:6px; background:#fdfdfd}
-</style>
-
-<div class="wrap">
-  <div class="controls">
-    <button class="btn" id="play">▶︎ Play</button>
-    <button class="btn" id="pause" disabled="">⏸ Pause</button>
-    <button class="btn" id="step">↦ Step</button>
-    <label class="mini">Speed <input id="speed" type="range" min="200" max="1500" step="50" value="700"></label>
-    <button class="btn" id="reset">↺ Reset</button>
-  </div>
-
-  <div class="row">
-    <div class="col">
-      <div class="label">Input feature map (5×5)</div>
-      <div class="board" id="board"></div>
-    </div>
-    <div class="col">
-      <div class="label">Dot‑product output (VALID, 3×3)</div>
-      <div class="out" id="out"></div>
-      <div class="mini">Position <span id="pos">(1,1)</span> • Value <span id="sum">—</span></div>
-      <div class="label" style="margin-top:10px">Filter weights (3×3)</div>
-      <div class="kernel" id="kernel"></div>
-    </div>
-  </div>
+<iframe src="cnn_filter_animation_quarto_ready_html.html" width="672" height="400px" data-external="1">
+</iframe>
+<div style="font-size: 0.6em; color: black; text-align: left; font-weight: bold">
+<p>Credit: OpenAI (2025a and 2025b)</p>
 </div>
-
-<script>
-window.addEventListener('DOMContentLoaded', function(){
-  const N = 5;
-  const K = 3;
-  const O = 3; // output 3x3
-
-  const KERNEL = [
-    [-1,-3,-1],
-    [-1, 4,-4],
-    [-1,3,1]
-  ];
-
-  // Preselected static output values (correct dot products precomputed)
-  const STATIC_OUTPUT = [
-    [-18,  -24, -30],
-    [ -30, -36,  -42],
-    [ -42, -48,  -53]
-  ];
-
-  const boardEl=document.getElementById('board');
-  const outEl=document.getElementById('out');
-  const posEl=document.getElementById('pos');
-  const sumEl=document.getElementById('sum');
-  const playBtn=document.getElementById('play');
-  const pauseBtn=document.getElementById('pause');
-  const stepBtn=document.getElementById('step');
-  const speedEl=document.getElementById('speed');
-  const resetBtn=document.getElementById('reset');
-  const kernelEl=document.getElementById('kernel');
-
-  function renderKernel(){
-    kernelEl.innerHTML='';
-    for(let r=0;r<K;r++){
-      for(let c=0;c<K;c++){
-        const d=document.createElement('div');
-        d.className='kcell';
-        d.textContent=KERNEL[r][c];
-        kernelEl.appendChild(d);
-      }
-    }
-  }
-
-  function makeInput(){
-    const a=[];
-    for(let r=0;r<N;r++){
-      const row=[];
-      for(let c=0;c<N;c++){
-        row.push(10+4*r+2*c);
-      }
-      a.push(row);
-    }
-    return a;
-  }
-
-  let input=makeInput();
-
-  function renderInput(){
-    boardEl.innerHTML='';
-    for(let r=0;r<N;r++){
-      for(let c=0;c<N;c++){
-        const d=document.createElement('div');
-        d.className='cell';
-        d.textContent=input[r][c];
-        boardEl.appendChild(d);
-      }
-    }
-    const hl=document.createElement('div');
-    hl.className='hl';
-    hl.id='hl';
-    boardEl.appendChild(hl);
-  }
-
-  function renderOutput(active){
-    outEl.innerHTML='';
-    for(let r=0;r<O;r++){
-      for(let c=0;c<O;c++){
-        const d=document.createElement('div');
-        const isActive=active && active[0]===r && active[1]===c;
-        d.className='ocell'+(isActive?' active':'');
-        d.textContent=STATIC_OUTPUT[r][c];
-        outEl.appendChild(d);
-      }
-    }
-  }
-
-  function moveHL(r,c){
-    const cs=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cell'));
-    const gp=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap'));
-    const left=c*(cs+gp);
-    const top=r*(cs+gp);
-    const hl=document.getElementById('hl');
-    hl.style.width=`calc(var(--cell) * ${K} + var(--gap) * ${K-1})`;
-    hl.style.height=`calc(var(--cell) * ${K} + var(--gap) * ${K-1})`;
-    hl.style.left=left+'px';
-    hl.style.top=top+'px';
-  }
-
-  const path=[];
-  for(let r=0;r<O;r++){
-    for(let c=0;c<O;c++) path.push([r,c]);
-  }
-  let idx=0; let playing=false; let timer=null;
-
-  function step(){
-    if(idx>=path.length){ stop(); return; }
-    const [r,c]=path[idx];
-    moveHL(r,c);
-    renderOutput([r,c]);
-    posEl.textContent=`(${r+1},${c+1})`;
-    sumEl.textContent=STATIC_OUTPUT[r][c];
-    idx++;
-  }
-  function play(){
-    if(playing) return; playing=true; playBtn.disabled=true; pauseBtn.disabled=false;
-    const go=()=>{ step(); if(playing && idx<path.length){ timer=setTimeout(go, parseInt(speedEl.value,10)); } else { stop(); } };
-    go();
-  }
-  function stop(){ playing=false; playBtn.disabled=false; pauseBtn.disabled=true; clearTimeout(timer); timer=null; }
-  function reset(){ stop(); idx=0; renderOutput(); moveHL(0,0); posEl.textContent='(1,1)'; sumEl.textContent='—'; }
-
-  playBtn.addEventListener('click',play);
-  pauseBtn.addEventListener('click',stop);
-  stepBtn.addEventListener('click',step);
-  resetBtn.addEventListener('click',reset);
-
-  renderInput();
-  renderOutput();
-  renderKernel();
-  moveHL(0,0);
-});
-</script>
+<p>RNNs are designed to capture sequential dependencies by incorporating feedback connections. At each time step, the hidden state depends not only on the current input but also on the state from the previous step. This architecture makes RNNs well suited for modeling temporal dynamics in sequential data.</p>
+<p>A FFN-MLP consists of an input layer, one or more hidden layers of perceptron nodes, and an output layer. Each hidden node computes a weighted sum of its inputs, passes it through a non-linear activation function, and forwards the result to the next layer. The weights, which determine the influence of each input, are initialised randomly and updated iteratively through backpropagation using an optimiser such as gradient descent. The activation functions (e.g., ReLU, sigmoid) introduce non-linearity, enabling the model to capture complex relationships between predictors and the target.</p>
 <p>[add section on RNN]</p>
 <section id="data-preprocessing-of-neural-networks-models" class="level3">
 <h3 class="anchored" data-anchor-id="data-preprocessing-of-neural-networks-models">Data Preprocessing of Neural Networks models</h3>
@@ -773,7 +606,7 @@ Table&nbsp;4: Expanded grid search hyperparameters and values.
 <img src="DS4i_writeup_files/figure-html/fig-cnn-search-viz-1.png" class="img-fluid figure-img" width="672">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cnn-search-viz-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;9: Top 30 configs by validation accuracy for CNN.
+Figure&nbsp;9: Top 30 configurations by validation accuracy for CNN.
 </figcaption>
 </figure>
 </div>
@@ -848,7 +681,7 @@ Table&nbsp;5: Expanded grid search hyperparameters and values.
 <img src="DS4i_writeup_files/figure-html/fig-rnn-configs-1.png" class="img-fluid figure-img" width="672">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rnn-configs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;11: Top 30 configs by validation accuracy for RNN.
+Figure&nbsp;11: Top 30 configurations by validation accuracy for RNN.
 </figcaption>
 </figure>
 </div>
@@ -872,7 +705,6 @@ Table&nbsp;6: FFN-MLP Hyperparameter Grid.
 <div aria-describedby="tbl-ffnn-param-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
 <table class="table table-hover table-condensed do-not-create-environment cell caption-top table-sm table-striped small" data-quarto-postprocess="true">
-<caption>Hyperparameter Grid</caption>
 <colgroup>
 <col style="width: 50%">
 <col style="width: 50%">
@@ -937,14 +769,14 @@ Figure&nbsp;12
 </div>
 </section>
 </section>
-<section id="results" class="level2">
-<h2 class="anchored" data-anchor-id="results">Results</h2>
+<section id="results-and-discussion" class="level2">
+<h2 class="anchored" data-anchor-id="results-and-discussion">Results and Discussion</h2>
 <section id="confusion-matrices" class="level3">
 <h3 class="anchored" data-anchor-id="confusion-matrices">Confusion Matrices</h3>
-<p><a href="#fig-compare_cms" class="quarto-xref">Figure&nbsp;13</a> displays the confusion matrices for our 3 models. Our FFNN has a clearer diagonal, which is indicative of its stronger performance. The confusion matrix for the RNN is very diffused with widespread misclassifications. <a href="#tbl-overall_stats" class="quarto-xref">Table&nbsp;8</a> confirms this observation is indeed the case, as the RNN had the lowest accuracy (59%) and the FFNN had the highest (75%). One limitation of the approach for evaluating the CNN and RNN is that, since the training and tests sets are not shuffled, and high risk avalanches are rare, there are no high risk avalanches in the test set. Therefore, the models ability to distinguish high risk cases is not measured well beyond.</p>
-<p>The FFNN had some noticeable misclassifications between Considerable- and Moderate. We see that for 103 cases, the model predicted Considerable- instead of Moderate, which shows that it confuses those two classes a lot. Similarly, 112 Low cases were predicted as Moderate, another pair of classes the model struggles with.</p>
-<p>The diagonal of the RNN is the weakest of them all. Its correct predictions are concentrated in Low (752) with spillover to Moderate (165), and its misclassifications are concentrated in Low (197) and Moderate (299) predictions which were actually Moderate instances. This tells us the model often confused Moderate cases as either Low (underestimated hazard) or moderate (overestimated hazard).</p>
-<p>In the case of the CNN, almost all predictions go to Low. There is a noticeable concentration on the diagonal for Low classifications (735), and a considerable concentration of Moderate classifications (270). On the off-diagonal, the model misclassified 205 Low instances as Moderate, and 148 Moderate instances as Low. Clearly, the CNN collapsed into predicting these two classes in many cases, and often confused the two classes. The rows for these respective classes are all zeros. This shows that this model fell for imbalance bias, favouring the majority class Low and second most abundance Moderate.</p>
+<p><a href="#fig-compare_cms" class="quarto-xref">Figure&nbsp;13</a> displays the confusion matrices for our 3 models. Our FFNN-MLP has a clearer diagonal, which is indicative of its stronger performance. The confusion matrix for the RNN is very diffused with widespread misclassifications. <a href="#tbl-overall_stats" class="quarto-xref">Table&nbsp;8</a> confirms this observation is indeed the case, as the RNN had the lowest accuracy (59%) and the FFNN-MLP had the highest (75%). One limitation of the approach for evaluating the CNN and RNN is that, since the training and tests sets are not shuffled, and “High” risk avalanches are rare, there are no “High” risk avalanches in the test set. Therefore, the models ability to distinguish “High” risk cases is not measured well beyond.</p>
+<p>The diagonal of the RNN is the weakest of them all. Its correct predictions are concentrated in “Low” (752) with spillover to “Moderate” (165), and its misclassifications are concentrated in “Low” (197) and “Moderate” (299) predictions which were actually “Moderate” instances. This tells us the model often confused “Moderate” cases as either “Low” (underestimated hazard) or “Moderate” (overestimated hazard).</p>
+<p>In the case of the CNN, almost all predictions go to “Low”. There is a noticeable concentration on the diagonal for “Low” classifications (735), and a considerable concentration of “Moderate” classifications (270). On the off-diagonal, the model misclassified 205 “Low” instances as “Moderate”, and 148 “Moderate” instances as “Low”. Clearly, the CNN collapsed into predicting these two classes in many cases, and often confused the two classes. The rows for these respective classes are all zeros. This shows that this model fell for imbalance bias, favouring the majority class “Low” and second most abundance “Moderate”.</p>
+<p>The FFNN-MLP had some noticeable misclassifications between “Considerable-” and “Moderate”. We see that for 103 cases, the model predicted “Considerable-” instead of “Moderate”, which shows that it confuses those two classes a lot. Similarly, 112 Low cases were predicted as “Moderate”, another pair of classes the model struggles with.</p>
 <div class="cell">
 <div class="cell-output-display">
 <div id="fig-compare_cms" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -974,10 +806,10 @@ Table&nbsp;7
 </section>
 <section id="overall-model-performance" class="level3">
 <h3 class="anchored" data-anchor-id="overall-model-performance">Overall Model Performance</h3>
-<p>In <a href="#tbl-overall_stats" class="quarto-xref">Table&nbsp;8</a> below, we have an overview of each model’s performance. The overall key insights that can be dervied are:</p>
+<p>In <a href="#tbl-overall_stats" class="quarto-xref">Table&nbsp;8</a> below, we have an overview of each model’s performance. The overall key insights that can be derived are:</p>
 <ul>
-<li>The FFNN clearly dominates with the highest accuracy, recall, specificity, and precision scores. It would be the best model for both detecting and correctly rejecting classes.</li>
-<li>The CNN serves as a middle grounf, with acceptable accuracy but low recall. This means this model misses many real cases of considerable avalanche hazards.</li>
+<li>The FFNN-MLP clearly dominates with the highest accuracy, recall, specificity, and precision scores. It would be the best model for both detecting and correctly rejecting classes.</li>
+<li>The CNN serves as a middle ground, with acceptable accuracy but low recall. This means this model misses many real cases of considerable avalanche hazards.</li>
 <li>The RNN fails overall. Its accuracy, recall and precision metrics are all low, making it unreliable for classification.</li>
 </ul>
 <div class="cell">
@@ -1033,121 +865,16 @@ Table&nbsp;8: Overall Model performance Statistics
 </figure>
 </div>
 </div>
-<p>The FFNN’s specificity was 0.934, the highest value observed. This tells us that this model is very good at ruling out cases that do not belong to a class. Its recall was 0.618, which means the model correctly identifies ~62% of true cases or in other words, it catches more actual danger levels compared to CNN and RNN. The CNN and RNN specificity scores were 0.880 and 0.849 respectively, which indicates they have fair ability to avoid false alarms of avalanche hazards, but not up to par with the FFNN’s ability. Notably, the RNN’s precision was 0.311, which means when it predicts, its only correct abour 31% of the time. This means the RNN is wrong more often than its not. Contrast that with the CNN’s 0.439 precision (correct a little under half the time) and the FFNN’s 0.633 (correct around 63% of the time).</p>
+<p>The FFNN-MLP’s specificity was 0.934, the highest value observed. This tells us that this model is very good at ruling out cases that do not belong to a class. Its recall was 0.618, which means the model correctly identifies ~62% of true cases or in other words, it catches more actual danger levels compared to CNN and RNN. The CNN and RNN specificity scores were 0.880 and 0.849 respectively, which indicates they have fair ability to avoid false alarms of avalanche hazards, but not up to par with the FFNN’s ability. Notably, the RNN’s precision was 0.311, which means when it predicts, its only correct abour 31% of the time. This means the RNN is wrong more often than its not. Contrast that with the CNN’s 0.439 precision (correct a little under half the time) and the FFNN’s 0.633 (correct around 63% of the time).</p>
 </section>
 <section id="model-statistics-by-class" class="level3">
 <h3 class="anchored" data-anchor-id="model-statistics-by-class">Model Statistics by Class</h3>
-<p>Looking at performance statistics by class can help us gain useful insight into each models strenghths and weaknesses, providing a more detailed overview of model behaviour. <a href="#tbl-ffn_stats_by_class" class="quarto-xref">Table&nbsp;9</a>, <a href="#tbl-cnn_stats_by_class" class="quarto-xref">Table&nbsp;10</a> and <a href="#tbl-rnn_stats_by_class" class="quarto-xref">Table&nbsp;11</a> summarise our model statistics by class.</p>
-<div class="cell">
-<div id="tbl-ffn_stats_by_class" class="cell quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ffn_stats_by_class-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;9: FFNN Statistics by Class
-</figcaption>
-<div aria-describedby="tbl-ffn_stats_by_class-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<div class="cell-output-display">
-<table class="table do-not-create-environment cell caption-top table-sm table-striped small" data-quarto-postprocess="true">
-<thead>
-<tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">Sensitivity</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">Specificity</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">Pos Pred Value</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">Neg Pred Value</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">Precision</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">Recall</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">F1</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">Prevalence</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">Detection Rate</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">Detection Prevalence</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">Balanced Accuracy</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">Class: Considerable -</td>
-<td style="text-align: right;">0.7812500</td>
-<td style="text-align: right;">0.8613782</td>
-<td style="text-align: right;">0.5910165</td>
-<td style="text-align: right;">0.9388646</td>
-<td style="text-align: right;">0.5910165</td>
-<td style="text-align: right;">0.7812500</td>
-<td style="text-align: right;">0.6729475</td>
-<td style="text-align: right;">0.2040816</td>
-<td style="text-align: right;">0.1594388</td>
-<td style="text-align: right;">0.2697704</td>
-<td style="text-align: right;">0.8213141</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Class: Considerable +</td>
-<td style="text-align: right;">0.1772152</td>
-<td style="text-align: right;">0.9865682</td>
-<td style="text-align: right;">0.4117647</td>
-<td style="text-align: right;">0.9576271</td>
-<td style="text-align: right;">0.4117647</td>
-<td style="text-align: right;">0.1772152</td>
-<td style="text-align: right;">0.2477876</td>
-<td style="text-align: right;">0.0503827</td>
-<td style="text-align: right;">0.0089286</td>
-<td style="text-align: right;">0.0216837</td>
-<td style="text-align: right;">0.5818917</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Class: High</td>
-<td style="text-align: right;">0.5600000</td>
-<td style="text-align: right;">0.9909268</td>
-<td style="text-align: right;">0.5000000</td>
-<td style="text-align: right;">0.9928571</td>
-<td style="text-align: right;">0.5000000</td>
-<td style="text-align: right;">0.5600000</td>
-<td style="text-align: right;">0.5283019</td>
-<td style="text-align: right;">0.0159439</td>
-<td style="text-align: right;">0.0089286</td>
-<td style="text-align: right;">0.0178571</td>
-<td style="text-align: right;">0.7754634</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Class: Low</td>
-<td style="text-align: right;">0.8208270</td>
-<td style="text-align: right;">0.9792350</td>
-<td style="text-align: right;">0.9657658</td>
-<td style="text-align: right;">0.8845015</td>
-<td style="text-align: right;">0.9657658</td>
-<td style="text-align: right;">0.8208270</td>
-<td style="text-align: right;">0.8874172</td>
-<td style="text-align: right;">0.4164541</td>
-<td style="text-align: right;">0.3418367</td>
-<td style="text-align: right;">0.3539541</td>
-<td style="text-align: right;">0.9000310</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Class: Moderate</td>
-<td style="text-align: right;">0.7515275</td>
-<td style="text-align: right;">0.8523677</td>
-<td style="text-align: right;">0.6988636</td>
-<td style="text-align: right;">0.8826923</td>
-<td style="text-align: right;">0.6988636</td>
-<td style="text-align: right;">0.7515275</td>
-<td style="text-align: right;">0.7242395</td>
-<td style="text-align: right;">0.3131378</td>
-<td style="text-align: right;">0.2353316</td>
-<td style="text-align: right;">0.3367347</td>
-<td style="text-align: right;">0.8019476</td>
-</tr>
-</tbody>
-</table>
-
-
-</div>
-</div>
-</figure>
-</div>
-</div>
+<p>Looking at performance statistics by class can help us gain useful insight into each models strenghths and weaknesses, providing a more detailed overview of model behaviour. <a href="#tbl-ffn_stats_by_class" class="quarto-xref">Table&nbsp;11</a>, <a href="#tbl-cnn_stats_by_class" class="quarto-xref">Table&nbsp;9</a> and <a href="#tbl-rnn_stats_by_class" class="quarto-xref">Table&nbsp;10</a> summarise our model statistics by class.</p>
 <div class="cell">
 <div id="tbl-cnn_stats_by_class" class="cell quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cnn_stats_by_class-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;10: CNN Statistics by Class
+Table&nbsp;9: CNN Statistics by Class
 </figcaption>
 <div aria-describedby="tbl-cnn_stats_by_class-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
@@ -1252,7 +979,7 @@ Table&nbsp;10: CNN Statistics by Class
 <div id="tbl-rnn_stats_by_class" class="cell quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-rnn_stats_by_class-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;11: RNN Statistics by Class
+Table&nbsp;10: RNN Statistics by Class
 </figcaption>
 <div aria-describedby="tbl-rnn_stats_by_class-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <div class="cell-output-display">
@@ -1353,32 +1080,139 @@ Table&nbsp;11: RNN Statistics by Class
 </figure>
 </div>
 </div>
-<p>We will start with the FFNN statistics detailed in <a href="#tbl-ffn_stats_by_class" class="quarto-xref">Table&nbsp;9</a>. It was especially good at recognising the common classes such as Low and Moderate danger, correctly identifying around 82% of Low cases and 75% of moderate cases. This means that it both caughts most of the true cases and rarely mislabeled other classes as these. However, the FFNN struggled with the rarer categories. For example, it only detected 18% of Considerable+ cases. This suggests some model bias towards classes that were better represented.</p>
-<p>The CNN statistics detailed in <a href="#tbl-cnn_stats_by_class" class="quarto-xref">Table&nbsp;10</a> show that this model had mized results. It was able to capture 82% of Low danger cases, which is the majority class, but its performance dropped sharply for the minority cases. Additionally, it only detected 3.5% of Considerable- cases.</p>
-<p>Even on a class-by-class basis, the RNN performed poorly overall. It was able to catch about 79% of Low hazard cases. Beyond that, its performance collapsed. It missed all Considerable- cases (0 sensitivity overall). It only managed to detect 35% of Moderate cases. Moreover, its specificity for the Low class was just 52%, meaning it frequently mislabeled other classes as Low.</p>
+<div class="cell">
+<div id="tbl-ffn_stats_by_class" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ffn_stats_by_class-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;11: FFNN Statistics by Class
+</figcaption>
+<div aria-describedby="tbl-ffn_stats_by_class-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="table do-not-create-environment cell caption-top table-sm table-striped small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Sensitivity</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Specificity</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Pos Pred Value</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Neg Pred Value</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Precision</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Recall</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">F1</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Prevalence</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Detection Rate</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Detection Prevalence</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Balanced Accuracy</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Class: Considerable -</td>
+<td style="text-align: right;">0.7812500</td>
+<td style="text-align: right;">0.8613782</td>
+<td style="text-align: right;">0.5910165</td>
+<td style="text-align: right;">0.9388646</td>
+<td style="text-align: right;">0.5910165</td>
+<td style="text-align: right;">0.7812500</td>
+<td style="text-align: right;">0.6729475</td>
+<td style="text-align: right;">0.2040816</td>
+<td style="text-align: right;">0.1594388</td>
+<td style="text-align: right;">0.2697704</td>
+<td style="text-align: right;">0.8213141</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Class: Considerable +</td>
+<td style="text-align: right;">0.1772152</td>
+<td style="text-align: right;">0.9865682</td>
+<td style="text-align: right;">0.4117647</td>
+<td style="text-align: right;">0.9576271</td>
+<td style="text-align: right;">0.4117647</td>
+<td style="text-align: right;">0.1772152</td>
+<td style="text-align: right;">0.2477876</td>
+<td style="text-align: right;">0.0503827</td>
+<td style="text-align: right;">0.0089286</td>
+<td style="text-align: right;">0.0216837</td>
+<td style="text-align: right;">0.5818917</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Class: High</td>
+<td style="text-align: right;">0.5600000</td>
+<td style="text-align: right;">0.9909268</td>
+<td style="text-align: right;">0.5000000</td>
+<td style="text-align: right;">0.9928571</td>
+<td style="text-align: right;">0.5000000</td>
+<td style="text-align: right;">0.5600000</td>
+<td style="text-align: right;">0.5283019</td>
+<td style="text-align: right;">0.0159439</td>
+<td style="text-align: right;">0.0089286</td>
+<td style="text-align: right;">0.0178571</td>
+<td style="text-align: right;">0.7754634</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Class: Low</td>
+<td style="text-align: right;">0.8208270</td>
+<td style="text-align: right;">0.9792350</td>
+<td style="text-align: right;">0.9657658</td>
+<td style="text-align: right;">0.8845015</td>
+<td style="text-align: right;">0.9657658</td>
+<td style="text-align: right;">0.8208270</td>
+<td style="text-align: right;">0.8874172</td>
+<td style="text-align: right;">0.4164541</td>
+<td style="text-align: right;">0.3418367</td>
+<td style="text-align: right;">0.3539541</td>
+<td style="text-align: right;">0.9000310</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Class: Moderate</td>
+<td style="text-align: right;">0.7515275</td>
+<td style="text-align: right;">0.8523677</td>
+<td style="text-align: right;">0.6988636</td>
+<td style="text-align: right;">0.8826923</td>
+<td style="text-align: right;">0.6988636</td>
+<td style="text-align: right;">0.7515275</td>
+<td style="text-align: right;">0.7242395</td>
+<td style="text-align: right;">0.3131378</td>
+<td style="text-align: right;">0.2353316</td>
+<td style="text-align: right;">0.3367347</td>
+<td style="text-align: right;">0.8019476</td>
+</tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>The CNN statistics detailed in <a href="#tbl-cnn_stats_by_class" class="quarto-xref">Table&nbsp;9</a> show that this model had mixed results. It was able to capture 82% of “Low” danger cases, which is the majority class, but its performance dropped sharply for the minority cases. Additionally, it only detected 3.5% of “Considerable -” cases.</p>
+<p>Even on a class-by-class basis, the RNN performed poorly overall. It was able to catch about 79% of “Low” hazard cases. Beyond that, its performance collapsed. It missed all “Considerable -” cases (0 sensitivity overall). It only managed to detect 35% of “Moderate” cases. Moreover, its specificity for the “Low” class was just 52%, meaning it frequently mislabeled other classes as “Low”.</p>
+<p>However, the FFNN-MLP (<a href="#tbl-ffn_stats_by_class" class="quarto-xref">Table&nbsp;11</a>) was especially good at recognising the common classes such as “Low” and “Moderate” danger, correctly identifying around 82% of “Low” cases and 75% of “Moderate” cases. This means that it both caught most of the true cases and rarely mislabeled other classes as these. However, the FFNN-MLP struggled with the rarer categories. For example, it only detected 18% of “Considerable +” cases. This suggests some model bias towards classes that were better represented.</p>
 </section>
-</section>
-<section id="discussion" class="level2">
-<h2 class="anchored" data-anchor-id="discussion">Discussion</h2>
-<p>In this study, we aimed to compare the ability of CNN, RNN, and FFNN models in predicting avalanches hazard levels. This is a multi-factorial investigation, as many different variables contribute to avalanche outcomes. Because the nature of this problem is sequential and we were able to preprocess that data to fit a time series context, we expected the CNN and RNN to outperform the FFNN since they have the added time series advantage.</p>
 <section id="summary-of-findings" class="level3">
 <h3 class="anchored" data-anchor-id="summary-of-findings">Summary of Findings</h3>
-<p>The FFNN turned out to be the best-performing model overall. It showed the most balanced detection and was the only one that managed to give acceptable performance across hazard levels. The CNN struggled with the minority classes and mainly acted as a majority-class (Low hazard) detector despite the controls put in place to re-weight the classes. This is unsatisfactory because in a real forecasting setting, it’s of great importance that we can detect the higher-risk cases. The RNN underperformed across the board, missing nearly all the minority class instances (Considerable+, Considerable-), and doing <em>fairly</em> well with the majority cases but still not as well as the other two models. This strongly disagrees with our initial hypothesis that sequence models would benefit from time series dependencies.</p>
+<p>In this study, we aimed to compare the ability of CNN, RNN, and FFNN-MLP models in predicting avalanches hazard levels. This is a multi-factorial investigation, as many different variables contribute to avalanche outcomes. Because the nature of this problem is sequential and we were able to preprocess that data to fit a time series context, we expected the CNN and RNN to outperform the FFNN-MLP since they have the added time series advantage.</p>
+<p>The FFNN-MLP turned out to be the best-performing model overall. It showed the most balanced detection and was the only one that managed to give acceptable performance across hazard levels. The CNN struggled with the minority classes and mainly acted as a majority-class (“Low” hazard) detector despite the controls put in place to re-weight the classes. This is unsatisfactory because in a real forecasting setting, it’s of great importance that we can detect the higher-risk cases. The RNN underperformed across the board, missing nearly all the minority class instances (“Considerable +”, “Considerable -”), and doing <em>fairly</em> well with the majority cases but still not as well as the other two models. This strongly disagrees with our initial hypothesis that sequence models would benefit from time series dependencies.</p>
 </section>
 <section id="strenghts-and-weaknesses" class="level3">
 <h3 class="anchored" data-anchor-id="strenghts-and-weaknesses">Strenghts and Weaknesses</h3>
-<p>A clear strength across all models is that they handled the majority class fairly well. This suggests that with a more balanced dataset where all classes have enough representation, similar architectures could perform much better. On the other hand, all three models showed clear bias toward the most common categories. None of them did especially well with the higher-risk, minority classes. The highlights a weakness in applying these models directly without addressing the class imbalance, and customizing the class weights more in favour of the minority classes could help counteract this measure.</p>
+<p>A clear strength across all models is that they handled the majority class fairly well. This suggests that with a more balanced dataset where all classes have enough representation, similar architectures could perform much better. On the other hand, all three models showed clear bias toward the most common categories. None of them did especially well with the higher-risk, minority classes. The highlights a weakness in applying these models directly without addressing the class imbalance, and customising the class weights more in favour of the minority classes could help counteract this measure.</p>
 </section>
 <section id="improvements-future-contributions" class="level3">
 <h3 class="anchored" data-anchor-id="improvements-future-contributions">Improvements &amp; Future Contributions</h3>
-<p>Another limitation of the present study is that largely complete cases were used in the data set. However, in practice avalanche forecasters do not have such luxuries. Forecasts have to be made regardless of whether some data points are missing. At the begining of the study, we considered imputation, although we agreed that this would be beyond the scope of the aims of evalauting neural netwrok performance. Developing an imputation model for this dataset could be a way of meaningfully improving the its practical use and its accuracy overall.</p>
+<p>Another limitation of the present study is that largely complete cases were used in the data set. However, in practice avalanche forecasters do not have such luxuries. Forecasts have to be made regardless of whether some data points are missing. At the beginning of the study, we considered imputation, although we agreed that this would be beyond the scope of the aims of evaluating neural network performance. Developing an imputation model for this dataset could be a way of meaningfully improving its practical use, robustness, and accuracy overall.</p>
 <p>There are several improvements that can be made going forward:</p>
-<p>Directly addressing the class imbalance by further exploring data generation or sampling techniques to help the models learn more about the high-risk hazard levels that are rare in the current dataset. - Literature shows that climate change is altering avalanche formation and risk. This means that future models need to take into acccount not just the historical data, but the shifting weather and snowpack patterns. - Scotland has very localised weather conditions where patterns in the eastern region can differ greatly from the west. Building seperate models for different regions or microclimates may improve local accuracy and forecast reliability. - Exploring alternative model types could strengthen predictions. Ensemble techniques such as Gradient Boosting or hybrid deep learning ensembles could potentially handle the categorical nature of this data better than the implemented architectures. - Further experimentation showed that training a model on a dataset completed with simple imputation performed about the same in terms of accuracy as the model trained only on complete cases. This finding is important because, in real-world forecasting, decisions often need to be made with incomplete information. Exploring more imputation techniques could therefore be a valuable direction for improving model robustness</p>
+<ol type="1">
+<li>Directly addressing the class imbalance by further exploring data generation or sampling techniques to help the models learn more about the high-risk hazard levels that are rare in the current dataset.</li>
+<li>Literature shows that climate change is altering avalanche formation and risk. This means that future models need to take into account not just the historical data, but the shifting weather and snowpack patterns.</li>
+<li>Scotland has very localised weather conditions where patterns in the eastern region can differ greatly from the west. Building seperate models for different regions or microclimates may improve local accuracy and forecast reliability.</li>
+<li>Exploring alternative model types could strengthen predictions. Ensemble techniques such as Gradient Boosting or hybrid deep learning ensembles could potentially handle the categorical nature of this data better than the implemented architectures.</li>
+</ol>
 </section>
 </section>
 <section id="conclusion" class="level2">
 <h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
-<p>Our objective requires reliable detection across all avalanche danger levels, not just the majority ones. In this study, the FFNN came closest to meeting this requirement, but even it struggled with the minority, high-risk cases. Future work should focus on reducing class imbalance, exploring region-specific models, and experimenting with ensemble approaches to ensure that high-risk avalanche conditions are consistently and accurately detected.</p>
+<p>Our objective requires reliable detection across all avalanche danger levels, not just the majority ones. In this study, the FFNN-MLP came closest to meeting this requirement, but even it struggled with the minority, high-risk cases. Future work should focus on reducing class imbalance, exploring region-specific models, and experimenting with ensemble approaches to ensure that high-risk avalanche conditions are consistently and accurately detected.</p>
 </section>
 <section id="references" class="level2">
 <h2 class="anchored" data-anchor-id="references">References</h2>
@@ -1397,6 +1231,8 @@ Table&nbsp;11: RNN Statistics by Class
 <li><p>Kala, M., Jain, S., Singh, A. &amp; Krishnan, N.C. 2025. Addressing class imbalance in avalanche forecasting. <em>Cold Regions Science and Technology</em>. 231. DOI: 10.1016/j.coldregions.2024.104411</p></li>
 <li><p>Langmuir, E. 1970. Snow profiles in Scotland. <em>Weather</em>. 25(5):205-209. DOI: 10.1002/j.1477-8696.1970.tb03262.x</p></li>
 <li><p>MetOffice. 2010. <em>UK regional climates</em>. Available: <a href="https://www.metoffice.gov.uk/research/climate/maps-and-data/regional-climates/index" class="uri">https://www.metoffice.gov.uk/research/climate/maps-and-data/regional-climates/index</a> [2025, September 11].</p></li>
+<li><p>OpenAI. (2025a). ChatGPT (Sept 23 version) [Large language model]. https://chatgpt.com/share/68d59a8c-efa4-8004-a295-616e83f37afb</p></li>
+<li><p>OpenAI. (2025b). ChatGPT (Sept 23 version) [Large language model]. https://chatgpt.com/share/68d59ad3-d50c-8004-b862-18966277b186</p></li>
 <li><p>Pozdnoukhov, A., Purves, R.S. &amp; Kanevski, M. 2008. Applying machine learning methods to avalanche forecasting. <em>Annals of Glaciology</em>. 49:107-113. DOI: 10.3189/172756408787814870</p></li>
 <li><p>Pozdnoukhov, A., Matasci, G., Kanevski, M. &amp; Purves, R.S. 2011. Spatio-temporal avalanche forecasting with Support Vector Machines. <em>Nat. Hazards Earth Syst. Sci.</em> 11:367-382. DOI: 10.5194/nhess-11-367-2011</p></li>
 <li><p>Purves, R.S., Morrison, K.W., Moss, G. &amp; Wright, D.S.B. Nearest neighbours for avalanche forecasting in Scotland - Development, verification and optimisation of a model. <em>Cold Regions Science and Technology</em>. 37(3):343-355. DOI: 10.1016/S0165-232X(03)00075-2</p></li>

@@ -166,6 +166,8 @@ final_map <- annotate_figure(map_OAH,
 final_map
 ```
 
+<br>
+
 ```{r}
 #| echo: FALSE
 #| label: tbl-area-hazard
@@ -193,6 +195,8 @@ area_hazard_table <- data %>%
 
 kable(area_hazard_table)
 ```
+
+<br>
 
 Data cover the Scottish winters (November to April) from the December 2009 to March 2025. Predictor variables are categorised into three main groups, including (1) position and topography, (2) weather, and (3) snowpack test, all collected at the forecast location. Each observation also includes the date and the forecast area (metadata). For an overview of the predictors available, see @tbl-pred below.
 
@@ -318,6 +322,8 @@ Other correlations with 0.5\<\|r\|\< 0.80 are moderately strong but remain infor
 
 p_corr
 ```
+
+<br>
 
 ```{r}
 #| echo: FALSE
@@ -633,7 +639,7 @@ df_prop <- as.data.frame(tab_prop) %>%
 
 ```
 
-Lastly, @fig-FAH-OAH shows the relationship between *forecast avalanche hazard (FAH)* on day *t* and *OAH* on day *t+1*. Each column sums to 100%, showing how outcomes were distributed given a specific forecast level. Forecasts of "Low" hazard were highly accurate, with `r round(tab_prop[1,1]*100, 2)` % of cases confirmed the following day. This indicates that forecasters were most successful in predicting stable snowpack conditions and low hazard scenarios.
+Lastly, @fig-FAH-OAH shows the relationship between *forecast avalanche hazard (FAH)* on day *t* and *OAH* on day *t+1*. Each column sums to 100%, showing how outcomes were distributed given a specific forecast level. Forecasts of "Low" hazard were highly accurate, with `r round(tab_prop[1,1]*100, 2)`% of cases confirmed the following day. This indicates that forecasters were most successful in predicting stable snowpack conditions and low hazard scenarios.
 
 For intermediate levels such as “Moderate” and “Considerable –” the agreement weakens. Only about half of “Moderate” forecasts matched the following day’s observations, with a substantial spillover into “Low” and “Considerable –”. “Considerable –” forecasts split almost evenly between being observed as “Moderate,” “Considerable –,” and “Considerable +.” This pattern shows that there is a challenge in differentiating between neighbouring hazard categories, which may highlight the subjectivity and sensitivity of these intermediate hazard thresholds.
 
@@ -671,7 +677,7 @@ The plot shows that the forecast (*FAH*) is highest in stable, low-risk conditio
 
 ## Data Cleaning and Feature Engineering
 
-Feature engineering focused on creating temporal variables to capture trends not natively handled by a feedforward neural network (FNN). Given that EDA highlighted that *OAH* varies according to the season and time of year, several variables were derived.
+Feature engineering focused on creating temporal variables to capture trends not natively handled by a feedforward neural network (FFNN). Given that EDA highlighted that *OAH* varies according to the season and time of year, several variables were derived.
 
 Before removing observations with extensive missing values, we extracted the time of day, day of the week, month, and year from each date. Next, a categorical variable for each avalanche season (December-April, 2009-2025) was created to account for the observed year-on-year increase in risk.
 
@@ -748,8 +754,11 @@ missing_df <- missing_df %>%
 
 #sum(!complete.cases(data))
 
+x1 <- unique(data$AV.Cat)
 
 ```
+
+Missing values were also a challenge. @tbl-missing-val presents the percentage of missing values for features with incomplete data. *Av.Cat* was removed because its meaning was unclear and it contained implausible values (e.g., `r x1`). @fig-ski-summit-wind shows no clear relationship between *ski penetration* and *OAH*, except for "High" risk avalanches; we therefore excluded it since snowfall effects are likely better represented by other variables. *Summit wind direction* (`r round(missing_df[missing_df$Variable == "Summit.Wind.Dir", "Missing (%)"], 2)`% missing) was also dropped for lack of a discernible trend.
 
 ```{r}
 #| echo: FALSE
@@ -765,11 +774,9 @@ kable(missing_df,
   ) %>%
   footnote(general = "All values rounded to 4 decimal places.")
 
-x1 <- unique(data$AV.Cat)
-
 ```
 
-Missing values were also a challenge. @tbl-missing-val presents the percentage of missing values for features with incomplete data. *Av.Cat* was removed because its meaning was unclear and it contained implausible values (e.g., `r x1`). @fig-ski-summit-wind shows no clear relationship between *ski penetration* and *OAH*, except for "High" risk avalanches; we therefore excluded it since snowfall effects are likely better represented by other variables. *Summit wind direction* (`r round(missing_df[missing_df$Variable == "Summit.Wind.Dir", "Missing (%)"], 2)`% missing) was also dropped for lack of a discernible trend.
+<br>
 
 ```{r}
 #| echo: FALSE
@@ -799,11 +806,9 @@ ski_summit_final_plot
 
 ```
 
+<br>
+
 Lastly, we dropped high-cardinality categorical variables, including *osgrid* and *location. osgrid* appeared to be an ID variable with \>3000 unique values, which would make one-hot encoding overly complex and was unlikely to indicate risk. *Location* was also removed, since *latitude*, *longitude*, and *area* already captured spatial information more effectively.
-
-```{r}
-
-```
 
 ```{r}
 
@@ -815,7 +820,7 @@ comp <- round(sum(!complete.cases(data_edit))/sum(complete.cases(data_edit)) * 1
 
 ```
 
-Having dropped these variables, we were left with roughly `r comp` % incomplete samples. We dropped the remaining samples that contained missing values to maintain complete cases for the models. While retaining more observations would be ideal, the remaining \~7000 were sufficient for representative results. Later, fitting our best model to an imputed dataset yielded a similar accuracy to the complete cases.
+Having dropped these variables, we were left with roughly `r comp`% incomplete samples. We dropped the remaining samples that contained missing values to maintain complete cases for the models. While retaining more observations would be ideal, the remaining \~7000 were sufficient for representative results. Later, fitting our best model to an imputed dataset yielded a similar accuracy to the complete cases.
 
 ```{r date_time}
 
@@ -881,22 +886,27 @@ test <- data[-train.idx,] #Testing Data
 
 ## Modeling Methodology
 
-There are three main models used in this project to exploit different structural properties of the data: a feedforward multilayer perceptron neural network network (FFN-MLP), a convolutional neural network (CNN), and a recurrent neural network (RNN). The FFN-MLP was expected to handle categorical predictors (e.g., forecasted avalanche risk) effectively, while the CNNs and RNNs were targeted at uncovering temporal or sequential patterns.
-
-A FFN-MLP consists of an input layer, one or more hidden layers of perceptron nodes, and an output layer. Each hidden node computes a weighted sum of its inputs, passes it through a non-linear activation function, and forwards the result to the next layer. The weights, which determine the influence of each input, are initialised randomly and updated iteratively through backpropagation using an optimiser such as gradient descent. The activation functions (e.g., ReLU, sigmoid) introduce non-linearity, enabling the model to capture complex relationships between predictors and the target.
+There are three main models used in this project to exploit different structural properties of the data: a convolutional neural network (CNN), a recurrent neural network (RNN), and a feedforward multilayer perceptron neural network network (FFNN-MLP). The FFNN-MLP was expected to handle categorical predictors (e.g., forecasted avalanche risk) effectively, while the CNNs and RNNs were targeted at uncovering temporal or sequential patterns.
 
 CNNs process data by applying convolutional filters (small weight matrices) that slide across the input space. Each filter computes dot products with local patches of the data, producing feature maps that emphasise spatial or temporal patterns based on the type of filters used. Non-linear activations are then applied, followed by pooling layers that down sample the feature maps to reduce dimensionality while preserving the most important information. One can stack numerous layers of convolutions to learn deeper trends in the data, although we found that 2 layers were a good balance between the model’s complexity and ability to generalise.
-
-RNNs are designed to capture sequential dependencies by incorporating feedback connections. At each time step, the hidden state depends not only on the current input but also on the state from the previous step. This architecture makes RNNs well suited for modeling temporal dynamics in sequential data.
 
 ```{r}
 #| echo: false
 #| results: asis
+#| label: fig-animation-cnn
+#| fig-cap: "Interactive visualisation of how a CNN operates."
 
 
-
-htmltools::includeHTML("cnn_filter_animation_quarto_ready_html.html")
+knitr::include_url("cnn_filter_animation_quarto_ready_html.html")
 ```
+
+::: {style="font-size: 0.6em; color: black; text-align: left; font-weight: bold"}
+Credit: OpenAI (2025a and 2025b)
+:::
+
+RNNs are designed to capture sequential dependencies by incorporating feedback connections. At each time step, the hidden state depends not only on the current input but also on the state from the previous step. This architecture makes RNNs well suited for modeling temporal dynamics in sequential data.
+
+A FFN-MLP consists of an input layer, one or more hidden layers of perceptron nodes, and an output layer. Each hidden node computes a weighted sum of its inputs, passes it through a non-linear activation function, and forwards the result to the next layer. The weights, which determine the influence of each input, are initialised randomly and updated iteratively through backpropagation using an optimiser such as gradient descent. The activation functions (e.g., ReLU, sigmoid) introduce non-linearity, enabling the model to capture complex relationships between predictors and the target.
 
 \[add section on RNN\]
 
@@ -1460,7 +1470,7 @@ kable(grid, format = "html",
 ```{r  final_cnn_search_viz}
 #| echo: FALSE
 #| label: fig-cnn-search-viz
-#| fig-cap: "Top 30 configs by validation accuracy for CNN."
+#| fig-cap: "Top 30 configurations by validation accuracy for CNN."
 
 res <- final_cnn_search %>%
   mutate(
@@ -1866,7 +1876,7 @@ load("rnn_final_search")
 ```{r}
 #| echo: FALSE
 #| label: fig-rnn-configs
-#| fig-cap: "Top 30 configs by validation accuracy for RNN."
+#| fig-cap: "Top 30 configurations by validation accuracy for RNN."
 
 res <- rnn_final_search %>%
   mutate(
@@ -1890,8 +1900,7 @@ ggplot(res %>% slice(1:top_n),
             hjust = -0.1, size = 3) +
   scale_y_continuous(labels = percent_format(accuracy = 1), expand = expansion(mult = c(0, .1))) +
   scale_fill_manual(values = c("lightblue", "#1f78b4"), guide = "none") +
-  labs(title = sprintf("Figure ?: Top %d configs by validation accuracy", top_n),
-       x = "Config", y = "Val accuracy")
+  labs(x = "Config", y = "Val accuracy")
 
 x1 <- round(max(results_rnn_search$val_accuracy)*100)
 
@@ -2052,8 +2061,7 @@ summary_df <- data.frame(
 tbl_df <- summary_df %>%
   mutate(Values = gsub("; ", "<br>", Values))
 
-kable(tbl_df, format = "html", escape = FALSE,
-      caption = "Hyperparameter Grid") %>%
+kable(tbl_df, format = "html", escape = FALSE) %>%
   kable_styling(
     bootstrap_options = c( "hover", "condensed"),
     full_width = FALSE, position = "left", font_size = 13
@@ -2503,7 +2511,7 @@ ggplot(data = imp_data, aes(x = relative_importance, y = variable, fill = relati
        x = "Relative Importance")
 ```
 
-## Results
+## Results and Discussion
 
 ```{r sanana_work}
 
@@ -2622,13 +2630,13 @@ acc_rnn <- round(mean(pred_rnn_labels == temporal_labels_rnn) * 100)
 acc_ffn <- round(mean(pred_ffn_labels == true_labels) *100)
 ```
 
-@fig-compare_cms displays the confusion matrices for our 3 models. Our FFNN has a clearer diagonal, which is indicative of its stronger performance. The confusion matrix for the RNN is very diffused with widespread misclassifications. @tbl-overall_stats confirms this observation is indeed the case, as the RNN had the lowest accuracy (`r acc_rnn`%) and the FFNN had the highest (`r acc_ffn`%). One limitation of the approach for evaluating the CNN and RNN is that, since the training and tests sets are not shuffled, and high risk avalanches are rare, there are no high risk avalanches in the test set. Therefore, the models ability to distinguish high risk cases is not measured well beyond.
+@fig-compare_cms displays the confusion matrices for our 3 models. Our FFNN-MLP has a clearer diagonal, which is indicative of its stronger performance. The confusion matrix for the RNN is very diffused with widespread misclassifications. @tbl-overall_stats confirms this observation is indeed the case, as the RNN had the lowest accuracy (`r acc_rnn`%) and the FFNN-MLP had the highest (`r acc_ffn`%). One limitation of the approach for evaluating the CNN and RNN is that, since the training and tests sets are not shuffled, and "High" risk avalanches are rare, there are no "High" risk avalanches in the test set. Therefore, the models ability to distinguish "High" risk cases is not measured well beyond.
 
-The FFNN had some noticeable misclassifications between Considerable- and Moderate. We see that for 103 cases, the model predicted Considerable- instead of Moderate, which shows that it confuses those two classes a lot. Similarly, 112 Low cases were predicted as Moderate, another pair of classes the model struggles with.
+The diagonal of the RNN is the weakest of them all. Its correct predictions are concentrated in "Low" (752) with spillover to "Moderate" (165), and its misclassifications are concentrated in "Low" (197) and "Moderate" (299) predictions which were actually "Moderate" instances. This tells us the model often confused "Moderate" cases as either "Low" (underestimated hazard) or "Moderate" (overestimated hazard).
 
-The diagonal of the RNN is the weakest of them all. Its correct predictions are concentrated in Low (752) with spillover to Moderate (165), and its misclassifications are concentrated in Low (197) and Moderate (299) predictions which were actually Moderate instances. This tells us the model often confused Moderate cases as either Low (underestimated hazard) or moderate (overestimated hazard).
+In the case of the CNN, almost all predictions go to "Low". There is a noticeable concentration on the diagonal for "Low" classifications (735), and a considerable concentration of "Moderate" classifications (270). On the off-diagonal, the model misclassified 205 "Low" instances as "Moderate", and 148 "Moderate" instances as "Low". Clearly, the CNN collapsed into predicting these two classes in many cases, and often confused the two classes. The rows for these respective classes are all zeros. This shows that this model fell for imbalance bias, favouring the majority class "Low" and second most abundance "Moderate".
 
-In the case of the CNN, almost all predictions go to Low. There is a noticeable concentration on the diagonal for Low classifications (735), and a considerable concentration of Moderate classifications (270). On the off-diagonal, the model misclassified 205 Low instances as Moderate, and 148 Moderate instances as Low. Clearly, the CNN collapsed into predicting these two classes in many cases, and often confused the two classes. The rows for these respective classes are all zeros. This shows that this model fell for imbalance bias, favouring the majority class Low and second most abundance Moderate.
+The FFNN-MLP had some noticeable misclassifications between "Considerable-" and "Moderate". We see that for 103 cases, the model predicted "Considerable-" instead of "Moderate", which shows that it confuses those two classes a lot. Similarly, 112 Low cases were predicted as "Moderate", another pair of classes the model struggles with.
 
 ```{r fig-compare_cms, echo = FALSE}
 #| fig-cap: "Confusion Matrices Comparing the Final CNN, RNN, and Feed-Forward Models"
@@ -2645,9 +2653,10 @@ plot_cm <- function(cm, title) {
     theme_minimal()
 }
 
-p1 <- plot_cm(ffn_cm, "Feed-Forward NN Confusion Matrix")
-p2 <- plot_cm(cnn_cm, "CNN Confusion Matrix")
-p3 <- plot_cm(rnn_cm, "RNN Confusion Matrix")
+
+p1 <- plot_cm(cnn_cm, "CNN Confusion Matrix")
+p2 <- plot_cm(rnn_cm, "RNN Confusion Matrix")
+p3 <- plot_cm(ffn_cm, "Feed-Forward NN Confusion Matrix")
 
 grid.arrange(p1, p2, p3, nrow = 3)
 ```
@@ -2670,10 +2679,10 @@ grid.arrange(p1, p2, p3, nrow = 3)
 
 ### Overall Model Performance
 
-In @tbl-overall_stats below, we have an overview of each model's performance. The overall key insights that can be dervied are:
+In @tbl-overall_stats below, we have an overview of each model's performance. The overall key insights that can be derived are:
 
--   The FFNN clearly dominates with the highest accuracy, recall, specificity, and precision scores. It would be the best model for both detecting and correctly rejecting classes.
--   The CNN serves as a middle grounf, with acceptable accuracy but low recall. This means this model misses many real cases of considerable avalanche hazards.
+-   The FFNN-MLP clearly dominates with the highest accuracy, recall, specificity, and precision scores. It would be the best model for both detecting and correctly rejecting classes.
+-   The CNN serves as a middle ground, with acceptable accuracy but low recall. This means this model misses many real cases of considerable avalanche hazards.
 -   The RNN fails overall. Its accuracy, recall and precision metrics are all low, making it unreliable for classification.
 
 ```{r tbl-overall_stats, echo = FALSE}
@@ -2697,16 +2706,11 @@ model_comparison <- rbind(
 kable(as.data.frame(model_comparison), caption = "Overall Model performance Statistics") %>% kable_styling()
 ```
 
-The FFNN's specificity was 0.934, the highest value observed. This tells us that this model is very good at ruling out cases that do not belong to a class. Its recall was 0.618, which means the model correctly identifies \~62% of true cases or in other words, it catches more actual danger levels compared to CNN and RNN. The CNN and RNN specificity scores were 0.880 and 0.849 respectively, which indicates they have fair ability to avoid false alarms of avalanche hazards, but not up to par with the FFNN's ability. Notably, the RNN's precision was 0.311, which means when it predicts, its only correct abour 31% of the time. This means the RNN is wrong more often than its not. Contrast that with the CNN's 0.439 precision (correct a little under half the time) and the FFNN's 0.633 (correct around 63% of the time).
+The FFNN-MLP's specificity was 0.934, the highest value observed. This tells us that this model is very good at ruling out cases that do not belong to a class. Its recall was 0.618, which means the model correctly identifies \~62% of true cases or in other words, it catches more actual danger levels compared to CNN and RNN. The CNN and RNN specificity scores were 0.880 and 0.849 respectively, which indicates they have fair ability to avoid false alarms of avalanche hazards, but not up to par with the FFNN's ability. Notably, the RNN's precision was 0.311, which means when it predicts, its only correct abour 31% of the time. This means the RNN is wrong more often than its not. Contrast that with the CNN's 0.439 precision (correct a little under half the time) and the FFNN's 0.633 (correct around 63% of the time).
 
 ### Model Statistics by Class
 
 Looking at performance statistics by class can help us gain useful insight into each models strenghths and weaknesses, providing a more detailed overview of model behaviour. @tbl-ffn_stats_by_class, @tbl-cnn_stats_by_class and @tbl-rnn_stats_by_class summarise our model statistics by class.
-
-```{r tbl-ffn_stats_by_class, echo = FALSE}
-
-kable(as.data.frame(ffn_cm$byClass), caption = "FFNN Statistics by Class") %>% kable_styling()
-```
 
 ```{r tbl-cnn_stats_by_class, echo = FALSE}
 
@@ -2718,35 +2722,41 @@ kable(as.data.frame(cnn_cm$byClass), caption = "CNN Statistics by Class") %>% ka
 kable(as.data.frame(rnn_cm$byClass), caption = "RNN Statistics by Class") %>% kable_styling()
 ```
 
-We will start with the FFNN statistics detailed in @tbl-ffn_stats_by_class. It was especially good at recognising the common classes such as Low and Moderate danger, correctly identifying around 82% of Low cases and 75% of moderate cases. This means that it both caughts most of the true cases and rarely mislabeled other classes as these. However, the FFNN struggled with the rarer categories. For example, it only detected 18% of Considerable+ cases. This suggests some model bias towards classes that were better represented.
+```{r tbl-ffn_stats_by_class, echo = FALSE}
 
-The CNN statistics detailed in @tbl-cnn_stats_by_class show that this model had mized results. It was able to capture 82% of Low danger cases, which is the majority class, but its performance dropped sharply for the minority cases. Additionally, it only detected 3.5% of Considerable- cases.
+kable(as.data.frame(ffn_cm$byClass), caption = "FFNN Statistics by Class") %>% kable_styling()
+```
 
-Even on a class-by-class basis, the RNN performed poorly overall. It was able to catch about 79% of Low hazard cases. Beyond that, its performance collapsed. It missed all Considerable- cases (0 sensitivity overall). It only managed to detect 35% of Moderate cases. Moreover, its specificity for the Low class was just 52%, meaning it frequently mislabeled other classes as Low.
+The CNN statistics detailed in @tbl-cnn_stats_by_class show that this model had mixed results. It was able to capture 82% of "Low" danger cases, which is the majority class, but its performance dropped sharply for the minority cases. Additionally, it only detected 3.5% of "Considerable -" cases.
 
-## Discussion
+Even on a class-by-class basis, the RNN performed poorly overall. It was able to catch about 79% of "Low" hazard cases. Beyond that, its performance collapsed. It missed all "Considerable -" cases (0 sensitivity overall). It only managed to detect 35% of "Moderate" cases. Moreover, its specificity for the "Low" class was just 52%, meaning it frequently mislabeled other classes as "Low".
 
-In this study, we aimed to compare the ability of CNN, RNN, and FFNN models in predicting avalanches hazard levels. This is a multi-factorial investigation, as many different variables contribute to avalanche outcomes. Because the nature of this problem is sequential and we were able to preprocess that data to fit a time series context, we expected the CNN and RNN to outperform the FFNN since they have the added time series advantage.
+However, the FFNN-MLP (@tbl-ffn_stats_by_class) was especially good at recognising the common classes such as "Low" and "Moderate" danger, correctly identifying around 82% of "Low" cases and 75% of "Moderate" cases. This means that it both caught most of the true cases and rarely mislabeled other classes as these. However, the FFNN-MLP struggled with the rarer categories. For example, it only detected 18% of "Considerable +" cases. This suggests some model bias towards classes that were better represented.
 
 ### Summary of Findings
 
-The FFNN turned out to be the best-performing model overall. It showed the most balanced detection and was the only one that managed to give acceptable performance across hazard levels. The CNN struggled with the minority classes and mainly acted as a majority-class (Low hazard) detector despite the controls put in place to re-weight the classes. This is unsatisfactory because in a real forecasting setting, it's of great importance that we can detect the higher-risk cases. The RNN underperformed across the board, missing nearly all the minority class instances (Considerable+, Considerable-), and doing *fairly* well with the majority cases but still not as well as the other two models. This strongly disagrees with our initial hypothesis that sequence models would benefit from time series dependencies.
+In this study, we aimed to compare the ability of CNN, RNN, and FFNN-MLP models in predicting avalanches hazard levels. This is a multi-factorial investigation, as many different variables contribute to avalanche outcomes. Because the nature of this problem is sequential and we were able to preprocess that data to fit a time series context, we expected the CNN and RNN to outperform the FFNN-MLP since they have the added time series advantage.
+
+The FFNN-MLP turned out to be the best-performing model overall. It showed the most balanced detection and was the only one that managed to give acceptable performance across hazard levels. The CNN struggled with the minority classes and mainly acted as a majority-class ("Low" hazard) detector despite the controls put in place to re-weight the classes. This is unsatisfactory because in a real forecasting setting, it's of great importance that we can detect the higher-risk cases. The RNN underperformed across the board, missing nearly all the minority class instances ("Considerable +", "Considerable -"), and doing *fairly* well with the majority cases but still not as well as the other two models. This strongly disagrees with our initial hypothesis that sequence models would benefit from time series dependencies.
 
 ### Strenghts and Weaknesses
 
-A clear strength across all models is that they handled the majority class fairly well. This suggests that with a more balanced dataset where all classes have enough representation, similar architectures could perform much better. On the other hand, all three models showed clear bias toward the most common categories. None of them did especially well with the higher-risk, minority classes. The highlights a weakness in applying these models directly without addressing the class imbalance, and customizing the class weights more in favour of the minority classes could help counteract this measure.
+A clear strength across all models is that they handled the majority class fairly well. This suggests that with a more balanced dataset where all classes have enough representation, similar architectures could perform much better. On the other hand, all three models showed clear bias toward the most common categories. None of them did especially well with the higher-risk, minority classes. The highlights a weakness in applying these models directly without addressing the class imbalance, and customising the class weights more in favour of the minority classes could help counteract this measure.
 
 ### Improvements & Future Contributions
 
-Another limitation of the present study is that largely complete cases were used in the data set. However, in practice avalanche forecasters do not have such luxuries. Forecasts have to be made regardless of whether some data points are missing. At the begining of the study, we considered imputation, although we agreed that this would be beyond the scope of the aims of evalauting neural netwrok performance. Developing an imputation model for this dataset could be a way of meaningfully improving the its practical use and its accuracy overall.
+Another limitation of the present study is that largely complete cases were used in the data set. However, in practice avalanche forecasters do not have such luxuries. Forecasts have to be made regardless of whether some data points are missing. At the beginning of the study, we considered imputation, although we agreed that this would be beyond the scope of the aims of evaluating neural network performance. Developing an imputation model for this dataset could be a way of meaningfully improving its practical use, robustness, and accuracy overall.
 
 There are several improvements that can be made going forward:
 
-Directly addressing the class imbalance by further exploring data generation or sampling techniques to help the models learn more about the high-risk hazard levels that are rare in the current dataset. - Literature shows that climate change is altering avalanche formation and risk. This means that future models need to take into acccount not just the historical data, but the shifting weather and snowpack patterns. - Scotland has very localised weather conditions where patterns in the eastern region can differ greatly from the west. Building seperate models for different regions or microclimates may improve local accuracy and forecast reliability. - Exploring alternative model types could strengthen predictions. Ensemble techniques such as Gradient Boosting or hybrid deep learning ensembles could potentially handle the categorical nature of this data better than the implemented architectures. - Further experimentation showed that training a model on a dataset completed with simple imputation performed about the same in terms of accuracy as the model trained only on complete cases. This finding is important because, in real-world forecasting, decisions often need to be made with incomplete information. Exploring more imputation techniques could therefore be a valuable direction for improving model robustness
+1.  Directly addressing the class imbalance by further exploring data generation or sampling techniques to help the models learn more about the high-risk hazard levels that are rare in the current dataset.
+2.  Literature shows that climate change is altering avalanche formation and risk. This means that future models need to take into account not just the historical data, but the shifting weather and snowpack patterns.
+3.  Scotland has very localised weather conditions where patterns in the eastern region can differ greatly from the west. Building seperate models for different regions or microclimates may improve local accuracy and forecast reliability.
+4.  Exploring alternative model types could strengthen predictions. Ensemble techniques such as Gradient Boosting or hybrid deep learning ensembles could potentially handle the categorical nature of this data better than the implemented architectures.
 
 ## Conclusion
 
-Our objective requires reliable detection across all avalanche danger levels, not just the majority ones. In this study, the FFNN came closest to meeting this requirement, but even it struggled with the minority, high-risk cases. Future work should focus on reducing class imbalance, exploring region-specific models, and experimenting with ensemble approaches to ensure that high-risk avalanche conditions are consistently and accurately detected.
+Our objective requires reliable detection across all avalanche danger levels, not just the majority ones. In this study, the FFNN-MLP came closest to meeting this requirement, but even it struggled with the minority, high-risk cases. Future work should focus on reducing class imbalance, exploring region-specific models, and experimenting with ensemble approaches to ensure that high-risk avalanche conditions are consistently and accurately detected.
 
 ## References
 
@@ -2778,45 +2788,48 @@ Our objective requires reliable detection across all avalanche danger levels, no
 
 14. MetOffice. 2010. *UK regional climates*. Available: <https://www.metoffice.gov.uk/research/climate/maps-and-data/regional-climates/index> \[2025, September 11\].
 
-15. Pozdnoukhov, A., Purves, R.S. & Kanevski, M. 2008. Applying machine learning methods to avalanche forecasting. *Annals of Glaciology*. 49:107-113. DOI: 10.3189/172756408787814870
+15. OpenAI. (2025a). ChatGPT (Sept 23 version) \[Large language model\]. https://chatgpt.com/share/68d59a8c-efa4-8004-a295-616e83f37afb
 
-16. Pozdnoukhov, A., Matasci, G., Kanevski, M. & Purves, R.S. 2011. Spatio-temporal avalanche forecasting with Support Vector Machines. *Nat. Hazards Earth Syst. Sci.* 11:367-382. DOI: 10.5194/nhess-11-367-2011
+16. OpenAI. (2025b). ChatGPT (Sept 23 version) \[Large language model\]. https://chatgpt.com/share/68d59ad3-d50c-8004-b862-18966277b186
 
-17. Purves, R.S., Morrison, K.W., Moss, G. & Wright, D.S.B. Nearest neighbours for avalanche forecasting in Scotland - Development, verification and optimisation of a model. *Cold Regions Science and Technology*. 37(3):343-355. DOI: 10.1016/S0165-232X(03)00075-2
+17. Pozdnoukhov, A., Purves, R.S. & Kanevski, M. 2008. Applying machine learning methods to avalanche forecasting. *Annals of Glaciology*. 49:107-113. DOI: 10.3189/172756408787814870
 
-18. Rahmati, O., Ghorbanzadeh, O., Teimurian, T., Mohammadi, F., Tiefenbacher, J.P., Falah, F., Pirasteh, S., Ngo, P.T.T. & Bui, D.T. 2019. Spatial modeling of snow avalanche using machine learning models and geo-environmental factors: Comparison of effectiveness in two mountain regions. *Remote Sensing*. 11(24). DOI: 10.3390/rs11242995
+18. Pozdnoukhov, A., Matasci, G., Kanevski, M. & Purves, R.S. 2011. Spatio-temporal avalanche forecasting with Support Vector Machines. *Nat. Hazards Earth Syst. Sci.* 11:367-382. DOI: 10.5194/nhess-11-367-2011
 
-19. Schirmer, M., Lehning, M. & Schweizer, J. 2009. Statistical forecasting of regional avalanche danger using simulated snow-cover data. *Journal of Glaciology*. 55(193):761-768. DOI: 10.3189/002214309790152429
+19. Purves, R.S., Morrison, K.W., Moss, G. & Wright, D.S.B. Nearest neighbours for avalanche forecasting in Scotland - Development, verification and optimisation of a model. *Cold Regions Science and Technology*. 37(3):343-355. DOI: 10.1016/S0165-232X(03)00075-2
 
-20. Scottish Avalanche Information Service. 2024. *Reviews of the winter season*. Available: <https://www.sais.gov.uk/sais-annual-reports/> \[2025, September 13\].
+20. Rahmati, O., Ghorbanzadeh, O., Teimurian, T., Mohammadi, F., Tiefenbacher, J.P., Falah, F., Pirasteh, S., Ngo, P.T.T. & Bui, D.T. 2019. Spatial modeling of snow avalanche using machine learning models and geo-environmental factors: Comparison of effectiveness in two mountain regions. *Remote Sensing*. 11(24). DOI: 10.3390/rs11242995
 
-21. Scottish Avalanche Information Service. 2025. *Avalanche information for the Scottish mountains*. Available: <https://www.sais.gov.uk/> \[2025, September 5\].
+21. Schirmer, M., Lehning, M. & Schweizer, J. 2009. Statistical forecasting of regional avalanche danger using simulated snow-cover data. *Journal of Glaciology*. 55(193):761-768. DOI: 10.3189/002214309790152429
 
-22. Scottish Government. 2011. *Scotland's marine atlas: Information for the National Marine Plan*. Available: <https://www.gov.scot/publications/scotlands-marine-atlas-information-national-marine-plan/pages/7/> \[2025, September, 10\].
+22. Scottish Avalanche Information Service. 2024. *Reviews of the winter season*. Available: <https://www.sais.gov.uk/sais-annual-reports/> \[2025, September 13\].
 
-23. Sharma, V., Kumar, S. & Sushil, R. 2023. A neural network model for automated prediction of avalanche danger level. *Nat. Hazards Earth Syst. Sci.* 23:2523-2530. DOI: 10.5194/nhess-23-2523-2023
+23. Scottish Avalanche Information Service. 2025. *Avalanche information for the Scottish mountains*. Available: <https://www.sais.gov.uk/> \[2025, September 5\].
 
-24. Singh, A. & Ganju, A. 2008. Artificial neural networks for snow avalanche forecasting in Indian Himalaya. *Proceedings of the 12th International Conference of
-    International Association for Computer Methods and Advances in Geomechanics (IACMAG)*. 1-6 October 2008. Gao, India. 1664-1670. Available: <https://www.researchgate.net/publication/263651736_Artificial_Neural_Networks_for_Snow_Avalanche_Forecasting_in_Indian_Himalaya> \[2025, September 13\].
+24. Scottish Government. 2011. *Scotland's marine atlas: Information for the National Marine Plan*. Available: <https://www.gov.scot/publications/scotlands-marine-atlas-information-national-marine-plan/pages/7/> \[2025, September, 10\].
 
-25. Spink, P.C. 1970. Scottish snowbeds in summer 1969. *Weather*. 25(5): 201-204. DOI: 10.1002/j.1477-8696.1970.tb03261.x
+25. Sharma, V., Kumar, S. & Sushil, R. 2023. A neural network model for automated prediction of avalanche danger level. *Nat. Hazards Earth Syst. Sci.* 23:2523-2530. DOI: 10.5194/nhess-23-2523-2023
 
-26. Tiwari, A., Arun, G. & Vishwakarma, B.D. 2021. Parameter importance assessment improves efficacy of machine learning methods for predicting snow avalanche sites in Leh-Manali Highway, India. *Science of The Total Environment*. 794. DOI: 10.1016/j.scitotenv.2021.148738
+26. Singh, A. & Ganju, A. 2008. Artificial neural networks for snow avalanche forecasting in Indian Himalaya. *Proceedings of the 12th International Conference of International Association for Computer Methods and Advances in Geomechanics (IACMAG)*. 1-6 October 2008. Gao, India. 1664-1670. Available: <https://www.researchgate.net/publication/263651736_Artificial_Neural_Networks_for_Snow_Avalanche_Forecasting_in_Indian_Himalaya> \[2025, September 13\].
 
-27. Tu, J.V. 1996. Advantages and disadvantages of using artificial neural network versus logistic regression for predicting medical outcomes. *Journal of Clinical Epidemiology*. 49(11):1225-1231. DOI: 10.1016/S0895-4356(96)00002-9
+27. Spink, P.C. 1970. Scottish snowbeds in summer 1969. *Weather*. 25(5): 201-204. DOI: 10.1002/j.1477-8696.1970.tb03261.x
 
-28. Ward, R.G.W. 1980. Avalanche hazard in the Cairngorm Mountains, Scotland. *Journal of Glaciology*. 26(94):31-41. DOI: 10.3189/S0022143000201020
+28. Tiwari, A., Arun, G. & Vishwakarma, B.D. 2021. Parameter importance assessment improves efficacy of machine learning methods for predicting snow avalanche sites in Leh-Manali Highway, India. *Science of The Total Environment*. 794. DOI: 10.1016/j.scitotenv.2021.148738
 
-29. Ward, R.G.W. 1984a. Avalanche prediction in Scotland: I. A survey of avalanche activity. *Applied Geography*. 4(2):91-108. DOI: 10.1016/0143-6228(84)90016-X
+29. Tu, J.V. 1996. Advantages and disadvantages of using artificial neural network versus logistic regression for predicting medical outcomes. *Journal of Clinical Epidemiology*. 49(11):1225-1231. DOI: 10.1016/S0895-4356(96)00002-9
 
-30. Ward, R.G.W. 1984b. Avalanche prediction in Scotland: II. Development of a predictive model. *Applied Geography*. 4(2):109-133. DOI: 10.1016/0143-6228(84)90017-1
+30. Ward, R.G.W. 1980. Avalanche hazard in the Cairngorm Mountains, Scotland. *Journal of Glaciology*. 26(94):31-41. DOI: 10.3189/S0022143000201020
 
-31. Ward, R.G.W., Langmuir, E.D.G. & Beattie, B. 1985. Snow profiles and avalanche activity in the Cairngorm Mountains, Scotland. *Journal of Glaciology*. 31(107):18-27. DOI: 10.3189/S0022143000004949
+31. Ward, R.G.W. 1984a. Avalanche prediction in Scotland: I. A survey of avalanche activity. *Applied Geography*. 4(2):91-108. DOI: 10.1016/0143-6228(84)90016-X
 
-32. Webster, H. 2020. *Avalanches in Scotland - interview with Mark Diggins*. Walkhighlands. Available: <https://www.walkhighlands.co.uk/news/avalanches-in-scotland-interview-with-mark-diggins/> \[2025, September 10\].
+32. Ward, R.G.W. 1984b. Avalanche prediction in Scotland: II. Development of a predictive model. *Applied Geography*. 4(2):109-133. DOI: 10.1016/0143-6228(84)90017-1
 
-33. Wen, H., Wu, X., Liao, X., Wang, D., Huang, K. & Wunnemann, B. 2022. Application of machine learning methods for snow avalanche susceptibility mapping in the Parlung Tsangpo catchement, southeastern Qinghai-Tibet Plateau. *Cold Regions Science and Technology*. 198. DOI: 10.1016/j.coldregions.2022.103535
+33. Ward, R.G.W., Langmuir, E.D.G. & Beattie, B. 1985. Snow profiles and avalanche activity in the Cairngorm Mountains, Scotland. *Journal of Glaciology*. 31(107):18-27. DOI: 10.3189/S0022143000004949
 
-34. Werritty, A. & Sugden, D. 2012. Climate change and Scotland: Recent trends and impacts. *Earth and Environmental Science Transactions of The Royal Society of Edinburgh*. 103(2):133-147. DOI: 10.1017/S1755691013000030
+34. Webster, H. 2020. *Avalanches in Scotland - interview with Mark Diggins*. Walkhighlands. Available: <https://www.walkhighlands.co.uk/news/avalanches-in-scotland-interview-with-mark-diggins/> \[2025, September 10\].
 
-35. WSL Institute for Snow and Avalanche Research SLF. 2016. *Scotland - Avalanche warning experts exchange*. Available: <https://www.slf.ch/en/news/scotland-avalanche-warning-experts-exchange/?utm_source=chatgpt.com> \[2025, September 12\].
+35. Wen, H., Wu, X., Liao, X., Wang, D., Huang, K. & Wunnemann, B. 2022. Application of machine learning methods for snow avalanche susceptibility mapping in the Parlung Tsangpo catchement, southeastern Qinghai-Tibet Plateau. *Cold Regions Science and Technology*. 198. DOI: 10.1016/j.coldregions.2022.103535
+
+36. Werritty, A. & Sugden, D. 2012. Climate change and Scotland: Recent trends and impacts. *Earth and Environmental Science Transactions of The Royal Society of Edinburgh*. 103(2):133-147. DOI: 10.1017/S1755691013000030
+
+37. WSL Institute for Snow and Avalanche Research SLF. 2016. *Scotland - Avalanche warning experts exchange*. Available: <https://www.slf.ch/en/news/scotland-avalanche-warning-experts-exchange/?utm_source=chatgpt.com> \[2025, September 12\].
