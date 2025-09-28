@@ -12,7 +12,7 @@ website:
         href: DS4i_writeup.qmd
       - text: "LLM"
         href: llm_use.qmd
-      - text: "Plagarism Declaration"
+      - text: "Plagiarism Declaration"
         href: plag_decl.qmd
       - text: "Final Model"
         href: mlp_model_report.html
