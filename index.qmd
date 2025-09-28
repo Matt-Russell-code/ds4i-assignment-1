@@ -1,0 +1,12 @@
+---
+title: "Home"
+format: html
+---
+
+# DS4i Writeup
+
+Short intro paragraph about the project.
+
+Navigation:
+- [Modelling](DS4i_writeup.qmd)
+- [LLM use](llm_use.qmd)

@@ -1,0 +1,14 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "DS4i Writeup"
+  navbar:
+    left:
+      - text: "Home"
+        href: index.qmd
+      - text: "Modelling"
+        href: DS4i_writeup.qmd
+      - text: "LLM use"
+        href: llm_use.qmd
