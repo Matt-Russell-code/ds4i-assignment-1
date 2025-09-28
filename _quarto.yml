@@ -8,9 +8,12 @@ website:
     left:
       - text: "Home"
         href: index.qmd
-      - text: "Modelling"
+      - text: "Report"
         href: DS4i_writeup.qmd
       - text: "LLM use"
         href: llm_use.qmd
       - text: "Plagarism Declaration"
         href: plag_decl.qmd
+      - text: "Final Model"
+        href: mlp_page.html
+        

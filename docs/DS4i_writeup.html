@@ -112,6 +112,10 @@ ul.task-list li input[type="checkbox"] {
     <a class="nav-link" href="./llm_use.html"> 
 <span class="menu-text">LLM use</span></a>
   </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./plag_decl.html"> 
+<span class="menu-text">Plagarism Declaration</span></a>
+  </li>  
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
@@ -158,6 +162,9 @@ ul.task-list li input[type="checkbox"] {
 <p><span style="font-size:12px">Photo by Nicolas Cool on Unsplash</span></p>
 <section id="abstract" class="level2">
 <h2 class="anchored" data-anchor-id="abstract">Abstract</h2>
+<p>This study evaluates the potential of neural networks for avalanche forecasting in Scotland, a region where research has been sparse and limited in scope. Using a 15-year archive of avalanche forecasts from the Scottish Avalanche Information Service (SAIS) across six regions (Creah Meagaidh, Glencoe, Lochaber, Northern Cairngorms, Southern Cairngorms, and Torridon), we compared three architectures: a feedforward multilayer perceptron (FFNN-MLP), a convolutional neural network (CNN), and a recurrent neural network (RNN). Each was selected for its theoretical strengths. Given the sequential nature of avalanche risk, we hypothesised that the CNN and RNN would outperform the FFNN-MLP.</p>
+<p>Contrary to this expectation, the FFNN-MLP achieved the best overall accuracy (75%) and the most balanced detection across hazard levels. The CNN (65% accuracy) and RNN (59% accuracy) both exhibited strong bias toward the majority “Low” and “Moderate” classes, and performed poorly on higher-risk cases. Even the FFNN-MLP struggled to identify rare but critical events, with a “High” hazard sensitivity of 0.56.</p>
+<p>These findings highlight both the promise and limitations of applying neural networks directly to avalanche hazard forecasting. While the FFNN-MLP proved most effective in this context, improving detection of minority, high-risk categories remains essential. Future research should prioritise methods for addressing class imbalance, region-specific modelling, and ensemble strategies to better capture Scotland’s diverse avalanche dynamics under changing climate conditions.</p>
 </section>
 <section id="introduction-and-literature-review" class="level2">
 <h2 class="anchored" data-anchor-id="introduction-and-literature-review">Introduction and Literature Review</h2>
@@ -928,7 +935,7 @@ Table&nbsp;9: CNN Statistics by Class
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">Class: Considerable -</td>
+<td style="text-align: left;">Class: low</td>
 <td style="text-align: right;">0.0350877</td>
 <td style="text-align: right;">0.9951824</td>
 <td style="text-align: right;">0.3636364</td>
@@ -942,7 +949,7 @@ Table&nbsp;9: CNN Statistics by Class
 <td style="text-align: right;">0.5151351</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">Class: Considerable +</td>
+<td style="text-align: left;">Class: moderate</td>
 <td style="text-align: right;">0.2368421</td>
 <td style="text-align: right;">0.9444081</td>
 <td style="text-align: right;">0.0957447</td>
@@ -956,7 +963,7 @@ Table&nbsp;9: CNN Statistics by Class
 <td style="text-align: right;">0.5906251</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">Class: High</td>
+<td style="text-align: left;">Class: considerable -</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">1.0000000</td>
 <td style="text-align: right;">NA</td>
@@ -970,7 +977,7 @@ Table&nbsp;9: CNN Statistics by Class
 <td style="text-align: right;">NA</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">Class: Low</td>
+<td style="text-align: left;">Class: considerable +</td>
 <td style="text-align: right;">0.7736842</td>
 <td style="text-align: right;">0.7179903</td>
 <td style="text-align: right;">0.8085809</td>
@@ -984,7 +991,7 @@ Table&nbsp;9: CNN Statistics by Class
 <td style="text-align: right;">0.7458372</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">Class: Moderate</td>
+<td style="text-align: left;">Class: high</td>
 <td style="text-align: right;">0.5806452</td>
 <td style="text-align: right;">0.7431942</td>
 <td style="text-align: right;">0.4882459</td>
@@ -1033,7 +1040,7 @@ Table&nbsp;10: RNN Statistics by Class
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">Class: Considerable -</td>
+<td style="text-align: left;">Class: low</td>
 <td style="text-align: right;">0.0000000</td>
 <td style="text-align: right;">0.9986207</td>
 <td style="text-align: right;">0.0000000</td>
@@ -1047,7 +1054,7 @@ Table&nbsp;10: RNN Statistics by Class
 <td style="text-align: right;">0.4993103</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">Class: Considerable +</td>
+<td style="text-align: left;">Class: moderate</td>
 <td style="text-align: right;">0.3243243</td>
 <td style="text-align: right;">0.9141547</td>
 <td style="text-align: right;">0.0839161</td>
@@ -1061,7 +1068,7 @@ Table&nbsp;10: RNN Statistics by Class
 <td style="text-align: right;">0.6192395</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">Class: High</td>
+<td style="text-align: left;">Class: considerable -</td>
 <td style="text-align: right;">NA</td>
 <td style="text-align: right;">1.0000000</td>
 <td style="text-align: right;">NA</td>
@@ -1075,7 +1082,7 @@ Table&nbsp;10: RNN Statistics by Class
 <td style="text-align: right;">NA</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">Class: Low</td>
+<td style="text-align: left;">Class: considerable +</td>
 <td style="text-align: right;">0.7924131</td>
 <td style="text-align: right;">0.5244300</td>
 <td style="text-align: right;">0.7203065</td>
@@ -1089,7 +1096,7 @@ Table&nbsp;10: RNN Statistics by Class
 <td style="text-align: right;">0.6584215</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">Class: Moderate</td>
+<td style="text-align: left;">Class: high</td>
 <td style="text-align: right;">0.3556034</td>
 <td style="text-align: right;">0.8098271</td>
 <td style="text-align: right;">0.4411765</td>
@@ -1138,7 +1145,35 @@ Table&nbsp;11: FFNN Statistics by Class
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">Class: Considerable -</td>
+<td style="text-align: left;">Class: low</td>
+<td style="text-align: right;">0.8208270</td>
+<td style="text-align: right;">0.9792350</td>
+<td style="text-align: right;">0.9657658</td>
+<td style="text-align: right;">0.8845015</td>
+<td style="text-align: right;">0.9657658</td>
+<td style="text-align: right;">0.8208270</td>
+<td style="text-align: right;">0.8874172</td>
+<td style="text-align: right;">0.4164541</td>
+<td style="text-align: right;">0.3418367</td>
+<td style="text-align: right;">0.3539541</td>
+<td style="text-align: right;">0.9000310</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Class: moderate</td>
+<td style="text-align: right;">0.7515275</td>
+<td style="text-align: right;">0.8523677</td>
+<td style="text-align: right;">0.6988636</td>
+<td style="text-align: right;">0.8826923</td>
+<td style="text-align: right;">0.6988636</td>
+<td style="text-align: right;">0.7515275</td>
+<td style="text-align: right;">0.7242395</td>
+<td style="text-align: right;">0.3131378</td>
+<td style="text-align: right;">0.2353316</td>
+<td style="text-align: right;">0.3367347</td>
+<td style="text-align: right;">0.8019476</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Class: considerable -</td>
 <td style="text-align: right;">0.7812500</td>
 <td style="text-align: right;">0.8613782</td>
 <td style="text-align: right;">0.5910165</td>
@@ -1152,7 +1187,7 @@ Table&nbsp;11: FFNN Statistics by Class
 <td style="text-align: right;">0.8213141</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">Class: Considerable +</td>
+<td style="text-align: left;">Class: considerable +</td>
 <td style="text-align: right;">0.1772152</td>
 <td style="text-align: right;">0.9865682</td>
 <td style="text-align: right;">0.4117647</td>
@@ -1166,7 +1201,7 @@ Table&nbsp;11: FFNN Statistics by Class
 <td style="text-align: right;">0.5818917</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">Class: High</td>
+<td style="text-align: left;">Class: high</td>
 <td style="text-align: right;">0.5600000</td>
 <td style="text-align: right;">0.9909268</td>
 <td style="text-align: right;">0.5000000</td>
@@ -1178,34 +1213,6 @@ Table&nbsp;11: FFNN Statistics by Class
 <td style="text-align: right;">0.0089286</td>
 <td style="text-align: right;">0.0178571</td>
 <td style="text-align: right;">0.7754634</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Class: Low</td>
-<td style="text-align: right;">0.8208270</td>
-<td style="text-align: right;">0.9792350</td>
-<td style="text-align: right;">0.9657658</td>
-<td style="text-align: right;">0.8845015</td>
-<td style="text-align: right;">0.9657658</td>
-<td style="text-align: right;">0.8208270</td>
-<td style="text-align: right;">0.8874172</td>
-<td style="text-align: right;">0.4164541</td>
-<td style="text-align: right;">0.3418367</td>
-<td style="text-align: right;">0.3539541</td>
-<td style="text-align: right;">0.9000310</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Class: Moderate</td>
-<td style="text-align: right;">0.7515275</td>
-<td style="text-align: right;">0.8523677</td>
-<td style="text-align: right;">0.6988636</td>
-<td style="text-align: right;">0.8826923</td>
-<td style="text-align: right;">0.6988636</td>
-<td style="text-align: right;">0.7515275</td>
-<td style="text-align: right;">0.7242395</td>
-<td style="text-align: right;">0.3131378</td>
-<td style="text-align: right;">0.2353316</td>
-<td style="text-align: right;">0.3367347</td>
-<td style="text-align: right;">0.8019476</td>
 </tr>
 </tbody>
 </table>
@@ -1244,12 +1251,12 @@ Figure&nbsp;13: Variable Importance for FFN-MLP.
 <section id="summary-of-findings" class="level3">
 <h3 class="anchored" data-anchor-id="summary-of-findings">Summary of Findings</h3>
 <p>In this study, we compared the ability of CNN, RNN, and FFNN-MLP models in predicting avalanches hazard levels. This was a multi-factorial investigation, as many different variables contribute to avalanche outcomes. The nature of this problem is sequential and we were able to preprocess that data to fit a time series context. We expected the CNN and RNN to outperform the FFNN-MLP since they have the added time series advantage.</p>
-<p>The FFNN-MLP turned out to be the best-performing model overall. It showed the most balanced detection and achiebed the best performance across hazard levels. The CNN struggled with the minority classes and mainly acted as a majority-class (“Low” hazard) detector despite the controls put in place to re-weight the classes. This is unsatisfactory because in a real forecasting setting, it’s of great importance that we can detect the higher-risk cases. The RNN performed wrost overall, missing nearly all the minority class instances (“Considerable+”, “Considerable-”), and doing <em>fairly</em> well with the majority cases but still not as well as the other two models. This strongly disagrees with our initial hypothesis that sequential models would benefit from time series dependencies.</p>
+<p>The FFNN-MLP turned out to be the best-performing model overall. It showed the most balanced detection and achieved the best performance across hazard levels. The CNN struggled with the minority classes and mainly acted as a majority-class (“Low” hazard) detector despite the controls put in place to re-weight the classes. This is unsatisfactory because in a real forecasting setting, it’s of great importance that we can detect the higher-risk cases. The RNN performed worst overall, missing nearly all the minority class instances (“Considerable+”, “Considerable-”), and doing <em>fairly</em> well with the majority cases but still not as well as the other two models. This strongly disagrees with our initial hypothesis that sequential models would benefit from time series dependencies.</p>
 <p>A clear strength across all models is that they handled the majority class fairly well. On the other hand, all three models showed clear bias toward the most common categories. None of them did especially well with the higher-risk, minority classes. The highlights a weakness in applying these models directly without addressing the class imbalance and customising the class weights more in favour of the minority classes could help counteract this measure.</p>
 </section>
 <section id="improvements-future-contributions" class="level3">
 <h3 class="anchored" data-anchor-id="improvements-future-contributions">Improvements &amp; Future Contributions</h3>
-<p>While the present study used only complete cases for modelling, avalanche forecasters in practice must often make predictions despite missing data. Imputation was considered, but fell outside the scope of evaluating NN performance. Developing an imputation model for this dataset could be a way of meaningfully improving its practical use, robustness, and accuracy overall. Secondly, Incorporating climate change effects by accounting for evolving weather and snowpack conditions alongside historical data could be a helpful tactic for researchers. Our models show that seasonal patterns are influential in predicting the risk. One reason this may be, is due to the evolving impact of climate change on the snow pack and ice condition. Furthermore, one may consider exploring region-specific models to reflect Scotland’s highly localized weather patterns and improve forecast reliability. Lastly, We restricted our hypothesis set to neural network models only, butthese may not be best suited to this data. Therefore, exploring alternative model types, such as gradient boosting or hybrid deep learning ensembles, to better handle categorical data and strengthen predictions could allow for more accurate prediction.</p>
+<p>While the present study used only complete cases for modelling, avalanche forecasters in practice must often make predictions despite missing data. Imputation was considered, but fell outside the scope of evaluating NN performance. Developing an imputation model for this dataset could be a way of meaningfully improving its practical use, robustness, and accuracy overall. Secondly, Incorporating climate change effects by accounting for evolving weather and snowpack conditions alongside historical data could be a helpful tactic for researchers. Our models show that seasonal patterns are influential in predicting the risk. One reason this may be, is due to the evolving impact of climate change on the snow pack and ice condition. Furthermore, one may consider exploring region-specific models to reflect Scotland’s highly localized weather patterns and improve forecast reliability. Lastly, We restricted our hypothesis set to neural network models only, but these may not be best suited to this data. Therefore, exploring alternative model types, such as gradient boosting or hybrid deep learning ensembles, to better handle categorical data and strengthen predictions could allow for more accurate prediction.</p>
 </section>
 </section>
 <section id="conclusion" class="level2">
