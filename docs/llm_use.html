@@ -93,7 +93,7 @@ ul.task-list li input[type="checkbox"] {
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./DS4i_writeup.html"> 
-<span class="menu-text">Modelling</span></a>
+<span class="menu-text">Report</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link active" href="./llm_use.html" aria-current="page"> 
@@ -102,6 +102,10 @@ ul.task-list li input[type="checkbox"] {
   <li class="nav-item">
     <a class="nav-link" href="./plag_decl.html"> 
 <span class="menu-text">Plagarism Declaration</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./mlp_page.html"> 
+<span class="menu-text">Final Model</span></a>
   </li>  
 </ul>
           </div> <!-- /navcollapse -->
@@ -137,9 +141,77 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="llm-use-notes" class="level1">
-<h1>LLM Use Notes</h1>
-<p>Placeholder. Add content later.</p>
+<p>Coming into this project, our team had little to no domain knowledge on avalanches, Scottish weather, or forecasting. With a large project scope and only three weeks to complete it, we used LLMs (ChatGPT, Gemini, and Llama) as a sort of personal tutor to help us get up to speed quickly. What and how each of us used LLMs for depended largely on our specific roles, including:</p>
+<ol type="1">
+<li><p><strong>Domain understanding:</strong></p>
+<p>Given our limited experience and knowledge on avalanches and forecasting, LLMs were used to quickly explain the basics of avalanche forecasting and highlight potential important variables, which were fact-checked against SAIS resources and when performing the literature review. Responses to prompts such as (<a href="https://chatgpt.com/share/68d51b49-d840-8002-ac38-577a47687625">https://chatgpt.com/share/68d51b49-d840-8002-ac38-577a47687625</a>):</p>
+<div style="margin-left: 2em">
+<ol type="a">
+<li>
+<em>What are some important things to know about Avalanche data for a data scientist predicting a neural network model to forecast avalanche severity categories? As a data scientist who does not have a background in weather forecasting</em>
+</li>
+<li>
+<em>What would be the best structure for this? What are the key objectives we are looking to do according to the brief?</em>
+</li>
+<li>
+<em>What variables are normally the most important in predicting avalanches?</em>
+</li>
+</ol>
+</div>
+<p>…gave us a good starting point and helped us understand the context quickly. Because ChatGPT highlighted aspects such as sparse data and class imbalances, these issues stood out more clearly when examining our own dataset. While generally informative, ChatGPT was not always correct or sometimes suggested overly complex approaches to some of our challenges. For example, it recommended handling data sparsity with imputation. We tried this, but after discussing with our lecturer, we realised simpler solutions were more appropriate for this assignment. Additionally, we found that performing a keyword search on Google Scholar and Scopus during our literature review process was far quicker and more reliable than asking ChatGPT for sources, as we were cautious due to previous experiences where ChatGPT produced inaccurate or fabricated references. This approach saved significant time by reducing the need for extensive fact-checking.</p></li>
+<li><p><strong>Exploratory Data Analysis (EDA)</strong></p>
+<p>ChatGPT was primarily used to assist with code generation of various plots and help identify gaps in interpretation of those plots. For plotting graphs, it was especially helpful with quickly generating “base” code and helping to brainstorm what type of plot would best show the relationships between certain predictors. Small tasks, such as formatting and colour palettes, were also delegated to LLMs to save time. During analysis, ChatGPT was used to validate that our initial interpretations were correct, as well as to identify other points we had missed out on (<a href="https://chatgpt.com/share/68d920ab-7f34-8012-8693-f1348cffb771">https://chatgpt.com/share/68d920ab-7f34-8012-8693-f1348cffb771</a>).</p></li>
+<li><p><strong>Feature Engineering and Modelling</strong></p>
+<p>LLMs were also used to support decisions on how best to handle temporal trends and how to control for this in the context of neural networks. For example, ChatGPT suggested creating new variables to represent the seasonal trends and using a rolling window for CNN and RNN (<a href="https://chatgpt.com/share/68d5946a-ef3c-8004-99a9-e2fb46c1d320">https://chatgpt.com/share/68d5946a-ef3c-8004-99a9-e2fb46c1d320</a>). After researching and finding that these approaches were valuable, we implemented this into our project.</p>
+<p>Additionally, ChatGPT was used as a coding assistant in the feedforward neural network modelling process, to refine code, debug issues, and generate structured explanations of neural network hyperparameters and evaluation metrics (<a href="https://chatgpt.com/share/68d914d2-e42c-8001-b208-6946cf96a535">https://chatgpt.com/share/68d914d2-e42c-8001-b208-6946cf96a535</a>). By supplying details of the dataset, objectives, and error messages, the LLM provided possible fixed and restructuring suggestions, which were tested and refined in R Studio.</p></li>
+</ol>
+<p>Another useful application was that we asked ChatGPT to produce an interactive animation to demonstrate how convolutional neural networks work. It produced this animation in html, although it took several iterations for the LLM to produce an outcome we were satisfied with. For example, one iteration of the animation had incorrect calculations for the dot product. Despite numerous attempts, the model could not rectify this issue in the code, perhaps due to the complexity and number of tokens required to process. To overcome this, we prompted ChatGPT to simply produce an animation that merely inputs the numbers into the graphic, rather than calculating the dot product directly. Then, we went into the file ourselves and changed the values to the correct workings (<a href="https://chatgpt.com/share/68d59a8c-efa4-8004-a295-616e83f37afb">https://chatgpt.com/share/68d59a8c-efa4-8004-a295-616e83f37afb</a>; <a href="https://chatgpt.com/share/68d59ad3-d50c-8004-b862-18966277b186">https://chatgpt.com/share/68d59ad3-d50c-8004-b862-18966277b186</a>).</p>
+<p>The LLM significantly accelerated the workflow by automating routine coding tasks and providing concise drafts for report sections. Their main strengths were efficiency, breadth of knowledge across R packages, and the ability to reformat and summarise results in scientific language. Its most valuable use was adding detailed comments in different code chunks. However, there were important limitations. Some code suggestions required correction due to inefficiencies or use of incompatible functions, sometimes even hallucinating packages or referencing outdated functions which is a result of its old training data. Additionally, outputs occasionally overstated the reliability of results.</p>
+<ol start="4" type="1">
+<li><p><strong>Formatting, GitHub, and Keras</strong></p>
+<p>LLMs were also extremely useful for addressing practical coding and workflow challenges (<a href="https://chatgpt.com/share/68d79583-1a28-8003-b629-12ce4bafd86f">https://chatgpt.com/share/68d79583-1a28-8003-b629-12ce4bafd86f</a>). For figure and table referencing in <em>.qmd</em> files, ChatGPT performed exceptionally well, providing the correct syntax and even automatically including in-text references. This proactive guidance saved time and reduced uncertainty, as it anticipated the need to reference figures and tables without explicit prompts.</p></li>
+</ol>
+<p>For version control issues, ChatGPT effectively guided us through Git errors. By copying the terminal output into the chat, we received:</p>
+<ul>
+<li>Clear explanations of what was going on<br>
+</li>
+<li>Clear steps to follow to rectify the error<br>
+</li>
+<li>Steps on how to safely proceed with my initial task (pushing my content to our project repository)</li>
+</ul>
+<p>Without this assistance, or using alternative resources such as YouTube videos, resolving merge conflicts would likely have taken considerably longer through trial and error. With ChatGPT, we were able to resume analysis promptly, making workflow more efficient.</p>
+<p>However, LLMs were less successful with system-specific tasks, such as resolving Keras installation errors. Two of our models relied on Keras, but some team members’ computers lacked the necessary packages to integrate Python and R. This became an issue for the writing team, who needed to report on the modelling results but could not access the model predictions. When asked to assist, ChatGPT repeatedly suggested running <code>library(keras)</code>, despite the error messages clearly stating that the module was missing. Attempts to follow installation instructions from this LLM were unsuccessful, including links provided for package installers that redirected to unrelated pages (<a href="https://chatgpt.com/share/68d796cf-43cc-8003-ba48-c98ff0b05b7d">https://chatgpt.com/share/68d796cf-43cc-8003-ba48-c98ff0b05b7d</a>; <a href="https://chatgpt.com/share/68d79670-e654-8003-91b9-f09fb9ae00be">https://chatgpt.com/share/68d79670-e654-8003-91b9-f09fb9ae00be</a>).</p>
+<p>When it comes to Keras installation, ChatGPT seems to have a very specific way of going about this, and if that doesn’t work, it struggles to deviate and explore other solutions. In this case, it is worthwhile going to someone who has the technical expertise to fix the issue. They can identify issues on a computer that an LLM cannot infer from prompts or ask questions that uncover information that is completely overlooked on the LLM’s side.</p>
+<ol start="5" type="1">
+<li><p><strong>Report Editing</strong></p>
+<p>Lastly, LLMs were very effective for streamlining our writing and reducing word count by suggesting more concise phrasing and flagging redundant words or sentences (<a href="https://chatgpt.com/c/68d6aa64-0ae0-8322-81b2-8ba74f1cb58b">https://chatgpt.com/c/68d6aa64-0ae0-8322-81b2-8ba74f1cb58b</a>). While ChatGPT’s summaries often helped, they sometimes altered the meaning of sentences. This meant the writing team’s judgement was still required to determine what worked and what did not.</p></li>
+</ol>
+<hr>
+<p>Overall, the above points demonstrate the importance of matching task complexity to the LLM’s capabilities. LLMs are valuable tools for scaffolding and accelerating tasks, but must be paired with critical evaluation, testing, and domain knowledge. In this project, final outputs were ultimately determined by our understanding of modelling, statistical validation, and careful checking of the LLM’s contributions. For accelerated understanding of domain knowledge, EDA plots, temporal trend suggestions, modelling assistance, and formatting, LLMs were exceptional at providing further information much more quickly than if we were to search for this ourselves. However, using it for the CNN interactive animation or resolving Keras installation issues, we had to work around LLM limitations, either simplifying tasks, or consulting other resources.</p>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<ol type="1">
+<li><p>OpenAI. (2025). ChatGPT (GPT-5). [Large language model].<br>
+<a href="https://chatgpt.com/share/68d51b49-d840-8002-ac38-577a47687625" class="uri">https://chatgpt.com/share/68d51b49-d840-8002-ac38-577a47687625</a></p></li>
+<li><p>OpenAI. (2025). ChatGPT (GPT-5). [Large language model].<br>
+<a href="https://chatgpt.com/share/68d5946a-ef3c-8004-99a9-e2fb46c1d320" class="uri">https://chatgpt.com/share/68d5946a-ef3c-8004-99a9-e2fb46c1d320</a></p></li>
+<li><p>OpenAI. (2025). ChatGPT (GPT-5). [Large language model].<br>
+<a href="https://chatgpt.com/share/68d59a8c-efa4-8004-a295-616e83f37afb" class="uri">https://chatgpt.com/share/68d59a8c-efa4-8004-a295-616e83f37afb</a></p></li>
+<li><p>OpenAI. (2025). ChatGPT (GPT-5). [Large language model].<br>
+<a href="https://chatgpt.com/share/68d59ad3-d50c-8004-b862-18966277b186" class="uri">https://chatgpt.com/share/68d59ad3-d50c-8004-b862-18966277b186</a></p></li>
+<li><p>OpenAI. (2025). ChatGPT (GPT-5). [Large language model].<br>
+<a href="https://chatgpt.com/share/68d79583-1a28-8003-b629-12ce4bafd86f" class="uri">https://chatgpt.com/share/68d79583-1a28-8003-b629-12ce4bafd86f</a></p></li>
+<li><p>OpenAI. (2025). ChatGPT (GPT-5). [Large language model].<br>
+<a href="https://chatgpt.com/share/68d796cf-43cc-8003-ba48-c98ff0b05b7d" class="uri">https://chatgpt.com/share/68d796cf-43cc-8003-ba48-c98ff0b05b7d</a></p></li>
+<li><p>OpenAI. (2025). ChatGPT (GPT-5). [Large language model].<br>
+<a href="https://chatgpt.com/share/68d79670-e654-8003-91b9-f09fb9ae00be" class="uri">https://chatgpt.com/share/68d79670-e654-8003-91b9-f09fb9ae00be</a></p></li>
+<li><p>OpenAI. (2025). ChatGPT (GPT-5). [Large language model].<br>
+<a href="https://chatgpt.com/c/68d6aa64-0ae0-8322-81b2-8ba74f1cb58b" class="uri">https://chatgpt.com/c/68d6aa64-0ae0-8322-81b2-8ba74f1cb58b</a></p></li>
+<li><p>OpenAI. (2025). ChatGPT (GPT-5). [Large language model].<br>
+<a href="https://chatgpt.com/share/68d914d2-e42c-8001-b208-6946cf96a535" class="uri">https://chatgpt.com/share/68d914d2-e42c-8001-b208-6946cf96a535</a></p></li>
+<li><p>OpenAI. (2025). ChatGPT (GPT-5). [Large language model].<br>
+<a href="https://chatgpt.com/share/68d920ab-7f34-8012-8693-f1348cffb771" class="uri">https://chatgpt.com/share/68d920ab-7f34-8012-8693-f1348cffb771</a></p></li>
+</ol>
 
 
 </section>
