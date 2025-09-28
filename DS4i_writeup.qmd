@@ -1177,8 +1177,8 @@ for (i in seq_len(nrow(grid))) {
     batch_size = 64,
     verbose = 0,
     validation_split = 0.2,
-    shuffle = FALSE
-    # = cl_weights
+    shuffle = FALSE,
+    class_weight = cl_weights
   )
 
   # collect validation accuracy from the last epoch
@@ -1372,8 +1372,8 @@ grid <- expand.grid(
 #     batch_size = 64,
 #     verbose = 0,
 #     validation_split = 0.2,
-#     shuffle = FALSE
-#     # = cl_weights
+#     shuffle = FALSE,
+#     class_weight = cl_weights
 #   )
 # 
 #   # Collect validation accuracy from the last epoch
@@ -1630,7 +1630,8 @@ The approach for the RNN was the same as the CNN discussed above. Firstly, a sea
       batch_size = 64,
       verbose = 0,
       validation_split = 0.2,
-      shuffle = FALSE
+      shuffle = FALSE,
+      class_weight = cl_weight
     )
 
     # val acc from last epoch
@@ -1816,7 +1817,8 @@ kable(grid_summary, format = "html",
 #     batch_size = 64,
 #     verbose = 0,
 #     validation_split = 0.2,
-#     shuffle = FALSE
+#     shuffle = FALSE,
+#     class_weight = cl_weight
 #   )
 # 
 #   # val acc from last epoch
