@@ -15,5 +15,5 @@ website:
       - text: "Plagarism Declaration"
         href: plag_decl.qmd
       - text: "Final Model"
-        href: mlp_page.html
+        href: mlp_model_report.html
         
