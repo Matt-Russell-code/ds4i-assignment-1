@@ -11,6 +11,8 @@ execute:
 editor: visual
 ---
 
+Don Gwese, Nina Lewis, Sanana Mwanawina, Matthew Russell, and Aidan Thomas
+
 ```{r setup}
 
 
