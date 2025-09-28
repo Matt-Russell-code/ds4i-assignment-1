@@ -2186,67 +2186,35 @@ load("FFN_final_model")
 
 ## Results and Discussion
 
-```{r sanana_work}
+```{r sanana_work, echo = FALSE}
 
-
-
- true_labels <- test$OAH
-# pred_ffn_labels <- factor(pred_ffn_labels, levels = levels(true_labels))
-# save(pred_ffn_labels, file = "pred_ffn_labels")
-# save(true_labels, file = "true_labels")
+risk_levels <- c("low", "moderate", "considerable -", "considerable +", "high")
 
 load("pred_ffn_labels")
 load("true_labels")
-
-
-# Map integers back to labels
-
 load("pred_cnn")
 load("pred_rnn")
-
-pred_cnn_labels <- factor(levels(true_labels)[pred_cnn],
-                   levels = levels(true_labels))
-
-
-
-pred_rnn_labels <- factor(levels(true_labels)[pred_rnn],
-                   levels = levels(true_labels))
-
-
-
-#Labels for CNNN and RNN
-
-#Test set changes for each one, because different windows were used
-
-
 load("temporal_labels_cnn")
 load("temporal_labels_rnn")
 
-temporal_labels_rnn <- factor(levels(true_labels)[temporal_labels_rnn],
-                   levels = levels(true_labels))
+# Make sure true labels and FFN predictions are factors with the right levels
+true_labels <- factor(tolower(as.character(true_labels)), levels = risk_levels)
+pred_ffn_labels <- factor(tolower(as.character(pred_ffn_labels)), levels = risk_levels)
 
-temporal_labels_cnn <- factor(levels(true_labels)[temporal_labels_cnn],
-                   levels = levels(true_labels))
+# Map CNN and RNN integer predictions (1–5) back to factor labels
+pred_cnn_labels <- factor(risk_levels[pred_cnn], levels = risk_levels)
+pred_rnn_labels <- factor(risk_levels[pred_rnn], levels = risk_levels)
 
+# Also ensure temporal labels are factors with same levels
+temporal_labels_cnn <- factor(risk_levels[temporal_labels_cnn], levels = risk_levels)
+temporal_labels_rnn <- factor(risk_levels[temporal_labels_rnn], levels = risk_levels)
 
-
-```
-
-### Confusion Matrices
-
-```{r, echo = FALSE}
-
-
-true_labels <- test$OAH
-pred_ffn_labels <- factor(pred_ffn_labels, levels = levels(true_labels))
+# Confusion matrices
 ffn_cm <- confusionMatrix(pred_ffn_labels, true_labels)
-
-
-# Create the confusion matrices
 cnn_cm <- confusionMatrix(pred_cnn_labels, temporal_labels_cnn)
 rnn_cm <- confusionMatrix(pred_rnn_labels, temporal_labels_rnn)
 
-
+# Accuracy for RNN & CNN
 acc_rnn <- round(mean(pred_rnn_labels == temporal_labels_rnn) * 100)
 acc_ffn <- round(mean(pred_ffn_labels == true_labels) *100)
 
@@ -2255,10 +2223,11 @@ acc_FOH <- round(mean(
   na.rm = TRUE
 ) *100)
 
-
 ```
 
-@fig-compare_cms displays the confusion matrices for our 3 models. Our FFNN-MLP has a clearer diagonal, which is indicative of its stronger performance. The confusion matrix for the RNN is very diffused with widespread misclassifications. @tbl-overall_stats confirms this observation is indeed the case, as the RNN had the lowest accuracy (`r acc_rnn`%) and the FFNN-MLP had the highest (`r acc_ffn`%). The FFN-MLP accuracy just narrowly beats the accuracy of the forecasted values (FAH) which had an accuracy of `r acc_FOH`. One limitation of the approach for evaluating the CNN and RNN is that, since the training and tests sets are not shuffled, and "High" risk avalanches are rare, there are no "High" risk avalanches in the test set. Therefore, the models ability to distinguish "High" risk cases is not assessed here.
+### Confusion Matrices
+
+@fig-compare_cms displays the confusion matrices for our 3 models. Our FFNN-MLP has a clearer diagonal, which is indicative of its stronger performance. The confusion matrix for the RNN is very diffused with widespread misclassifications. @tbl-overall_stats confirms this observation is indeed the case, as the RNN had the lowest accuracy (`r acc_rnn`%) and the FFNN-MLP had the highest (`r acc_ffn`%). The FFN-MLP accuracy just narrowly beats the  accuracy of  the forecasted values (FAH)  which had an accuracy of `r acc_FOH`. One limitation of the approach for evaluating the CNN and RNN is that, since the training and tests sets are not shuffled, and "High" risk avalanches are rare, there are no "High" risk avalanches in the test set. Therefore, the models ability to distinguish "High" risk cases is not assessed here.
 
 The diagonal of the RNN is the weakest of them all. Its correct predictions are concentrated in "Low" (752) with spillover to "Moderate" (165), and its misclassifications are concentrated in "Low" (197) and "Moderate" (299) predictions which were actually "Moderate" instances. This tells us the model often confused "Moderate" cases as either "Low" (underestimated hazard) or "Moderate" (overestimated hazard).
 
@@ -2269,8 +2238,7 @@ The FFNN-MLP had some noticeable misclassifications between "Considerable-" and 
 ```{r fig-compare_cms, echo = FALSE}
 #| fig-cap: "Confusion Matrices Comparing the Final CNN, RNN, and Feed-Forward Models"
 
-
-
+# Function to plot confusion matrices
 plot_cm <- function(cm, title) {
   cm_table <- as.data.frame(cm$table)
   ggplot(cm_table, aes(x = Reference, y = Prediction, fill = Freq)) +
@@ -2281,12 +2249,13 @@ plot_cm <- function(cm, title) {
     theme_minimal()
 }
 
-
+# Plot them
 p1 <- plot_cm(cnn_cm, "CNN Confusion Matrix")
 p2 <- plot_cm(rnn_cm, "RNN Confusion Matrix")
-p3 <- plot_cm(ffn_cm, "Feed-Forward NN Confusion Matrix")
+p3 <- plot_cm(ffn_cm, "FFNN-MLP Confusion Matrix")
 
 grid.arrange(p1, p2, p3, nrow = 3)
+
 ```
 
 ```{r tbl-accuracy_comparison, eval = FALSE, echo = FALSE}
