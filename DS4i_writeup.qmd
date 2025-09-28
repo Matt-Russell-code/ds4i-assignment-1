@@ -1492,7 +1492,7 @@ x1 <- round(max(results_cnn_search$val_accuracy)*100)
 
 ```
 
-After completing the initial window search, an expanded grid-search using the hyperparameters presented in @tbl-expan-grid was conducted. The validation accuracy for the top 30 models is presented in @fig-cnn-search-viz .The best performing model during the initial prediction window search (the first stage of the search) achieved a validation accuracy of `r x1`, while the top model using the chosen window in the second stage of the search reached `r round(max(res$val_accuracy) * 100, 1)`%. We stuck with this model, as validation accuracy had not improved meaningfully over the course of the expanded search. The final selected model involved 32 filters in the first layer, followed by a dropout of 70%, then 16 layers in the second layers, followed by dropout of 70% and global average pooling into the final output layer.
+After completing the initial window search, an expanded grid-search using the hyperparameters presented in @tbl-expan-grid was conducted. The validation accuracy for the top 30 models is presented in @fig-cnn-search-viz .The best performing model during the initial prediction window search (the first stage of the search) achieved a validation accuracy of `r x1`, while the top model using the chosen window in the second stage of the search reached `r round(max(res$val_accuracy) * 100, 1)`%. We stuck with this model, as validation accuracy had not improved meaningfully over the course of the expanded search. The final selected model involved 32 filters in the first layer, followed by a dropout of 70%, then 16 layers in the second layers, followed by dropout of 70% and global average pooling into the final output layer, and 5 Kernels (Filters).
 
 ```{r fiiting_final_cnn}
 
@@ -1515,9 +1515,9 @@ F_ <- W_[[6]]
 # input <- layer_input(shape = c(dim(X.train)[2], F_)) # (L, F)
 # 
 #   output <- input %>%
-#     layer_conv_1d(filters = 32, kernel_size = 15, padding = "same", activation = "relu") %>%
+#     layer_conv_1d(filters = 32, kernel_size = 5, padding = "same", activation = "relu") %>%
 #     layer_dropout(rate = 0.7) %>%
-#     layer_conv_1d(filters = 16, kernel_size = 15, padding = "same", activation = "relu") %>%
+#     layer_conv_1d(filters = 16, kernel_size = 5, padding = "same", activation = "relu") %>%
 #     layer_global_average_pooling_1d() %>%
 #     layer_dropout(rate = 0.5) %>%
 #     layer_dense(units = 5, activation = "softmax")
@@ -2033,7 +2033,7 @@ summary_df <- data.frame(
                      "l1",
                      "l2",
                      "rate",
-                     "input_dropout_ratio"),
+                     "input dropout  ratio"),
   Values = c("(128,128); (128,64); (64,32,16); (64,32)",
              "RectifierWithDropout",
              "0, 1e-4, 1e-5",
@@ -2048,17 +2048,13 @@ summary_df <- data.frame(
 
 
 
-tbl_df <- summary_df %>%
-  mutate(Values = gsub("; ", "<br>", Values))
-
-kable(tbl_df, format = "html", escape = FALSE) %>%
+kable(summary_df, format = "html",
+      digits = 4) %>%
   kable_styling(
-    bootstrap_options = c( "hover", "condensed"),
-    full_width = FALSE, position = "left", font_size = 13
-  ) %>%
-  row_spec(0, color = "white") %>%   # header style
-  column_spec(1, bold = TRUE, width = "22%") %>%             # Hyperparameter column
-  column_spec(2, width = "60%", monospace = TRUE)
+    bootstrap_options = c("hover", "striped"),
+    full_width = FALSE
+  ) 
+
 
 ```
 
@@ -2621,9 +2617,16 @@ rnn_cm <- confusionMatrix(pred_rnn_labels, temporal_labels_rnn)
 
 acc_rnn <- round(mean(pred_rnn_labels == temporal_labels_rnn) * 100)
 acc_ffn <- round(mean(pred_ffn_labels == true_labels) *100)
+
+acc_FOH <- round(mean(
+  as.character(test$OAH) == as.character(test$FAH),
+  na.rm = TRUE
+) *100)
+
+
 ```
 
-@fig-compare_cms displays the confusion matrices for our 3 models. Our FFNN-MLP has a clearer diagonal, which is indicative of its stronger performance. The confusion matrix for the RNN is very diffused with widespread misclassifications. @tbl-overall_stats confirms this observation is indeed the case, as the RNN had the lowest accuracy (`r acc_rnn`%) and the FFNN-MLP had the highest (`r acc_ffn`%). One limitation of the approach for evaluating the CNN and RNN is that, since the training and tests sets are not shuffled, and "High" risk avalanches are rare, there are no "High" risk avalanches in the test set. Therefore, the models ability to distinguish "High" risk cases is not measured well beyond.
+@fig-compare_cms displays the confusion matrices for our 3 models. Our FFNN-MLP has a clearer diagonal, which is indicative of its stronger performance. The confusion matrix for the RNN is very diffused with widespread misclassifications. @tbl-overall_stats confirms this observation is indeed the case, as the RNN had the lowest accuracy (`r acc_rnn`%) and the FFNN-MLP had the highest (`r acc_ffn`%). The FFN-MLP accuracy just narrowly beats the  accuracy of  the forecasted values (FAH)  which had an accuracy of `r acc_FOH`. One limitation of the approach for evaluating the CNN and RNN is that, since the training and tests sets are not shuffled, and "High" risk avalanches are rare, there are no "High" risk avalanches in the test set. Therefore, the models ability to distinguish "High" risk cases is not assessed here.
 
 The diagonal of the RNN is the weakest of them all. Its correct predictions are concentrated in "Low" (752) with spillover to "Moderate" (165), and its misclassifications are concentrated in "Low" (197) and "Moderate" (299) predictions which were actually "Moderate" instances. This tells us the model often confused "Moderate" cases as either "Low" (underestimated hazard) or "Moderate" (overestimated hazard).
 
@@ -2672,12 +2675,7 @@ grid.arrange(p1, p2, p3, nrow = 3)
 
 ### Overall Model Performance
 
-In @tbl-overall_stats below, we have an overview of each model's performance. The overall key insights that can be derived are:
-
--   The FFNN-MLP clearly dominates with the highest accuracy, recall, specificity, and precision scores. It would be the best model for both detecting and correctly rejecting classes.
--   The CNN serves as a middle ground, with acceptable accuracy but low recall. This means this model misses many real cases of considerable avalanche hazards.
--   The RNN fails overall. Its accuracy, recall and precision metrics are all low, making it unreliable for classification.
-
+In @tbl-overall_stats below, an overview of each model's performance is presented. The FFNN-MLP performs best, achieving the highest accuracy, recall, specificity, and precision scores. The CNN serves as a middle ground, with acceptable accuracy but low recall.   The RNN model performs the worst overall. In particular its recall and precision are fairly low which cast its practical reliability into doubt. 
 ```{r tbl-overall_stats, echo = FALSE}
 get_overall_stats <- function(cm_obj) {
   data.frame(
@@ -2722,19 +2720,19 @@ kable(as.data.frame(ffn_cm$byClass), caption = "FFNN Statistics by Class") %>% k
 
 The CNN statistics detailed in @tbl-cnn_stats_by_class show that this model had mixed results. It was able to capture 82% of "Low" danger cases, which is the majority class, but its performance dropped sharply for the minority cases. Additionally, it only detected 3.5% of "Considerable -" cases.
 
-Even on a class-by-class basis, the RNN performed poorly overall. It was able to catch about 79% of "Low" hazard cases. Beyond that, its performance collapsed. It missed all "Considerable-" cases (0 sensitivity overall). It only managed to detect 35% of "Moderate" cases. Moreover, its specificity for the "Low" class was just 52%, meaning it frequently mislabelled other classes as "Low".
+On a class-by-class basis, the RNN performed poorly overall. It was able to catch about 79% of "Low" hazard cases. Beyond that, its performance collapsed. It missed all "Considerable-" cases (0 sensitivity overall). It only managed to detect 35% of "Moderate" cases. Moreover, its specificity for the "Low" class was just 52%, meaning it frequently mislabelled other classes as "Low".
 
 However, the FFNN-MLP (@tbl-ffn_stats_by_class) was especially good at recognising the common classes such as "Low" and "Moderate" danger, correctly identifying around 82% of "Low" cases and 75% of "Moderate" cases. This means that it both caught most of the true cases and rarely mislabelled other classes as these. However, the FFNN-MLP struggled with the rarer categories. For example, it only detected 18% of "Considerable +" cases. This suggests some model bias towards classes that were better represented.
 
 ### Feature Importance
 
-In @fig-var-imp-ffnn, the feature importance plot from the FFNN-MLP is shown, chosen as it was the most balanced model. Through the results above, we believe it best captures the multi-factorial nature of avalanche forecasting and highlights influential features.
+In @fig-var-imp-ffnn, the feature importance plot from the FFNN-MLP is shown, for the  first 30 most important variables.
 
-*FAH* dominates, with *FAH.Moderate*, *FAH.Low*, *FAH.Considerable-*, and *FAH.Considerable+* as the top predictors. *Altitude* *(Alt)* ranks just below *FAH*, while *snow.index* and certain seasons (*season12*, *season5*, *season3*) have moderate influence. This suggests seasonal trends do matter, but no single season dominates the prediction. If avalanches were restricted to one specific time/season window, we would have seen that season stand out much more.
+The avalanche forecast varibles were highly influential. *FAH* dominates, with *FAH.Moderate*, *FAH.Low*, *FAH.Considerable-*, and *FAH.Considerable+* as the top predictors. *Altitude* *(Alt)* ranks just below *FAH*, while *snow.index* and the seasonal variables we constructed (*season12*, *season5*, *season3*) have moderate influence. This suggests seasonal trends do matter, but no single season dominates the prediction. If avalanches were restricted to one specific time/season window, we would have seen that season stand out much more.
 
 Geographical area (*Area.Torridon*, *Area.Glencoe*) contributes minimally, indicating spatial differences are less important than *FAH*. *Precipitation* ranks lowest, adding little predictive power beyond snow index, which is clearly more influential.
 
-Overall, the *FAH* drives predictions, followed by *altitude* and *snow.index*, with seasonal, spatial, and precipitation factors adding little value to predictions.
+Overall, the *FAH* drives predictions, followed by *altitude* and *snow.index*, with seasonal, spatial, and precipitation factors also adding influence to the  model.
 
 ```{r}
 #| echo: FALSE
@@ -2761,24 +2759,16 @@ ggplot(data = imp_data, aes(x = relative_importance, y = variable, fill = relati
 
 ### Summary of Findings
 
-In this study, we compared the ability of CNN, RNN, and FFNN-MLP models in predicting avalanches hazard levels. This was a multi-factorial investigation, as many different variables contribute to avalanche outcomes. Because the nature of this problem is sequential and we were able to preprocess that data to fit a time series context, we expected the CNN and RNN to outperform the FFNN-MLP since they have the added time series advantage.
+In this study, we compared the ability of CNN, RNN, and FFNN-MLP models in predicting avalanches hazard levels. This was a multi-factorial investigation, as many different variables contribute to avalanche outcomes. The nature of this problem is sequential and we were able to preprocess that data to fit a time series context. We expected the CNN and RNN to outperform the FFNN-MLP since they have the added time series advantage.
 
-The FFNN-MLP turned out to be the best-performing model overall. It showed the most balanced detection and was the only one that managed to give acceptable performance across hazard levels. The CNN struggled with the minority classes and mainly acted as a majority-class ("Low" hazard) detector despite the controls put in place to re-weight the classes. This is unsatisfactory because in a real forecasting setting, it's of great importance that we can detect the higher-risk cases. The RNN underperformed across the board, missing nearly all the minority class instances ("Considerable+", "Considerable-"), and doing *fairly* well with the majority cases but still not as well as the other two models. This strongly disagrees with our initial hypothesis that sequence models would benefit from time series dependencies.
+The FFNN-MLP turned out to be the best-performing model overall. It showed the most balanced detection and achiebed the best performance across hazard levels. The CNN struggled with the minority classes and mainly acted as a majority-class ("Low" hazard) detector despite the controls put in place to re-weight the classes. This is unsatisfactory because in a real forecasting setting, it's of great importance that we can detect the higher-risk cases. The RNN performed wrost overall, missing nearly all the minority class instances ("Considerable+", "Considerable-"), and doing *fairly* well with the majority cases but still not as well as the other two models. This strongly disagrees with our initial hypothesis that sequential models would benefit from time series dependencies.
 
-### Strengths and Weaknesses
 
-A clear strength across all models is that they handled the majority class fairly well. This suggests that with a more balanced dataset where all classes have enough representation, similar architectures could perform much better. On the other hand, all three models showed clear bias toward the most common categories. None of them did especially well with the higher-risk, minority classes. The highlights a weakness in applying these models directly without addressing the class imbalance and customising the class weights more in favour of the minority classes could help counteract this measure.
+A clear strength across all models is that they handled the majority class fairly well. On the other hand, all three models showed clear bias toward the most common categories. None of them did especially well with the higher-risk, minority classes. The highlights a weakness in applying these models directly without addressing the class imbalance and customising the class weights more in favour of the minority classes could help counteract this measure.
 
 ### Improvements & Future Contributions
 
-While the present study used only complete cases for modelling, avalanche forecasters in practice must often make predictions despite missing data. Imputation was considered, but fell outside the scope of evaluating NN performance. Developing an imputation model for this dataset could be a way of meaningfully improving its practical use, robustness, and accuracy overall.
-
-There are several other improvements that can be made going forward:
-
-1.  Address class imbalance through data generation or sampling techniques to better capture rarer high-risk hazards.
-2.  Incorporate climate change effects by accounting for evolving weather and snowpack conditions alongside historical data.
-3.  Explore building region-specific models to reflect Scotland's highly localised weather patterns and improve forecast reliability.
-4.  Explore alternative model types, such as gradient boosting or hybrid deep learning ensembles, to better handle categorical data and strengthen predictions.
+While the present study used only complete cases for modelling, avalanche forecasters in practice must often make predictions despite missing data. Imputation was considered, but fell outside the scope of evaluating NN performance. Developing an imputation model for this dataset could be a way of meaningfully improving its practical use, robustness, and accuracy overall. Secondly, Incorporating climate change effects by accounting for evolving weather and snowpack conditions alongside historical data could be a helpful tactic for researchers. Our models  show that  seasonal patterns are influential in predicting the risk. One reason this may be, is due to the evolving impact of climate change on the  snow pack and ice condition. Furthermore, one may consider exploring region-specific models to reflect Scotland's highly localized weather patterns and improve forecast reliability. Lastly, We restricted our hypothesis set to neural network models only, butthese may  not be  best suited to this data. Therefore, exploring alternative model types, such as gradient boosting or hybrid deep learning ensembles, to better handle categorical data and strengthen predictions could allow for more accurate prediction. 
 
 ## Conclusion
 
