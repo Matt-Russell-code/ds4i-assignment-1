@@ -1,3 +1,7 @@
+project:
+  type: website
+  output-dir: docs
+
 website:
   title: "DS4i Writeup"
   navbar:
@@ -11,4 +15,5 @@ website:
       - text: "Plagiarism Declaration"
         href: plag_decl.qmd
       - text: "Final Model"
-        href: /report_editing/mlp_model_report.html
+        href: mlp_model_report.html
+        
