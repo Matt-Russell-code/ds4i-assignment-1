@@ -9,7 +9,7 @@ format: html
 
 **COURSE CODE**: STA5073Z
 
-**COURSE NAME**: [Data Science for Industry]{.underline}
+**COURSE NAME**: Data Science for Industry
 
 **STUDENT NAMES**: Don Gwese; Matthew Russell; Nina Lewis; Aidan Thomas; Sanana Mwanawina
 
