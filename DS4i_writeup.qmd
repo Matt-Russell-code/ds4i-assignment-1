@@ -173,7 +173,7 @@ map_OAH <- ggplot() +
 map_OAH
 ```
 
-::: {style="font-size: 0.6em; font-weight: bold;"}
+::: {style="font-size: 0.6em; font-style: italic"}
 Note: Point observations coloured by hazard level; SAIS areas labelled.
 :::
 
@@ -663,8 +663,8 @@ fah_oah_corrplot <- ggplot(df_prop, aes(x = FAH, y = OAH, fill = p)) +
 fah_oah_corrplot
 ```
 
-::: {style="font-size: 0.6em; font-weight: bold;"}
-**Note:** Each FAH column sums to 100%; next-day alignment performed within Area (if available).
+::: {style="font-size: 0.6em; font-style: italic"}
+Note: Each FAH column sums to 100%; next-day alignment performed within Area (if available).
 :::
 
 Class imbalances will need to be addressed during model training to ensure the network does not simply default to predicting the most common outcomes.
@@ -794,8 +794,8 @@ p_all <- ggarrange(px, px1,
 p_all
 ```
 
-::: {style="font-size: 0.6em; font-weight: bold;"}
-**Note:** Outliers have been excluded. Y-axis scale from 0 to 20 on the left, and 0 to 500 on the right**.**
+::: {style="font-size: 0.6em; font-style: italic"}
+Note: Outliers have been excluded. Y-axis scale from 0 to 20 on the left, and 0 to 500 on the right**.**
 :::
 
 <br>
@@ -891,8 +891,8 @@ CNNs process data by applying convolutional filters (small weight matrices) that
 knitr::include_url("cnn_filter_animation_quarto_ready_html.html")
 ```
 
-::: {style="font-size: 0.6em; color: black; text-align: left; font-weight: bold"}
-**Credit: OpenAI (2025a and 2025b)**
+::: {style="font-size: 0.6em; color: black; text-align: left; font-style: italic"}
+Credit: OpenAI (2025a and 2025b)
 :::
 
 RNNs are designed to capture sequential dependencies by incorporating feedback connections. At each time step, the hidden state depends not only on the current input but also on the state from the previous step. This architecture makes RNNs well suited for modelling temporal dynamics in sequential data.
@@ -2390,25 +2390,42 @@ The FFNN-MLP's specificity was 0.934, the highest value observed. This shows tha
 Looking at performance statistics by class can help us gain useful insight into each model's strengths and weaknesses, providing a more detailed overview of model behaviour. @tbl-cnn_stats_by_class, @tbl-rnn_stats_by_class, and @tbl-ffn_stats_by_class summarise our model statistics by class.
 
 ```{r tbl-cnn_stats_by_class, echo = FALSE}
+# class order
+class_order <- c(
+  "Class: Low",
+  "Class: Moderate",
+  "Class: Considerable -",
+  "Class: Considerable +",
+  "Class: High"
+)
 
-kable(as.data.frame(cnn_cm$byClass), caption = "CNN Statistics by Class", digits = 4) %>% kable_styling()
+cnn_cm_df <- as.data.frame(cnn_cm$byClass)[class_order, ]
+
+kable(cnn_cm_df, caption = "CNN Statistics by Class", digits = 4) %>%
+  kable_styling()
 ```
 
 ```{r tbl-rnn_stats_by_class, echo = FALSE}
 
-kable(as.data.frame(rnn_cm$byClass), caption = "RNN Statistics by Class", digits = 4) %>% kable_styling()
+rnn_cm_df <- as.data.frame(rnn_cm$byClass)[class_order, ]
+
+kable(rnn_cm_df, caption = "RNN Statistics by Class", digits = 4) %>%
+  kable_styling()
 ```
 
 ```{r tbl-ffn_stats_by_class, echo = FALSE}
 
-kable(as.data.frame(ffn_cm$byClass), caption = "FFNN Statistics by Class", digits = 4) %>% kable_styling()
+ffnn_cm_df <- as.data.frame(ffn_cm$byClass)[class_order, ]
+
+kable(ffnn_cm_df, caption = "FFNN-MLP Statistics by Class", digits = 4) %>%
+  kable_styling()
 ```
 
-The CNN statistics detailed in @tbl-cnn_stats_by_class show that this model had mixed results. It was able to capture 82% of "Low" danger cases, which is the majority class, but its performance dropped sharply for the minority cases. Additionally, it only detected 3.5% of "Considerable -" cases.
+CNN (@tbl-cnn_stats_by_class) performance is best for the "Low" class (sensitivity = 0.7737, precision = 0.8086, F1 = 0.7907, balanced accuracy (BA) = 0.7458), dropping at higher-risk categories as prevalence decreases. For example, it performed poorly for "Considerable-" and "Considerable+" (sensitivity = 0.0351, 0.2368; precision = 0.3636, 0.0957; F1 = 0.0640, 0.1364; BA = 0.5151, 0.5906). RNN (@tbl-rnn_stats_by_class) shows similar trends, with a slightly higher sensitivity for "Low" (0.7737) but lower F1 (0.7546) and BA (0.6584), and poorer performance for "Moderate" (F1 = 0.3938; BA = 0.5827) and higher-risk classes ("Considerable-": F1 = NA, BA = 0.4993 ; "Considerable+": F1 = 0.1333, BA = 0.6192). For both models, "High" could not be assessed due to zero prevalence.
 
-On a class-by-class basis, the RNN performed poorly overall. It was able to catch about 79% of "Low" hazard cases. Beyond that, its performance collapsed. It missed all "Considerable-" cases (0 sensitivity overall). It only managed to detect 35% of "Moderate" cases. Moreover, its specificity for the "Low" class was just 52%, meaning it frequently mislabelled other classes as "Low".
+However, FFNN-MLP (@tbl-ffn_stats_by_class) maintained strong performance for the common and moderate classes: "Low" (F1 = 0.8874, BA = 0.9), "Moderate" (F1 = 0.7242, BA = 0.8019), and "Considerable-" (F1 = 0.6729, BA = 0.8213), catching most of the true cases and rarely mislabelling other classes as these. Performance dropped for "Considerable+" (F1 = 0.2478, BA = 0.5819), but unlike CNN and RNN, FFNN-MLP was able to better detect "High" (F1 = 0.5283, BA = 0.7755), showing improved identification of rarer, higher-risk categories.
 
-However, the FFNN-MLP (@tbl-ffn_stats_by_class) was especially good at recognising the common classes such as "Low" and "Moderate" danger, correctly identifying around 82% (Specificity) of "Low" cases and 75% of "Moderate" cases. This means that it both caught most of the true cases and rarely mislabelled other classes as these. However, the FFNN-MLP struggled with the rarer categories. For example, it only detected 18% of "Considerable +" cases. This suggests some model bias towards classes that were better represented.
+This suggests model bias towards better-represented classes.
 
 ### Feature Importance
 
@@ -2423,7 +2440,7 @@ Overall, the *FAH* drives predictions, followed by *altitude* and *snow.index*, 
 ```{r}
 #| echo: FALSE
 #| label: fig-var-imp-ffnn
-#| fig-cap: "Variable Importance for FFN-MLP."
+#| fig-cap: "Variable importance for FFNN-MLP."
 
 # imp_data <- as.data.frame(h2o.varimp(best_model)) %>%
 #    mutate(variable = reorder(variable, relative_importance),
@@ -2534,3 +2551,5 @@ Our objective requires reliable detection across all avalanche danger levels, no
 36. Werritty, A. & Sugden, D. 2012. Climate change and Scotland: Recent trends and impacts. *Earth and Environmental Science Transactions of The Royal Society of Edinburgh*. 103(2):133-147. DOI: 10.1017/S1755691013000030
 
 37. WSL Institute for Snow and Avalanche Research SLF. 2016. *Scotland - Avalanche warning experts exchange*. Available: <https://www.slf.ch/en/news/scotland-avalanche-warning-experts-exchange/?utm_source=chatgpt.com> \[2025, September 12\].
+
+<https://unsplash.com/s/photos/avalanche>
