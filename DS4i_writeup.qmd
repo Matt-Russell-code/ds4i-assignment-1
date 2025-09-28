@@ -2402,8 +2402,12 @@ class_order <- c(
 
 cnn_cm_df <- as.data.frame(cnn_cm$byClass)[class_order, ]
 
-kable(cnn_cm_df, caption = "CNN Statistics by Class", digits = 4) %>%
-  kable_styling() %>%
+ 
+
+kable(cnn_cm_df, format  = "html", 
+      caption = "CNN Statistics by Class", 
+      digits = 4) %>%
+  kable_styling("hover", "striped") %>%
   footnote(general = "All values rounded to 4 decimal places.")
 ```
 
@@ -2411,8 +2415,11 @@ kable(cnn_cm_df, caption = "CNN Statistics by Class", digits = 4) %>%
 
 rnn_cm_df <- as.data.frame(rnn_cm$byClass)[class_order, ]
 
-kable(rnn_cm_df, caption = "RNN Statistics by Class", digits = 4) %>%
-  kable_styling() %>%
+
+
+kable(rnn_cm_df, caption = "RNN Statistics by Class",format  = "html", 
+      digits = 4) %>%
+  kable_styling("hover", "striped") %>%
   footnote(general = "All values rounded to 4 decimal places.")
 ```
 
@@ -2420,8 +2427,9 @@ kable(rnn_cm_df, caption = "RNN Statistics by Class", digits = 4) %>%
 
 ffnn_cm_df <- as.data.frame(ffn_cm$byClass)[class_order, ]
 
-kable(ffnn_cm_df, caption = "FFNN-MLP Statistics by Class", digits = 4) %>%
-  kable_styling() %>%
+
+kable(ffnn_cm_df, caption = "FFNN-MLP Statistics by Class", digits = 4,format  = "html", ) %>%
+  kable_styling("hover", "striped") %>%
   footnote(general = "All values rounded to 4 decimal places.")
 ```
 
