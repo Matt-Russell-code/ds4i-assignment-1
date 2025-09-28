@@ -57,7 +57,7 @@ When it comes to Keras installation, ChatGPT seems to have a very specific way o
 
 Overall, the above points demonstrate the importance of matching task complexity to the LLM’s capabilities. LLMs are valuable tools for scaffolding and accelerating tasks, but must be paired with critical evaluation, testing, and domain knowledge. In this project, final outputs were ultimately determined by our understanding of modelling, statistical validation, and careful checking of the LLM’s contributions. For accelerated understanding of domain knowledge, EDA plots, temporal trend suggestions, modelling assistance, and formatting, LLMs were exceptional at providing further information much more quickly than if we were to search for this ourselves. However, using it for the CNN interactive animation or resolving Keras installation issues, we had to work around LLM limitations, either simplifying tasks, or consulting other resources.
 
-## Reference List
+## References
 
 1. OpenAI. (2025). ChatGPT (GPT-5). [Large language model].  
    <https://chatgpt.com/share/68d51b49-d840-8002-ac38-577a47687625>
