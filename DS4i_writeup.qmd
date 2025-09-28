@@ -2288,30 +2288,36 @@ ffn_cm_df <- data.frame(
   Prediction = c("Low", "Moderate", "Considerable -", "Considerable +", "High"),
   Low                = c(536, 112, 4, 1, 0),
   Moderate           = c(17, 369, 103, 1, 1),
-  Considerable_minus = c(2, 41, 250, 17, 10),
-  Considerable_plus  = c(0, 6, 56, 14, 3),
+  Considerable_neg = c(2, 41, 250, 17, 10),
+  Considerable_pos  = c(0, 6, 56, 14, 3),
   High               = c(0, 0, 10, 1, 14)
 )
+
+colnames(ffn_cm_df) <- c("Prediction", "Low", "Moderate", "Considerable -", "Considerable +", "High")
 
 # CNN confusion matrix reordered
 cnn_cm_df <- data.frame(
   Prediction = c("Low", "Moderate", "Considerable -", "Considerable +", "High"),
   Low                = c(735, 205, 1, 8, 0),
   Moderate           = c(148, 270, 3, 44, 0),
-  Considerable_minus = c(18, 60, 4, 32, 0),
-  Considerable_plus  = c(8, 18, 3, 9, 0),
+  Considerable_neg = c(18, 60, 4, 32, 0),
+  Considerable_pos  = c(8, 18, 3, 9, 0),
   High               = c(0, 0, 0, 0, 0)
 )
+
+colnames(cnn_cm_df) <- c("Prediction", "Low", "Moderate", "Considerable -", "Considerable +", "High")
 
 # RNN confusion matrix reordered
 rnn_cm_df <- data.frame(
   Prediction = c("Low", "Moderate", "Considerable -", "Considerable +", "High"),
   Low                = c(752, 175, 0, 22, 0),
   Moderate           = c(219, 165, 2, 78, 0),
-  Considerable_minus = c(53, 29, 0, 31, 0),
-  Considerable_plus  = c(20, 5, 0, 12, 0),
+  Considerable_neg = c(53, 29, 0, 31, 0),
+  Considerable_pos = c(20, 5, 0, 12, 0),
   High               = c(0, 0, 0, 0, 0)
 )
+
+colnames(rnn_cm_df) <- c("Prediction", "Low", "Moderate", "Considerable -", "Considerable +", "High")
 
 plot_cm <- function(cm_df, title) {
   # Convert wide-format df to long format for ggplot
