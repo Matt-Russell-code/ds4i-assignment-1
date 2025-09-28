@@ -875,7 +875,7 @@ test <- data[-train.idx,] #Testing Data
 
 Three main models were used in this project to exploit different structural properties of the data: a convolutional neural network (CNN), a recurrent neural network (RNN), and a feedforward multilayer perceptron neural network network (FFNN-MLP). The FFNN-MLP was expected to handle categorical predictors (e.g., forecasted avalanche risk) effectively, while the CNNs and RNNs were targeted at uncovering temporal or sequential patterns.
 
-CNNs process data by applying convolutional filters (small weight matrices) that slide across the input space. Each filter computes dot products with local patches of the data, producing feature maps that emphasise spatial or temporal patterns based on the type of filters used. Non-linear activations are then applied, followed by pooling layers to down-sample the maps and reduce dimensionality while preserving key information. Multiple convolutional layers can be stacked, though two layers were found to balance complexity and generalisation. The below interactive animation aims to illustrate how the filtering process works.  
+CNNs process data by applying convolutional filters (small weight matrices) that slide across the input space. Each filter computes dot products with local patches of the data, producing feature maps that emphasise spatial or temporal patterns based on the type of filters used. Non-linear activations are then applied, followed by pooling layers to down-sample the maps and reduce dimensionality while preserving key information. Multiple convolutional layers can be stacked, though two layers were found to balance complexity and generalisation. The below interactive animation aims to illustrate how the filtering process works.
 
 ```{r}
 #| echo: false
@@ -2048,8 +2048,6 @@ library(h2o)
 # test_h2o  <- as.h2o(test)
 ```
 
-
-
 ```{r neural-net-weighted-data-train-test-split}
 # Split training H2O frame into train/validation for early stopping ---------
 # We'll keep a validation frame to enable early stopping during H2O training.
@@ -2186,8 +2184,6 @@ load("FFN_final_model")
 
 ```
 
-
-
 ## Results and Discussion
 
 ```{r sanana_work}
@@ -2262,7 +2258,7 @@ acc_FOH <- round(mean(
 
 ```
 
-@fig-compare_cms displays the confusion matrices for our 3 models. Our FFNN-MLP has a clearer diagonal, which is indicative of its stronger performance. The confusion matrix for the RNN is very diffused with widespread misclassifications. @tbl-overall_stats confirms this observation is indeed the case, as the RNN had the lowest accuracy (`r acc_rnn`%) and the FFNN-MLP had the highest (`r acc_ffn`%). The FFN-MLP accuracy just narrowly beats the  accuracy of  the forecasted values (FAH)  which had an accuracy of `r acc_FOH`. One limitation of the approach for evaluating the CNN and RNN is that, since the training and tests sets are not shuffled, and "High" risk avalanches are rare, there are no "High" risk avalanches in the test set. Therefore, the models ability to distinguish "High" risk cases is not assessed here.
+@fig-compare_cms displays the confusion matrices for our 3 models. Our FFNN-MLP has a clearer diagonal, which is indicative of its stronger performance. The confusion matrix for the RNN is very diffused with widespread misclassifications. @tbl-overall_stats confirms this observation is indeed the case, as the RNN had the lowest accuracy (`r acc_rnn`%) and the FFNN-MLP had the highest (`r acc_ffn`%). The FFN-MLP accuracy just narrowly beats the accuracy of the forecasted values (FAH) which had an accuracy of `r acc_FOH`. One limitation of the approach for evaluating the CNN and RNN is that, since the training and tests sets are not shuffled, and "High" risk avalanches are rare, there are no "High" risk avalanches in the test set. Therefore, the models ability to distinguish "High" risk cases is not assessed here.
 
 The diagonal of the RNN is the weakest of them all. Its correct predictions are concentrated in "Low" (752) with spillover to "Moderate" (165), and its misclassifications are concentrated in "Low" (197) and "Moderate" (299) predictions which were actually "Moderate" instances. This tells us the model often confused "Moderate" cases as either "Low" (underestimated hazard) or "Moderate" (overestimated hazard).
 
@@ -2311,7 +2307,8 @@ grid.arrange(p1, p2, p3, nrow = 3)
 
 ### Overall Model Performance
 
-In @tbl-overall_stats below, an overview of each model's performance is presented. The FFNN-MLP performs best, achieving the highest accuracy, recall, specificity, and precision scores. The CNN serves as a middle ground, with acceptable accuracy but low recall.   The RNN model performs the worst overall. In particular its recall and precision are fairly low which cast its practical reliability into doubt. 
+In @tbl-overall_stats below, an overview of each model's performance is presented. The FFNN-MLP performs best, achieving the highest accuracy, recall, specificity, and precision scores. The CNN serves as a middle ground, with acceptable accuracy but low recall. The RNN model performs the worst overall. In particular its recall and precision are fairly low which cast its practical reliability into doubt.
+
 ```{r tbl-overall_stats, echo = FALSE}
 get_overall_stats <- function(cm_obj) {
   data.frame(
@@ -2362,13 +2359,13 @@ However, the FFNN-MLP (@tbl-ffn_stats_by_class) was especially good at recognisi
 
 ### Feature Importance
 
-In @fig-var-imp-ffnn, the feature importance plot from the FFNN-MLP is shown, for the  first 30 most important variables.
+In @fig-var-imp-ffnn, the feature importance plot from the FFNN-MLP is shown, for the first 30 most important variables.
 
 The avalanche forecast varibles were highly influential. *FAH* dominates, with *FAH.Moderate*, *FAH.Low*, *FAH.Considerable-*, and *FAH.Considerable+* as the top predictors. *Altitude* *(Alt)* ranks just below *FAH*, while *snow.index* and the seasonal variables we constructed (*season12*, *season5*, *season3*) have moderate influence. This suggests seasonal trends do matter, but no single season dominates the prediction. If avalanches were restricted to one specific time/season window, we would have seen that season stand out much more.
 
 Geographical area (*Area.Torridon*, *Area.Glencoe*) contributes minimally, indicating spatial differences are less important than *FAH*. *Precipitation* ranks lowest, adding little predictive power beyond snow index, which is clearly more influential.
 
-Overall, the *FAH* drives predictions, followed by *altitude* and *snow.index*, with seasonal, spatial, and precipitation factors also adding influence to the  model.
+Overall, the *FAH* drives predictions, followed by *altitude* and *snow.index*, with seasonal, spatial, and precipitation factors also adding influence to the model.
 
 ```{r}
 #| echo: FALSE
@@ -2399,12 +2396,11 @@ In this study, we compared the ability of CNN, RNN, and FFNN-MLP models in predi
 
 The FFNN-MLP turned out to be the best-performing model overall. It showed the most balanced detection and achiebed the best performance across hazard levels. The CNN struggled with the minority classes and mainly acted as a majority-class ("Low" hazard) detector despite the controls put in place to re-weight the classes. This is unsatisfactory because in a real forecasting setting, it's of great importance that we can detect the higher-risk cases. The RNN performed wrost overall, missing nearly all the minority class instances ("Considerable+", "Considerable-"), and doing *fairly* well with the majority cases but still not as well as the other two models. This strongly disagrees with our initial hypothesis that sequential models would benefit from time series dependencies.
 
-
 A clear strength across all models is that they handled the majority class fairly well. On the other hand, all three models showed clear bias toward the most common categories. None of them did especially well with the higher-risk, minority classes. The highlights a weakness in applying these models directly without addressing the class imbalance and customising the class weights more in favour of the minority classes could help counteract this measure.
 
 ### Improvements & Future Contributions
 
-While the present study used only complete cases for modelling, avalanche forecasters in practice must often make predictions despite missing data. Imputation was considered, but fell outside the scope of evaluating NN performance. Developing an imputation model for this dataset could be a way of meaningfully improving its practical use, robustness, and accuracy overall. Secondly, Incorporating climate change effects by accounting for evolving weather and snowpack conditions alongside historical data could be a helpful tactic for researchers. Our models  show that  seasonal patterns are influential in predicting the risk. One reason this may be, is due to the evolving impact of climate change on the  snow pack and ice condition. Furthermore, one may consider exploring region-specific models to reflect Scotland's highly localized weather patterns and improve forecast reliability. Lastly, We restricted our hypothesis set to neural network models only, butthese may  not be  best suited to this data. Therefore, exploring alternative model types, such as gradient boosting or hybrid deep learning ensembles, to better handle categorical data and strengthen predictions could allow for more accurate prediction. 
+While the present study used only complete cases for modelling, avalanche forecasters in practice must often make predictions despite missing data. Imputation was considered, but fell outside the scope of evaluating NN performance. Developing an imputation model for this dataset could be a way of meaningfully improving its practical use, robustness, and accuracy overall. Secondly, Incorporating climate change effects by accounting for evolving weather and snowpack conditions alongside historical data could be a helpful tactic for researchers. Our models show that seasonal patterns are influential in predicting the risk. One reason this may be, is due to the evolving impact of climate change on the snow pack and ice condition. Furthermore, one may consider exploring region-specific models to reflect Scotland's highly localized weather patterns and improve forecast reliability. Lastly, We restricted our hypothesis set to neural network models only, butthese may not be best suited to this data. Therefore, exploring alternative model types, such as gradient boosting or hybrid deep learning ensembles, to better handle categorical data and strengthen predictions could allow for more accurate prediction.
 
 ## Conclusion
 
