@@ -3,10 +3,9 @@ title: "Home"
 format: html
 ---
 
-# DS4i Writeup
+# Welcome to My Project
 
-Short intro paragraph about the project.
+- [Full Report](DS4i_writeup.html)
+- [Project Template](project_template.html)
+- [LLM Use](llm_use.html)
 
-Navigation:
-- [Modelling](DS4i_writeup.qmd)
-- [LLM use](llm_use.qmd)
