@@ -1486,16 +1486,16 @@ After completing the initial window search, an expanded grid-search using the hy
 
 ```{r fiiting_final_cnn}
 
-library(keras3)
 
-W_ <- pre_data(w = 7, h = 1)
 
-y.test <- W_[[1]]
-y.train <- W_[[2]]
-X.train <- W_[[3]]
-X.test <- W_[[4]]
-cl_weights <- W_[[5]]
-F_ <- W_[[6]]
+# W_ <- pre_data(w = 7, h = 1)
+# 
+# y.test <- W_[[1]]
+# y.train <- W_[[2]]
+# X.train <- W_[[3]]
+# X.test <- W_[[4]]
+# cl_weights <- W_[[5]]
+# F_ <- W_[[6]]
 
 # input <- layer_input(shape = c(dim(X.train)[2], F_)) # (L, F)
 # 
