@@ -1,0 +1,4 @@
+/* makes table header not break when with caption. found by inspection */
+.cell table.cell.table.caption-top {
+    display: table !important;
+}
