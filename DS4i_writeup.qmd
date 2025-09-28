@@ -2192,35 +2192,51 @@ load("FFN_final_model")
 
 ## Results and Discussion
 
-```{r sanana_work, echo = FALSE}
-
-risk_levels <- c("low", "moderate", "considerable -", "considerable +", "high")
+```{r sanana_work, echo=FALSE}
+ true_labels <- test$OAH
+# pred_ffn_labels <- factor(pred_ffn_labels, levels = levels(true_labels))
+# save(pred_ffn_labels, file = "pred_ffn_labels")
+# save(true_labels, file = "true_labels")
 
 load("pred_ffn_labels")
 load("true_labels")
+
+
+# Map integers back to labels
+
 load("pred_cnn")
 load("pred_rnn")
+
+pred_cnn_labels <- factor(levels(true_labels)[pred_cnn],
+                   levels = levels(true_labels))
+
+
+
+pred_rnn_labels <- factor(levels(true_labels)[pred_rnn],
+                   levels = levels(true_labels))
+
 load("temporal_labels_cnn")
 load("temporal_labels_rnn")
 
-# Make sure true labels and FFN predictions are factors with the right levels
-true_labels <- factor(tolower(as.character(true_labels)), levels = risk_levels)
-pred_ffn_labels <- factor(tolower(as.character(pred_ffn_labels)), levels = risk_levels)
+temporal_labels_rnn <- factor(levels(true_labels)[temporal_labels_rnn],
+                   levels = levels(true_labels))
 
-# Map CNN and RNN integer predictions (1–5) back to factor labels
-pred_cnn_labels <- factor(risk_levels[pred_cnn], levels = risk_levels)
-pred_rnn_labels <- factor(risk_levels[pred_rnn], levels = risk_levels)
+temporal_labels_cnn <- factor(levels(true_labels)[temporal_labels_cnn],
+                   levels = levels(true_labels))
 
-# Also ensure temporal labels are factors with same levels
-temporal_labels_cnn <- factor(risk_levels[temporal_labels_cnn], levels = risk_levels)
-temporal_labels_rnn <- factor(risk_levels[temporal_labels_rnn], levels = risk_levels)
+```
 
-# Confusion matrices
+```{r, echo=FALSE}
+true_labels <- test$OAH
+pred_ffn_labels <- factor(pred_ffn_labels, levels = levels(true_labels))
 ffn_cm <- confusionMatrix(pred_ffn_labels, true_labels)
+
+
+# Create the confusion matrices
 cnn_cm <- confusionMatrix(pred_cnn_labels, temporal_labels_cnn)
 rnn_cm <- confusionMatrix(pred_rnn_labels, temporal_labels_rnn)
 
-# Accuracy for RNN & CNN
+
 acc_rnn <- round(mean(pred_rnn_labels == temporal_labels_rnn) * 100)
 acc_ffn <- round(mean(pred_ffn_labels == true_labels) *100)
 
@@ -2228,7 +2244,6 @@ acc_FOH <- round(mean(
   as.character(test$OAH) == as.character(test$FAH),
   na.rm = TRUE
 ) *100)
-
 ```
 
 ### Confusion Matrices
