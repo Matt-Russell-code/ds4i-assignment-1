@@ -2330,7 +2330,7 @@ The CNN statistics detailed in @tbl-cnn_stats_by_class show that this model had 
 
 On a class-by-class basis, the RNN performed poorly overall. It was able to catch about 79% of "Low" hazard cases. Beyond that, its performance collapsed. It missed all "Considerable-" cases (0 sensitivity overall). It only managed to detect 35% of "Moderate" cases. Moreover, its specificity for the "Low" class was just 52%, meaning it frequently mislabelled other classes as "Low".
 
-However, the FFNN-MLP (@tbl-ffn_stats_by_class) was especially good at recognising the common classes such as "Low" and "Moderate" danger, correctly identifying around 82% of "Low" cases and 75% of "Moderate" cases. This means that it both caught most of the true cases and rarely mislabelled other classes as these. However, the FFNN-MLP struggled with the rarer categories. For example, it only detected 18% of "Considerable +" cases. This suggests some model bias towards classes that were better represented.
+However, the FFNN-MLP (@tbl-ffn_stats_by_class) was especially good at recognising the common classes such as "Low" and "Moderate" danger, correctly identifying around 82% (Specificity) of "Low" cases and 75% of "Moderate" cases. This means that it both caught most of the true cases and rarely mislabelled other classes as these. However, the FFNN-MLP struggled with the rarer categories. For example, it only detected 18% of "Considerable +" cases. This suggests some model bias towards classes that were better represented.
 
 ### Feature Importance
 
