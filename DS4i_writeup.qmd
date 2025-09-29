@@ -782,11 +782,11 @@ kable(missing_df,
 # 2) Plot (note the exact column name)
 px <- ggplot(data, aes(x = OAH, y = Ski.Pen)) +
   geom_boxplot(na.rm = TRUE)+
-  ylim(0, 20)
+  ylim(0, 20) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 px1 <- ggplot(data, aes(x = OAH, y = Summit.Wind.Dir) )+
   geom_boxplot(na.rm = TRUE)+
-  ylim(0,500)
+  ylim(0,500) +   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 p_all <- ggarrange(px, px1,
                    ncol = 2,
@@ -1295,8 +1295,7 @@ ggplot(data = results_cnn_search, aes( x  = model_no, y  = val_accuracy, colour 
 
 ```
 
-Considering @fig-cnn-window above, we chose a 7-day prediction window. Overall, most models performed best with 3-7 days, while 30- and 120-day windows were meaningfully worse. Validation accuracy was competitive between 3 and-7-days. However, 7-days appeared more robust, as some 3-day models showed much lower accuracy at the extremes.
-
+Considering @fig-cnn-window above, we chose a 7-day prediction window. Overall, most models performed best with 3-7 days, while 30- and 120-day windows were meaningfully worse. Validation accuracy was competitive between 3 and-7-days. However, we chose a 7-day window as we felt this was more likely to capture influential all season and spatial patterns for the next day prediction. 
 ```{r  expanded_search}
 # #we will go with a window of roughly  7  days
 
