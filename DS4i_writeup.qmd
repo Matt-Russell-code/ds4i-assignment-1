@@ -1,5 +1,6 @@
 ---
 title: "Exploring Neural Networks for Snow Avalanche Forecasting in Scotland: A Multi-Factorial Investigation"
+author: Don Gwese, Nina Lewis, Sanana Mwanawina, Matthew Russell, and Aidan Thomas
 format:
   html:
     css: style.css
@@ -11,7 +12,6 @@ execute:
 editor: visual
 ---
 
-Don Gwese, Nina Lewis, Sanana Mwanawina, Matthew Russell, and Aidan Thomas
 
 ```{r setup}
 
