@@ -17,7 +17,6 @@ execute:
 editor: visual
 ---
 
-
 ```{r setup}
 
 
@@ -1300,7 +1299,8 @@ ggplot(data = results_cnn_search, aes( x  = model_no, y  = val_accuracy, colour 
 
 ```
 
-Considering @fig-cnn-window above, we chose a 7-day prediction window. Overall, most models performed best with 3-7 days, while 30- and 120-day windows were meaningfully worse. Validation accuracy was competitive between 3 and-7-days. However, we chose a 7-day window as we felt this was more likely to capture influential all season and spatial patterns for the next day prediction. 
+Considering @fig-cnn-window above, we chose a 7-day prediction window. Overall, most models performed best with 3-7 days, while 30- and 120-day windows were meaningfully worse. Validation accuracy was competitive between 3 and-7-days. However, we chose a 7-day window as we felt this was more likely to capture influential all season and spatial patterns for the next day prediction.
+
 ```{r  expanded_search}
 # #we will go with a window of roughly  7  days
 
@@ -1893,7 +1893,7 @@ x1 <- round(max(results_rnn_search$val_accuracy)*100)
 
 ```
 
-From the expanded grid-search, the best performing model achieved a validation accuracy of `r round(max(res$val_accuracy) * 100, 1)`%. We fitted this model to the full training data and used that to predict onto the test set. Overall, we were satisfied with this search as the validation accuracy had not improved drastically compared to the initial window search; for example, the best model in the first stage reached roughly `r x1`%. The final RNN model therefore included 64 LSTM units in the first layer, 16 units in the second layer with 70% dropout in the first and 50% dropout in the second. 
+From the expanded grid-search, the best performing model achieved a validation accuracy of `r round(max(res$val_accuracy) * 100, 1)`%. We fitted this model to the full training data and used that to predict onto the test set. Overall, we were satisfied with this search as the validation accuracy had not improved drastically compared to the initial window search; for example, the best model in the first stage reached roughly `r x1`%. The final RNN model therefore included 64 LSTM units in the first layer, 16 units in the second layer with 70% dropout in the first and 50% dropout in the second.
 
 ```{r final_rnn_search}
 
@@ -2472,8 +2472,6 @@ ggplot(data = imp_data, aes(x = relative_importance, y = variable, fill = relati
        fill = "Relative Importance",
        x = "Relative Importance")
 ```
-
-
 
 ### Improvements & Future Contributions
 
