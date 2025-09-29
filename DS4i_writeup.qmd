@@ -1888,7 +1888,7 @@ x1 <- round(max(results_rnn_search$val_accuracy)*100)
 
 ```
 
-From the expanded grid-search, the best performing model achieved a validation accuracy of `r round(max(res$val_accuracy) * 100, 1)`%. We fitted this model to the full training data and used that to predict onto the test set. Overall, we were satisfied with this search as the validation accuracy had not improved drastically compared to the initial window search; for example, the best model in the first stage reached roughly `r x1`%.
+From the expanded grid-search, the best performing model achieved a validation accuracy of `r round(max(res$val_accuracy) * 100, 1)`%. We fitted this model to the full training data and used that to predict onto the test set. Overall, we were satisfied with this search as the validation accuracy had not improved drastically compared to the initial window search; for example, the best model in the first stage reached roughly `r x1`%. The final RNN model therefore included 64 LSTM units in the first layer, 16 units in the second layer with 70% dropout in the first and 50% dropout in the second. 
 
 ```{r final_rnn_search}
 
