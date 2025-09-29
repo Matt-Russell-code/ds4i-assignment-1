@@ -2468,21 +2468,19 @@ ggplot(data = imp_data, aes(x = relative_importance, y = variable, fill = relati
        x = "Relative Importance")
 ```
 
-### Summary of Findings
+
+
+### Improvements & Future Contributions
+
+While the present study used only complete cases for modelling, avalanche forecasters in practice must often make predictions despite missing data. Imputation was considered, but fell outside the scope of evaluating NN performance. Developing an imputation model for this dataset could be a way of meaningfully improving its practical use, robustness, and accuracy overall. Secondly, incorporating climate change effects by accounting for evolving weather and snowpack conditions alongside historical data could be a helpful tactic for researchers. Our models show that seasonal patterns are influential in predicting the risk. One reason this may be, is due to the evolving impact of climate change on the snowpack and ice condition. Furthermore, one may consider exploring region-specific models to reflect Scotland's highly localized weather patterns and improve forecast reliability. Lastly, we restricted our hypothesis to neural network models only, but these may not be best suited to this data. Exploring alternative model types, such as gradient boosting or hybrid deep learning ensembles, may handle categorical data better and allow for more accurate predictions.
+
+## Summary of Findings and Conclusion
 
 In this study, we compared the ability of CNN, RNN, and FFNN-MLP models in predicting avalanches hazard levels. This was a multi-factorial investigation, as many different variables contribute to avalanche outcomes. The nature of this problem is sequential, and we were able to preprocess that data to fit a time series context. We expected the CNN and RNN to outperform the FFNN-MLP since they have the added time series advantage.
 
 The FFNN-MLP turned out to be the best-performing model overall. It showed the most balanced detection and achieved the best performance across hazard levels. The CNN struggled with the minority classes and mainly acted as a majority-class ("Low" hazard) detector despite the controls put in place to re-weight the classes. This is unsatisfactory because in a real forecasting setting, it's of great importance that we can detect the higher-risk cases. The RNN performed worst overall, missing nearly all the minority class instances ("Considerable+", "Considerable-"), and doing *fairly* well with the majority cases but still not as well as the other two models. This strongly disagrees with our initial hypothesis that sequential models would benefit from time series dependencies.
 
 A clear strength across all models is that they handled the majority class fairly well. On the other hand, all three models showed clear bias toward the most common categories. None of them did especially well with the higher-risk, minority classes. The highlights a weakness in applying these models directly without addressing the class imbalance and customising the class weights more in favour of the minority classes could help counteract this measure.
-
-### Improvements & Future Contributions
-
-While the present study used only complete cases for modelling, avalanche forecasters in practice must often make predictions despite missing data. Imputation was considered, but fell outside the scope of evaluating NN performance. Developing an imputation model for this dataset could be a way of meaningfully improving its practical use, robustness, and accuracy overall. Secondly, incorporating climate change effects by accounting for evolving weather and snowpack conditions alongside historical data could be a helpful tactic for researchers. Our models show that seasonal patterns are influential in predicting the risk. One reason this may be, is due to the evolving impact of climate change on the snowpack and ice condition. Furthermore, one may consider exploring region-specific models to reflect Scotland's highly localized weather patterns and improve forecast reliability. Lastly, we restricted our hypothesis to neural network models only, but these may not be best suited to this data. Exploring alternative model types, such as gradient boosting or hybrid deep learning ensembles, may handle categorical data better and allow for more accurate predictions.
-
-## Conclusion
-
-Our objective requires reliable detection across all avalanche danger levels, not just the majority ones. In this study, the FFNN-MLP came closest to meeting this requirement, but even it struggled with the minority, high-risk cases. Future work should focus on reducing class imbalance, exploring region-specific models, and experimenting with ensemble approaches to ensure that high-risk avalanche conditions are consistently and accurately detected.
 
 ## References
 
