@@ -1432,7 +1432,7 @@ best <- final_cnn_search[1, ]
 
 
 grid <- data.frame(
-  hyperparameter = c("filters1", "filters2", "kernel_sz", "drop1", "drop2"),
+  hyperparameter = c("filters (layer 1)", "filters (layer 2)", "kernel size", "dropout (layer 1)", "dropout (layer 2)"),
   values = I(list(
     c(16, 32, 64),
     c(16, 32, 64),
@@ -1733,7 +1733,7 @@ The RNN window search showed more competitive performance. In this case, a windo
 
 
 grid_summary <- data.frame(
-  Hyperparameter = c("units1", "units2", "drop1", "drop2"),
+  Hyperparameter = c("units (layer 1)", "units (layer 2)", "dropout (layer 1)", "drop (layer 2)"),
   Values = c(
     paste(c(16, 32, 64), collapse = ", "),
     paste(c(16, 32, 64), collapse = ", "),
