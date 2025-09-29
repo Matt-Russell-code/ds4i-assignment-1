@@ -1,11 +1,104 @@
 ---
-title: "Home"
-format: html
+title: ""
+format:
+  html:
+    toc: false
+page-layout: full
 ---
 
-# Welcome to My Project
+<style>
+  :root {
+    --ink:#0f172a; --sub:#475569; --muted:#f8fafc;
+    --accent:#3b82f6;       /* softer blue */
+    --accent-dark:#2563eb;  /* darker on hover */
+  }
+  .hero {
+    text-align:center; padding: 2.25rem 1rem 1.75rem;
+    background: linear-gradient(180deg, var(--muted), #ffffff 60%);
+    border-radius: 1rem; border: 1px solid #eef2f7;
+  }
+  .hero h1 { margin: 0 0 .5rem; font-weight: 800; letter-spacing: .2px; }
+  .hero p { max-width: 900px; margin: 0 auto; color: var(--sub); font-size: 1.05rem; line-height: 1.6; }
+  .kicker { display:inline-block; font-size:.78rem; font-weight:700; letter-spacing:.04em; color:#64748b; text-transform:uppercase; margin-bottom:.35rem; }
 
-- [Full Report](DS4i_writeup.html)
-- [Project Template](project_template.html)
-- [LLM Use](llm_use.html)
+  /* GRID: make all cards equal height in a row */
+  .cards {
+    display:grid; gap:1rem; margin-top: 1.25rem;
+    grid-template-columns: repeat( auto-fit, minmax(240px, 1fr) );
+    align-items:stretch;           /* stretch items to same height */
+    grid-auto-rows: 1fr;           /* equal row heights */
+  }
 
+  /* CARD: flex column so button can stick to bottom */
+  .card {
+    border:1px solid #e2e8f0; border-radius: .85rem; background:#fff;
+    transition: box-shadow .15s ease, transform .05s ease;
+    display:flex; flex-direction:column; padding: 1rem; height:100%;
+    text-align:center;
+  }
+  .card:hover { box-shadow: 0 8px 24px rgba(2,6,23,.06); transform: translateY(-1px); }
+  .card h3 { margin:.1rem 0 .35rem; font-size:1.05rem; }
+  .card-body { flex:1; display:flex; flex-direction:column; justify-content:flex-start; }
+  .card-body p { margin:.25rem 0 1rem; color: var(--sub); font-size:.98rem; }
+  .card-actions { margin-top:auto; display:flex; justify-content:center; }
+
+  .btn {
+    display:inline-block; padding:.58rem 1.05rem; border-radius:.65rem;
+    border:1px solid var(--accent); text-decoration:none; font-weight:600;
+    background: var(--accent); color:#fff !important;
+  }
+  .btn:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+</style>
+
+::: {.hero}
+<span class="kicker">STA5073Z — Data Science for Industry (2025)</span>
+
+# Scottish Avalanche Forecasts: Neural Network Modelling
+
+This website presents coursework completed in fulfillment of **STA5073Z – Data Science for Industry (2025)**.  
+The project uses 15 years of avalanche forecast data from the **Scottish Avalanche Information Service (SAIS)** to build and evaluate predictive neural network models. The site includes the full scientific report, a description of how we used large language models (LLMs) during the assignment, a signed plagiarism declaration, and the details of our final model.
+:::
+
+## Explore the Project
+
+::: {.cards}
+::: {.card}
+### 📄 Full Report
+<div class="card-body">
+  <p>Scientific paper with data, methods, results, and discussion.</p>
+</div>
+<div class="card-actions">
+  [View Report](DS4i_writeup.html){.btn}
+</div>
+:::
+
+::: {.card}
+### 🤖 LLM Use
+<div class="card-body">
+  <p>What we used LLMs for, prompt design, and reflections on performance.</p>
+</div>
+<div class="card-actions">
+  [View LLM Use](llm_use.html){.btn}
+</div>
+:::
+
+::: {.card}
+### ✅ Plagiarism Declaration
+<div class="card-body">
+  <p>Signed statement of academic integrity for the submission.</p>
+</div>
+<div class="card-actions">
+  [View Declaration](plag_decl.html){.btn}
+</div>
+:::
+
+::: {.card}
+### 🧠 Final Model
+<div class="card-body">
+  <p>Architecture, training details, evaluation, and feature importance.</p>
+</div>
+<div class="card-actions">
+  [View Model](mlp_model_report.html){.btn}
+</div>
+:::
+:::
